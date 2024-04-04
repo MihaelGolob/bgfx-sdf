@@ -4,4 +4,4 @@ Pomemben vidik video iger je vizualno privlačno prikazovanje besedila, ki se po
 
 V diplomski nalogi bom podrobno preučil delovanje SDF in MSDF in ti dve metodi implementiral s pomočjo knjižnice za upodabljanje BGFX. Preveril bom ali je mogoče že znane implementacije izboljšati oz. pohitriti na koncu pa še evalviral SDF/MSDF z drugimi alternativnimi metodami, ki se uporabljajo v industriji.
 
-![image](https://github.com/MihaelGolob/bgfx-sdf/assets/48100773/bcd74ce0-deb2-4103-b0a2-f08037a2fe93)
+![image](https://github.com/MihaelGolob/bgfx-sdf/assets/48100773/a13c8c66-32ef-4d40-99ea-fefc4b6ab70c)
