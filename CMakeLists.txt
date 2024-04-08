@@ -14,16 +14,17 @@ target_compile_options(bgfx-sdf PUBLIC
 
 add_subdirectory(libs/bgfx.cmake)
 add_subdirectory(libs/glfw)
+add_subdirectory(libs/freetype)
 
 # disable glfw tests, examples and documentation
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 
-target_include_directories(bgfx-sdf
-	PRIVATE "libs/bgfx.cmake/bgfx/include" "libs/glfw/include"
+include_directories(bgfx-sdf
+	SYSTEM "libs/bgfx.cmake/bgfx/include" "libs/glfw/include" "libs/freetype/include"
 )
 
 target_link_libraries(bgfx-sdf
-	PRIVATE bgfx glfw
+	bgfx glfw freetype
 )
