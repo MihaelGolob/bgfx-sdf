@@ -1,12 +1,16 @@
 ﻿#define GLFW_EXPOSE_NATIVE_WIN32
 
-#include "bgfx/bgfx.h"
-#include "GLFW/glfw3.h"
-#include "GLFW/glfw3native.h"
-#include "ft2build.h"
+#include <iostream>
+
+#include <bgfx/bgfx.h>
+#include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
+#include <ft2build.h>
 #include FT_FREETYPE_H
 
-#include <iostream>
+#include "managers/FontManager.h"
+#include "managers/TextBufferManager.h"
+#include "utilities.h"
 
 // constants
 constexpr int k_window_width_ = 1600;
@@ -15,6 +19,14 @@ constexpr int k_window_height_ = 900;
 // global variables
 GLFWwindow* window_;
 FT_Library  ft_;
+FontManager* font_manager_;
+TextBufferManager* text_buffer_manager_;
+
+// fonts
+TrueTypeHandle font_file_;
+FontHandle font_;
+
+TextBufferHandle text_buffer_;
 
 GLFWwindow* CreateAndLinkWindow() {
     glfwInit();
@@ -35,21 +47,30 @@ GLFWwindow* CreateAndLinkWindow() {
     return window;
 }
 
-void InitFreetype() {
-    if (FT_Init_FreeType(&ft_)) {
-        std::cerr << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
-    } 
+TrueTypeHandle LoadTTF(const char* file_path) {
+    uint32_t size;
+    void* data = load(file_path, &size);
+
+    if (nullptr != data) {
+        TrueTypeHandle handle = font_manager_->createTtf( (uint8_t*)data, size);
+        return handle;
+    }
+
+    TrueTypeHandle invalid = BGFX_INVALID_HANDLE;
+    return invalid;
 }
 
-FT_Face LoadFont(const char* font_path, int font_size) {
-    FT_Face face;
-    if (FT_New_Face(ft_, font_path, 0, &face)) {
-        std::cerr << "ERROR::FREETYPE: Failed to load font" << std::endl;
-    }
-    if (FT_Set_Char_Size(face, 0, font_size * 64, k_window_width_, k_window_height_)) {
-        std::cerr << "ERROR::FREETYPE: Failed to set char size" << std::endl;
-    }
-    return face;
+void InitFonts() {
+    if (FT_Init_FreeType(&ft_)) {
+        PrintError("Could not init FreeType Library");
+    } 
+    
+    font_manager_ = new FontManager(512);
+    text_buffer_manager_ = new TextBufferManager(font_manager_);
+    
+    font_file_ = LoadTTF("../assets/fonts/freedom.ttf");
+    font_ = font_manager_->createFontByPixelSize(font_file_, 0, 32);
+    text_buffer_ = text_buffer_manager_->createTextBuffer(FONT_TYPE_ALPHA, BufferType::Transient);
 }
 
 void Update() {
@@ -62,20 +83,34 @@ void Update() {
 }
 
 void Shutdown() {
-    bgfx::shutdown();
     glfwDestroyWindow(window_);
     glfwTerminate();
+    
+    // destroy ttf file handles
+    font_manager_->destroyTtf(font_file_);
+    
+    // destroy font handles
+    font_manager_->destroyFont(font_);
+    
+    // destroy text buffer handles
+    text_buffer_manager_->destroyTextBuffer(text_buffer_);
+    
+    // destroy managers
+    delete font_manager_;
+    delete text_buffer_manager_;
+    
+    bgfx::shutdown();
 }
 
 int main() {
     // initialization
     window_ = CreateAndLinkWindow();
-    InitFreetype();
-    const auto font_face = LoadFont(R"(..\assets\fonts\freedom.ttf)", 20);
+    InitFonts();
     
     // update loop
     Update();
     
     Shutdown();
+    
     return 0;
 }
