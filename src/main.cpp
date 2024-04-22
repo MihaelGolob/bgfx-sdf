@@ -69,15 +69,44 @@ void InitFonts() {
     text_buffer_manager_ = new TextBufferManager(font_manager_);
     
     font_file_ = LoadTTF("../assets/fonts/freedom.ttf");
-    font_ = font_manager_->createFontByPixelSize(font_file_, 0, 32);
+    font_ = font_manager_->createFontByPixelSize(font_file_, 0, 40);
     text_buffer_ = text_buffer_manager_->createTextBuffer(FONT_TYPE_ALPHA, BufferType::Transient);
 }
 
 void Update() {
     while(!glfwWindowShouldClose(window_)) {
         glfwPollEvents();
-
         bgfx::touch(0);
+        
+        text_buffer_manager_->clearTextBuffer(text_buffer_);
+        text_buffer_manager_->setPenPosition(text_buffer_, 10.0f, 50.0f);
+        text_buffer_manager_->appendText(text_buffer_, font_, "Hello, World!\n");
+
+        const bx::Vec3 at  = { 0.0f, 0.0f,  0.0f };
+        const bx::Vec3 eye = { 0.0f, 0.0f, -1.0f };
+        float view[16];
+        bx::mtxLookAt(view, eye, at);
+        
+        const bgfx::Caps* caps = bgfx::getCaps();
+        {
+            float ortho[16];
+            bx::mtxOrtho(
+                    ortho
+                    , 0.0f
+                    , float(k_window_width_)
+                    , float(k_window_height_)
+                    , 0.0f
+                    , 0.0f
+                    , 100.0f
+                    , 0.0f
+                    , caps->homogeneousDepth
+            );
+            bgfx::setViewTransform(0, view, ortho);
+            bgfx::setViewRect(0, 0, 0, uint16_t(k_window_width_), uint16_t(k_window_height_) );
+        }
+        
+        text_buffer_manager_->submitTextBuffer(text_buffer_, 0);
+
         bgfx::frame();
     }
 }

@@ -18,7 +18,7 @@
 #include "../bgfx_example/utf8.h"
 
 #include "../bgfx_example/shaders/vs_font_basic.bin.h"
-//#include "fs_font_basic.bin.h"
+#include "../bgfx_example/shaders/fs_font_basic.bin.h"
 //#include "vs_font_distance_field.bin.h"
 //#include "fs_font_distance_field.bin.h"
 //#include "vs_font_distance_field_subpixel.bin.h"
@@ -37,7 +37,7 @@
 static const bgfx::EmbeddedShader s_embeddedShaders[] =
         {
                 BGFX_EMBEDDED_SHADER(vs_font_basic),
-//                BGFX_EMBEDDED_SHADER(fs_font_basic),
+                BGFX_EMBEDDED_SHADER(fs_font_basic),
 //                BGFX_EMBEDDED_SHADER(vs_font_distance_field),
 //                BGFX_EMBEDDED_SHADER(fs_font_distance_field),
 //                BGFX_EMBEDDED_SHADER(vs_font_distance_field_subpixel),
