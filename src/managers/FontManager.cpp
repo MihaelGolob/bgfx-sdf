@@ -144,69 +144,6 @@ bool TrueTypeFont::bakeGlyphAlpha(CodePoint _codePoint, GlyphInfo& _glyphInfo, u
     return true;
 }
 
-bool TrueTypeFont::bakeGlyphDistance(CodePoint _codePoint, GlyphInfo& _glyphInfo, uint8_t* _outBuffer)
-{
-    BX_ASSERT(false, "Do not use!")
-    
-    int32_t ascent, descent, lineGap;
-    stbtt_GetFontVMetrics(&m_font, &ascent, &descent, &lineGap);
-
-    int32_t advance, lsb;
-    stbtt_GetCodepointHMetrics(&m_font, _codePoint, &advance, &lsb);
-
-    const float scale = m_scale;
-    int32_t x0, y0, x1, y1;
-    stbtt_GetCodepointBitmapBox(&m_font, _codePoint, scale, scale, &x0, &y0, &x1, &y1);
-
-    const int32_t ww = x1-x0;
-    const int32_t hh = y1-y0;
-
-    _glyphInfo.offset_x  = (float)x0;
-    _glyphInfo.offset_y  = (float)y0;
-    _glyphInfo.width     = (float)ww;
-    _glyphInfo.height    = (float)hh;
-    _glyphInfo.advance_x = bx::round(((float)advance) * scale);
-    _glyphInfo.advance_y = bx::round(((float)(ascent + descent + lineGap)) * scale);
-
-    uint32_t bpp = 1;
-    uint32_t dstPitch = ww * bpp;
-
-    stbtt_MakeCodepointBitmap(&m_font, _outBuffer, ww, hh, dstPitch, scale, scale, _codePoint);
-
-    if (ww * hh > 0)
-    {
-        uint32_t dw = m_widthPadding;
-        uint32_t dh = m_heightPadding;
-
-        uint32_t nw = ww + dw * 2;
-        uint32_t nh = hh + dh * 2;
-        BX_ASSERT(nw * nh < 128 * 128, "Buffer overflow (size %d)", nw * nh);
-
-        uint32_t buffSize = nw * nh * sizeof(uint8_t);
-
-        uint8_t* alphaImg = (uint8_t*)malloc(buffSize);
-        bx::memSet(alphaImg, 0, nw * nh * sizeof(uint8_t) );
-
-        //copy the original buffer to the temp one
-        for (uint32_t ii = dh; ii < nh - dh; ++ii)
-        {
-            bx::memCopy(alphaImg + ii * nw + dw, _outBuffer + (ii - dh) * ww, ww);
-        }
-
-//         stb_truetype has some builtin sdf functionality, we can investigate using that too
-//        todo Mihael: investigate this!
-//        sdfBuildDistanceField(_outBuffer, nw, 8.0f, alphaImg, nw, nh, nw);
-        free(alphaImg);
-
-        _glyphInfo.offset_x -= (float)dw;
-        _glyphInfo.offset_y -= (float)dh;
-        _glyphInfo.width = (float)nw;
-        _glyphInfo.height = (float)nh;
-    }
-
-    return true;
-}
-
 typedef stl::unordered_map<CodePoint, GlyphInfo> GlyphHashMap;
 
 // cache font data
@@ -404,30 +341,15 @@ bool FontManager::preloadGlyph(FontHandle _handle, CodePoint _codePoint)
         return true;
     }
 
-    if (NULL != font.trueTypeFont)
+    if (font.trueTypeFont != nullptr)
     {
         GlyphInfo glyphInfo;
 
+        // todo mihael: add support for distance field font
         switch (font.fontInfo.fontType)
         {
             case FONT_TYPE_ALPHA:
                 font.trueTypeFont->bakeGlyphAlpha(_codePoint, glyphInfo, m_buffer);
-                break;
-
-            case FONT_TYPE_DISTANCE:
-                font.trueTypeFont->bakeGlyphDistance(_codePoint, glyphInfo, m_buffer);
-                break;
-
-            case FONT_TYPE_DISTANCE_SUBPIXEL:
-                font.trueTypeFont->bakeGlyphDistance(_codePoint, glyphInfo, m_buffer);
-                break;
-
-            case FONT_TYPE_DISTANCE_OUTLINE:
-            case FONT_TYPE_DISTANCE_OUTLINE_IMAGE:
-            case FONT_TYPE_DISTANCE_DROP_SHADOW:
-            case FONT_TYPE_DISTANCE_DROP_SHADOW_IMAGE:
-            case FONT_TYPE_DISTANCE_OUTLINE_DROP_SHADOW_IMAGE:
-                font.trueTypeFont->bakeGlyphDistance(_codePoint, glyphInfo, m_buffer);
                 break;
 
             default:

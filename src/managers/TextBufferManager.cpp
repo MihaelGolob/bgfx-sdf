@@ -19,39 +19,11 @@
 
 #include "../bgfx_example/shaders/vs_font_basic.bin.h"
 #include "../bgfx_example/shaders/fs_font_basic.bin.h"
-//#include "vs_font_distance_field.bin.h"
-//#include "fs_font_distance_field.bin.h"
-//#include "vs_font_distance_field_subpixel.bin.h"
-//#include "fs_font_distance_field_subpixel.bin.h"
-//#include "vs_font_distance_field_outline.bin.h"
-//#include "fs_font_distance_field_outline.bin.h"
-//#include "vs_font_distance_field_outline_image.bin.h"
-//#include "fs_font_distance_field_outline_image.bin.h"
-//#include "vs_font_distance_field_drop_shadow.bin.h"
-//#include "fs_font_distance_field_drop_shadow.bin.h"
-//#include "vs_font_distance_field_drop_shadow_image.bin.h"
-//#include "fs_font_distance_field_drop_shadow_image.bin.h"
-//#include "vs_font_distance_field_outline_drop_shadow_image.bin.h"
-//#include "fs_font_distance_field_outline_drop_shadow_image.bin.h"
 
 static const bgfx::EmbeddedShader s_embeddedShaders[] =
         {
                 BGFX_EMBEDDED_SHADER(vs_font_basic),
                 BGFX_EMBEDDED_SHADER(fs_font_basic),
-//                BGFX_EMBEDDED_SHADER(vs_font_distance_field),
-//                BGFX_EMBEDDED_SHADER(fs_font_distance_field),
-//                BGFX_EMBEDDED_SHADER(vs_font_distance_field_subpixel),
-//                BGFX_EMBEDDED_SHADER(fs_font_distance_field_subpixel),
-//                BGFX_EMBEDDED_SHADER(vs_font_distance_field_outline),
-//                BGFX_EMBEDDED_SHADER(fs_font_distance_field_outline),
-//                BGFX_EMBEDDED_SHADER(vs_font_distance_field_outline_image),
-//                BGFX_EMBEDDED_SHADER(fs_font_distance_field_outline_image),
-//                BGFX_EMBEDDED_SHADER(vs_font_distance_field_drop_shadow),
-//                BGFX_EMBEDDED_SHADER(fs_font_distance_field_drop_shadow),
-//                BGFX_EMBEDDED_SHADER(vs_font_distance_field_drop_shadow_image),
-//                BGFX_EMBEDDED_SHADER(fs_font_distance_field_drop_shadow_image),
-//                BGFX_EMBEDDED_SHADER(vs_font_distance_field_outline_drop_shadow_image),
-//                BGFX_EMBEDDED_SHADER(fs_font_distance_field_outline_drop_shadow_image),
 
                 BGFX_EMBEDDED_SHADER_END()
         };
@@ -368,28 +340,28 @@ void TextBuffer::appendText(FontHandle _fontHandle, const char* _string, const c
     BX_ASSERT(_end >= _string, "");
 
     const FontInfo& font = m_fontManager->getFontInfo(_fontHandle);
-    if (font.fontType & FONT_TYPE_MASK_DISTANCE_DROP_SHADOW)
-    {
-        float savePenX = m_penX;
-        float savePenY = m_penY;
-        CodePoint savePreviousCodePoint = m_previousCodePoint;
-        TextRectangle saveRectangle = m_rectangle;
-
-        const char* origString = _string;
-        for (; *_string && _string < _end ; ++_string)
-        {
-            if (utf8_decode(&state, (uint32_t*)&codepoint, *_string) == UTF8_ACCEPT )
-            {
-                appendGlyph(_fontHandle, codepoint, true);
-            }
-        }
-        _string = origString;
-
-        m_penX = savePenX;
-        m_penY = savePenY;
-        m_previousCodePoint = savePreviousCodePoint;
-        m_rectangle = saveRectangle;
-    }
+//    if (font.fontType & FONT_TYPE_MASK_DISTANCE_DROP_SHADOW)
+//    {
+//        float savePenX = m_penX;
+//        float savePenY = m_penY;
+//        CodePoint savePreviousCodePoint = m_previousCodePoint;
+//        TextRectangle saveRectangle = m_rectangle;
+//
+//        const char* origString = _string;
+//        for (; *_string && _string < _end ; ++_string)
+//        {
+//            if (utf8_decode(&state, (uint32_t*)&codepoint, *_string) == UTF8_ACCEPT )
+//            {
+//                appendGlyph(_fontHandle, codepoint, true);
+//            }
+//        }
+//        _string = origString;
+//
+//        m_penX = savePenX;
+//        m_penY = savePenY;
+//        m_previousCodePoint = savePreviousCodePoint;
+//        m_rectangle = saveRectangle;
+//    }
 
     for (; *_string && _string < _end ; ++_string)
     {
@@ -421,24 +393,24 @@ void TextBuffer::appendText(FontHandle _fontHandle, const wchar_t* _string, cons
     BX_ASSERT(_end >= _string, "");
 
     const FontInfo& font = m_fontManager->getFontInfo(_fontHandle);
-    if (font.fontType & FONT_TYPE_MASK_DISTANCE_DROP_SHADOW)
-    {
-        float savePenX = m_penX;
-        float savePenY = m_penY;
-        CodePoint savePreviousCodePoint = m_previousCodePoint;
-        TextRectangle saveRectangle = m_rectangle;
-
-        for (const wchar_t* _current = _string; _current < _end; ++_current)
-        {
-            uint32_t _codePoint = *_current;
-            appendGlyph(_fontHandle, _codePoint, true);
-        }
-
-        m_penX = savePenX;
-        m_penY = savePenY;
-        m_previousCodePoint = savePreviousCodePoint;
-        m_rectangle = saveRectangle;
-    }
+//    if (font.fontType & FONT_TYPE_MASK_DISTANCE_DROP_SHADOW)
+//    {
+//        float savePenX = m_penX;
+//        float savePenY = m_penY;
+//        CodePoint savePreviousCodePoint = m_previousCodePoint;
+//        TextRectangle saveRectangle = m_rectangle;
+//
+//        for (const wchar_t* _current = _string; _current < _end; ++_current)
+//        {
+//            uint32_t _codePoint = *_current;
+//            appendGlyph(_fontHandle, _codePoint, true);
+//        }
+//
+//        m_penX = savePenX;
+//        m_penY = savePenY;
+//        m_previousCodePoint = savePreviousCodePoint;
+//        m_rectangle = saveRectangle;
+//    }
 
     for (const wchar_t* _current = _string; _current < _end; ++_current)
     {
@@ -829,53 +801,12 @@ TextBufferManager::TextBufferManager(FontManager* _fontManager)
 
     bgfx::RendererType::Enum type = bgfx::getRendererType();
 
+    // create shader programs
     m_basicProgram = bgfx::createProgram(
             bgfx::createEmbeddedShader(s_embeddedShaders, type, "vs_font_basic")
             , bgfx::createEmbeddedShader(s_embeddedShaders, type, "fs_font_basic")
             , true
     );
-
-//    m_distanceProgram = bgfx::createProgram(
-//            bgfx::createEmbeddedShader(s_embeddedShaders, type, "vs_font_distance_field")
-//            , bgfx::createEmbeddedShader(s_embeddedShaders, type, "fs_font_distance_field")
-//            , true
-//    );
-//
-//    m_distanceSubpixelProgram = bgfx::createProgram(
-//            bgfx::createEmbeddedShader(s_embeddedShaders, type, "vs_font_distance_field_subpixel")
-//            , bgfx::createEmbeddedShader(s_embeddedShaders, type, "fs_font_distance_field_subpixel")
-//            , true
-//    );
-//
-//    m_distanceDropShadowProgram = bgfx::createProgram(
-//            bgfx::createEmbeddedShader(s_embeddedShaders, type, "vs_font_distance_field_drop_shadow")
-//            , bgfx::createEmbeddedShader(s_embeddedShaders, type, "fs_font_distance_field_drop_shadow")
-//            , true
-//    );
-//
-//    m_distanceDropShadowImageProgram = bgfx::createProgram(
-//            bgfx::createEmbeddedShader(s_embeddedShaders, type, "vs_font_distance_field_drop_shadow_image")
-//            , bgfx::createEmbeddedShader(s_embeddedShaders, type, "fs_font_distance_field_drop_shadow_image")
-//            , true
-//    );
-//
-//    m_distanceOutlineProgram = bgfx::createProgram(
-//            bgfx::createEmbeddedShader(s_embeddedShaders, type, "vs_font_distance_field_outline")
-//            , bgfx::createEmbeddedShader(s_embeddedShaders, type, "fs_font_distance_field_outline")
-//            , true
-//    );
-//
-//    m_distanceOutlineImageProgram = bgfx::createProgram(
-//            bgfx::createEmbeddedShader(s_embeddedShaders, type, "vs_font_distance_field_outline_image")
-//            , bgfx::createEmbeddedShader(s_embeddedShaders, type, "fs_font_distance_field_outline_image")
-//            , true
-//    );
-//
-//    m_distanceOutlineDropShadowImageProgram = bgfx::createProgram(
-//            bgfx::createEmbeddedShader(s_embeddedShaders, type, "vs_font_distance_field_outline_drop_shadow_image")
-//            , bgfx::createEmbeddedShader(s_embeddedShaders, type, "fs_font_distance_field_outline_drop_shadow_image")
-//            , true
-//    );
 
     m_vertexLayout
             .begin()
@@ -905,14 +836,8 @@ TextBufferManager::~TextBufferManager()
     bgfx::destroy(u_dropShadowColor);
     bgfx::destroy(s_texColor);
 
+    // destroy shader programs
     bgfx::destroy(m_basicProgram);
-//    bgfx::destroy(m_distanceProgram);
-//    bgfx::destroy(m_distanceSubpixelProgram);
-//    bgfx::destroy(m_distanceOutlineProgram);
-//    bgfx::destroy(m_distanceOutlineImageProgram);
-//    bgfx::destroy(m_distanceDropShadowProgram);
-//    bgfx::destroy(m_distanceDropShadowImageProgram);
-//    bgfx::destroy(m_distanceOutlineDropShadowImageProgram);
 }
 
 TextBufferHandle TextBufferManager::createTextBuffer(uint32_t _type, BufferType::Enum _bufferType)
@@ -990,8 +915,8 @@ void TextBufferManager::submitTextBuffer(TextBufferHandle _handle, bgfx::ViewId 
     bgfx::setTexture(0, s_texColor, m_fontManager->getAtlas()->getTextureHandle() );
 
     bgfx::ProgramHandle program = BGFX_INVALID_HANDLE;
-    switch (bc.fontType)
-    {
+    // todo mihael: add support for other font types (sdf, msdf, ...)
+    switch (bc.fontType) {
         case FONT_TYPE_ALPHA:
             program = m_basicProgram;
             bgfx::setState(0
@@ -999,106 +924,6 @@ void TextBufferManager::submitTextBuffer(TextBufferHandle _handle, bgfx::ViewId 
                            | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA)
             );
             break;
-
-//        case FONT_TYPE_DISTANCE:
-//        {
-//            program = m_distanceProgram;
-//            bgfx::setState(0
-//                           | BGFX_STATE_WRITE_RGB
-//                           | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA)
-//            );
-//
-//            float params[4] = { 0.0f, (float)m_fontManager->getAtlas()->getTextureSize() / 512.0f, 0.0f, 0.0f };
-//            bgfx::setUniform(u_params, &params);
-//            break;
-//        }
-//
-//        case FONT_TYPE_DISTANCE_SUBPIXEL:
-//            program = m_distanceSubpixelProgram;
-//            bgfx::setState(0
-//                           | BGFX_STATE_WRITE_RGB
-//                           | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_FACTOR, BGFX_STATE_BLEND_INV_SRC_COLOR)
-//                    , bc.textBuffer->getTextColor()
-//            );
-//            break;
-//
-//        case FONT_TYPE_DISTANCE_OUTLINE:
-//        {
-//            program = m_distanceOutlineProgram;
-//            bgfx::setState(0
-//                           | BGFX_STATE_WRITE_RGB
-//                           | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA)
-//            );
-//
-//            float params[4] = { 0.0f, (float)m_fontManager->getAtlas()->getTextureSize() / 512.0f, 0.0f, bc.textBuffer->getOutlineWidth() };
-//            bgfx::setUniform(u_params, &params);
-//            break;
-//        }
-//
-//        case FONT_TYPE_DISTANCE_OUTLINE_IMAGE:
-//        {
-//            program = m_distanceOutlineImageProgram;
-//            bgfx::setState(0
-//                           | BGFX_STATE_WRITE_RGB
-//                           | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA)
-//            );
-//
-//            float params[4] = { 0.0f, (float)m_fontManager->getAtlas()->getTextureSize() / 512.0f, 0.0f, bc.textBuffer->getOutlineWidth() };
-//            bgfx::setUniform(u_params, &params);
-//            break;
-//        }
-//
-//        case FONT_TYPE_DISTANCE_DROP_SHADOW:
-//        {
-//            program = m_distanceDropShadowProgram;
-//            bgfx::setState(0
-//                           | BGFX_STATE_WRITE_RGB
-//                           | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA)
-//            );
-//
-//            uint32_t dropShadowColor = bc.textBuffer->getDropShadowColor();
-//            float dropShadowColorVec[4] = { ((dropShadowColor >> 16) & 0xff) / 255.0f, ((dropShadowColor >> 8) & 0xff) / 255.0f, (dropShadowColor & 0xff) / 255.0f, (dropShadowColor >> 24) / 255.0f };
-//            bgfx::setUniform(u_dropShadowColor, &dropShadowColorVec);
-//
-//            float params[4] = { 0.0f, (float)m_fontManager->getAtlas()->getTextureSize() / 512.0f, bc.textBuffer->getDropShadowSoftener(), 0.0 };
-//            bgfx::setUniform(u_params, &params);
-//            break;
-//        }
-//
-//        case FONT_TYPE_DISTANCE_DROP_SHADOW_IMAGE:
-//        {
-//            program = m_distanceDropShadowImageProgram;
-//            bgfx::setState(0
-//                           | BGFX_STATE_WRITE_RGB
-//                           | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA)
-//            );
-//
-//            uint32_t dropShadowColor = bc.textBuffer->getDropShadowColor();
-//            float dropShadowColorVec[4] = { ((dropShadowColor >> 16) & 0xff) / 255.0f, ((dropShadowColor >> 8) & 0xff) / 255.0f, (dropShadowColor & 0xff) / 255.0f, (dropShadowColor >> 24) / 255.0f };
-//            bgfx::setUniform(u_dropShadowColor, &dropShadowColorVec);
-//
-//            float params[4] = { 0.0f, (float)m_fontManager->getAtlas()->getTextureSize() / 512.0f, bc.textBuffer->getDropShadowSoftener(), 0.0 };
-//            bgfx::setUniform(u_params, &params);
-//            break;
-//        }
-//
-//        case FONT_TYPE_DISTANCE_OUTLINE_DROP_SHADOW_IMAGE:
-//        {
-//            program = m_distanceOutlineDropShadowImageProgram;
-//            bgfx::setState(0
-//                           | BGFX_STATE_WRITE_RGB
-//                           | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA)
-//            );
-//
-//            uint32_t dropShadowColor = bc.textBuffer->getDropShadowColor();
-//            float dropShadowColorVec[4] = { ((dropShadowColor >> 16) & 0xff) / 255.0f, ((dropShadowColor >> 8) & 0xff) / 255.0f, (dropShadowColor & 0xff) / 255.0f, (dropShadowColor >> 24) / 255.0f };
-//            bgfx::setUniform(u_dropShadowColor, &dropShadowColorVec);
-//
-//            float params[4] = { 0.0f, (float)m_fontManager->getAtlas()->getTextureSize() / 512.0f, bc.textBuffer->getDropShadowSoftener(), bc.textBuffer->getOutlineWidth() };
-//            bgfx::setUniform(u_params, &params);
-//            break;
-//        }
-
     }
 
     switch (bc.bufferType)
