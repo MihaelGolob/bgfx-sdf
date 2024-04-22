@@ -10,6 +10,7 @@
 
 #include "managers/FontManager.h"
 #include "managers/TextBufferManager.h"
+#include "managers/InputManager.h"
 #include "utilities.h"
 
 // constants
@@ -19,8 +20,11 @@ constexpr int k_window_height_ = 600;
 // global variables
 GLFWwindow* window_;
 FT_Library  ft_;
+
+// managers
 FontManager* font_manager_;
 TextBufferManager* text_buffer_manager_;
+InputManager* input_manager_;
 
 // fonts
 TrueTypeHandle font_file_;
@@ -28,6 +32,7 @@ FontHandle font_;
 TextBufferHandle text_buffer_;
 
 const std::string text_to_write_ = "Hello!\nI am Mihael and today\nwe are going to learn\nhow to use bgfx fonts!";
+const std::vector keys_to_track_ = {GLFW_KEY_W, GLFW_KEY_A, GLFW_KEY_S, GLFW_KEY_D};
 
 GLFWwindow* CreateAndLinkWindow() {
     glfwInit();
@@ -150,6 +155,7 @@ void Shutdown() {
     // destroy managers
     delete font_manager_;
     delete text_buffer_manager_;
+    delete input_manager_;
     
     bgfx::shutdown();
 }
@@ -158,6 +164,7 @@ int main() {
     // initialization
     window_ = CreateAndLinkWindow();
     InitFonts();
+    input_manager_ = new InputManager(window_, keys_to_track_);
     
     // update loop
     Update();

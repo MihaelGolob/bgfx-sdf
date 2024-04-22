@@ -18,6 +18,8 @@ add_executable(bgfx-sdf
 		src/managers/TextBufferManager.cpp
 		src/managers/TextBufferManager.h
 		src/utilities.h
+		src/managers/InputManager.cpp
+		src/managers/InputManager.h
 )
 
 target_compile_features(bgfx-sdf PUBLIC cxx_std_17)
