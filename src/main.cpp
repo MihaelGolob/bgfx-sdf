@@ -13,8 +13,8 @@
 #include "utilities.h"
 
 // constants
-constexpr int k_window_width_ = 1600;
-constexpr int k_window_height_ = 900;
+constexpr int k_window_width_ = 600;
+constexpr int k_window_height_ = 600;
 
 // global variables
 GLFWwindow* window_;
@@ -25,8 +25,9 @@ TextBufferManager* text_buffer_manager_;
 // fonts
 TrueTypeHandle font_file_;
 FontHandle font_;
-
 TextBufferHandle text_buffer_;
+
+const std::string text_to_write_ = "Hello!\nI am Mihael and today\nwe are going to learn\nhow to use bgfx fonts!";
 
 GLFWwindow* CreateAndLinkWindow() {
     glfwInit();
@@ -68,43 +69,65 @@ void InitFonts() {
     font_manager_ = new FontManager(512);
     text_buffer_manager_ = new TextBufferManager(font_manager_);
     
-    font_file_ = LoadTTF("../assets/fonts/freedom.ttf");
+    font_file_ = LoadTTF("../assets/fonts/droidsans.ttf");
     font_ = font_manager_->createFontByPixelSize(font_file_, 0, 40);
     text_buffer_ = text_buffer_manager_->createTextBuffer(FONT_TYPE_ALPHA, BufferType::Transient);
 }
 
+void SetViewTransform() {
+    const bx::Vec3 at  = { 0.0f, 0.0f,  10.0f };
+
+    const bx::Vec3 eye = { 0.0f, 0.0f, -1.0f };
+    float view[16];
+    bx::mtxLookAt(view, eye, at);
+
+    float ortho[16];
+    
+    bx::mtxOrtho(ortho,
+                0.0f,
+                float(k_window_width_),
+                float(k_window_height_),
+                0.0f,
+                0.0f,
+                100.0f,
+                0.0f,
+                bgfx::getCaps()->homogeneousDepth
+    );
+
+    bgfx::setViewTransform(0, view, ortho);
+    bgfx::setViewRect(0, 0, 0, uint16_t(k_window_width_), uint16_t(k_window_height_) );
+}
+
 void Update() {
+    double last_time = glfwGetTime();
+    std::string text;
+    int index = 0;
+    double timer = 0;
+    
     while(!glfwWindowShouldClose(window_)) {
+        // calculate delta time
+        double current_time = glfwGetTime();
+        double delta_time = current_time - last_time;
+        last_time = current_time;
+        
+        // update
+        timer += delta_time;
+        if (timer > 0.1) {
+            text += text_to_write_[index];
+            index++;
+            timer = 0;
+        }
+        
+        // rendering
         glfwPollEvents();
         bgfx::touch(0);
         
         text_buffer_manager_->clearTextBuffer(text_buffer_);
         text_buffer_manager_->setPenPosition(text_buffer_, 10.0f, 50.0f);
-        text_buffer_manager_->appendText(text_buffer_, font_, "Hello, World!\n");
+        text_buffer_manager_->appendText(text_buffer_, font_, text.c_str());
+        
+        SetViewTransform();
 
-        const bx::Vec3 at  = { 0.0f, 0.0f,  0.0f };
-        const bx::Vec3 eye = { 0.0f, 0.0f, -1.0f };
-        float view[16];
-        bx::mtxLookAt(view, eye, at);
-        
-        const bgfx::Caps* caps = bgfx::getCaps();
-        {
-            float ortho[16];
-            bx::mtxOrtho(
-                    ortho
-                    , 0.0f
-                    , float(k_window_width_)
-                    , float(k_window_height_)
-                    , 0.0f
-                    , 0.0f
-                    , 100.0f
-                    , 0.0f
-                    , caps->homogeneousDepth
-            );
-            bgfx::setViewTransform(0, view, ortho);
-            bgfx::setViewRect(0, 0, 0, uint16_t(k_window_width_), uint16_t(k_window_height_) );
-        }
-        
         text_buffer_manager_->submitTextBuffer(text_buffer_, 0);
 
         bgfx::frame();
