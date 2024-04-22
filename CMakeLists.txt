@@ -39,12 +39,12 @@ set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 
 include_directories(bgfx-sdf
 	SYSTEM 
-		"libs/bgfx.cmake/bgfx/include"
-		"libs/bgfx.cmake/bx/include"
-		"libs/bgfx.cmake/bimg/include"
+		libs/bgfx.cmake/bgfx/include
+		libs/bgfx.cmake/bx/include
+		libs/bgfx.cmake/bimg/include
 		
-		"libs/glfw/include"
-		"libs/freetype/include"
+		libs/glfw/include
+		libs/freetype/include
 		
 		libs/stb
 )
