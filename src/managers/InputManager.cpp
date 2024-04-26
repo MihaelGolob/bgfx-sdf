@@ -119,7 +119,7 @@ char InputManager::GetKeyChar(int key) {
         case GLFW_KEY_SPACE: return ' ';
         default: {
             PrintError("Key not found in GetKeyChar!");
-            return '\0';
+            return ' ';
         }
     }
 }
