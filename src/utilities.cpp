@@ -10,8 +10,16 @@ void PrintError(const char* _error) {
     std::cerr << "ERROR: " << _error << std::endl;
 }
 
+void PrintError(const std::string& _error) {
+    PrintError(_error.c_str());
+}
+
 void PrintInfo(const char* _info) {
     std::cout << "INFO: " << _info << std::endl;
+}
+
+void PrintInfo(const std::string& _info) {
+    PrintInfo(_info.c_str());
 }
 
 // file reading 

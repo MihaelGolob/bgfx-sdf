@@ -10,7 +10,9 @@
 #include <string>
 
 void PrintError(const char* _error);
+void PrintError(const std::string& _error);
 void PrintInfo(const char* _info);
+void PrintInfo(const std::string& _info);
 
 class FileReader : public bx::FileReader {
     typedef bx::FileReader super;
