@@ -75,7 +75,7 @@ void InitFonts() {
         PrintError("Could not init FreeType Library");
     } 
     
-    font_manager_ = new FontManager(512);
+    font_manager_ = new FontManager(256);
     text_buffer_manager_ = new TextBufferManager(font_manager_);
     
     font_file_ = LoadTTF("../assets/fonts/droidsans.ttf");
@@ -162,7 +162,7 @@ void Update() {
         
         // draw static text
         text_buffer_manager_->clearTextBuffer(static_text_buffer_);
-        text_buffer_manager_->setPenPosition(static_text_buffer_, 10.0f, 50.0f);
+        text_buffer_manager_->setPenPosition(static_text_buffer_, 10.0f, 20.0f);
         text_buffer_manager_->appendText(static_text_buffer_, font_, text.c_str());
         
         // draw dynamic text

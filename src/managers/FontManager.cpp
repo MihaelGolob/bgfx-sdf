@@ -10,166 +10,46 @@
 
 #include <bx/bx.h>
 #include <bx/math.h>
-#include <stb_truetype.h>
 #include <bgfx/bgfx.h>
 
 BX_PRAGMA_DIAGNOSTIC_PUSH()
-BX_PRAGMA_DIAGNOSTIC_IGNORED_MSVC(
-        4244) //  warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+BX_PRAGMA_DIAGNOSTIC_IGNORED_MSVC(4244) //  warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 BX_PRAGMA_DIAGNOSTIC_IGNORED_MSVC(4701) //  warning C4701: potentially uninitialized local variable 'pt' used
-#define SDF_IMPLEMENTATION
 BX_PRAGMA_DIAGNOSTIC_POP()
 
-#include <wchar.h> // wcslen
-
+#include <cwchar> 
 #include <tinystl/allocator.h>
 #include <tinystl/unordered_map.h>
 
 namespace stl = tinystl;
 
 #include "FontManager.h"
-#include "../bgfx_example/cube_atlas.h"
-
-
-class TrueTypeFont {
-public:
-    TrueTypeFont();
-
-    ~TrueTypeFont();
-
-    /// Initialize from  an external buffer
-    /// @remark The ownership of the buffer is external, and you must ensure it stays valid up to this object lifetime
-    /// @return true if the initialization succeed
-    bool
-    init(const uint8_t *_buffer, uint32_t _bufferSize, int32_t _fontIndex, uint32_t _pixelHeight, int16_t _widthPadding,
-         int16_t _heightPadding);
-
-    /// return the font descriptor of the current font
-    FontInfo getFontInfo();
-
-    /// raster a glyph as 8bit alpha to a memory buffer
-    /// update the GlyphInfo according to the raster strategy
-    /// @ remark buffer min size: glyphInfo.m_width * glyphInfo * height * sizeof(char)
-    bool bakeGlyphAlpha(CodePoint _codePoint, GlyphInfo &_outGlyphInfo, uint8_t *_outBuffer);
-
-    /// raster a glyph as 8bit signed distance to a memory buffer
-    /// update the GlyphInfo according to the raster strategy
-    /// @ remark buffer min size: glyphInfo.m_width * glyphInfo * height * sizeof(char)
-    bool bakeGlyphDistance(CodePoint _codePoint, GlyphInfo &_outGlyphInfo, uint8_t *_outBuffer);
-
-private:
-    friend class FontManager;
-
-    stbtt_fontinfo m_font;
-    float m_scale;
-
-    int16_t m_widthPadding;
-    int16_t m_heightPadding;
-};
-
-TrueTypeFont::TrueTypeFont() : m_font(), m_widthPadding(6), m_heightPadding(6) {
-}
-
-TrueTypeFont::~TrueTypeFont() {
-}
-
-bool TrueTypeFont::init(const uint8_t *_buffer, uint32_t _bufferSize, int32_t _fontIndex, uint32_t _pixelHeight,
-                        int16_t _widthPadding, int16_t _heightPadding) {
-    BX_WARN((_bufferSize > 256 && _bufferSize < 100000000), "(FontIndex %d) TrueType buffer size is suspicious (%d)",
-            _fontIndex, _bufferSize);
-    BX_WARN((_pixelHeight > 4 && _pixelHeight < 128), "(FontIndex %d) TrueType pixel height is suspicious (%d)",
-            _fontIndex, _pixelHeight);
-    BX_UNUSED(_bufferSize);
-
-    int offset = stbtt_GetFontOffsetForIndex(_buffer, _fontIndex);
-
-    stbtt_InitFont(&m_font, _buffer, offset);
-
-    m_scale = stbtt_ScaleForMappingEmToPixels(&m_font, (float) _pixelHeight);
-
-    m_widthPadding = _widthPadding;
-    m_heightPadding = _heightPadding;
-    return true;
-}
-
-FontInfo TrueTypeFont::getFontInfo() {
-    int ascent;
-    int descent;
-    int lineGap;
-    stbtt_GetFontVMetrics(&m_font, &ascent, &descent, &lineGap);
-
-    float scale = m_scale;
-
-    int x0, y0, x1, y1;
-    stbtt_GetFontBoundingBox(&m_font, &x0, &y0, &x1, &y1);
-
-    FontInfo outFontInfo;
-    outFontInfo.scale = 1.0f;
-    outFontInfo.ascender = bx::round(ascent * scale);
-    outFontInfo.descender = bx::round(descent * scale);
-    outFontInfo.lineGap = bx::round(lineGap * scale);
-    outFontInfo.maxAdvanceWidth = bx::round((y1 - y0) * scale);
-
-    outFontInfo.underlinePosition = (x1 - x0) * scale - ascent;
-    outFontInfo.underlineThickness = (x1 - x0) * scale / 24.f;
-    return outFontInfo;
-}
-
-bool TrueTypeFont::bakeGlyphAlpha(CodePoint _codePoint, GlyphInfo &_glyphInfo, uint8_t *_outBuffer) {
-    int32_t ascent, descent, lineGap;
-    stbtt_GetFontVMetrics(&m_font, &ascent, &descent, &lineGap);
-
-    int32_t advance, lsb;
-    stbtt_GetCodepointHMetrics(&m_font, _codePoint, &advance, &lsb);
-
-    const float scale = m_scale;
-    int32_t x0, y0, x1, y1;
-    stbtt_GetCodepointBitmapBox(&m_font, _codePoint, scale, scale, &x0, &y0, &x1, &y1);
-
-    const int32_t ww = x1 - x0;
-    const int32_t hh = y1 - y0;
-
-    _glyphInfo.offset_x = (float) x0;
-    _glyphInfo.offset_y = (float) y0;
-    _glyphInfo.width = (float) ww;
-    _glyphInfo.height = (float) hh;
-    _glyphInfo.advance_x = bx::round(((float) advance) * scale);
-    _glyphInfo.advance_y = bx::round(((float) (ascent + descent + lineGap)) * scale);
-
-    uint32_t bpp = 1;
-    uint32_t dstPitch = ww * bpp;
-
-    stbtt_MakeCodepointBitmap(&m_font, _outBuffer, ww, hh, dstPitch, scale, scale, _codePoint);
-
-    return true;
-}
+#include "../FontAtlas/CubeAtlas.h"
+#include "../FontAtlas/TrueTypeFont.h"
 
 typedef stl::unordered_map<CodePoint, GlyphInfo> GlyphHashMap;
 
 // cache font data
 struct FontManager::CachedFont {
-    CachedFont()
-            : trueTypeFont(NULL) {
+    CachedFont() : trueTypeFont(nullptr) {
         masterFontHandle.idx = bx::kInvalidHandle;
     }
 
     FontInfo fontInfo;
     GlyphHashMap cachedGlyphs;
     TrueTypeFont *trueTypeFont;
-    // an handle to a master font in case of sub distance field font
+    // a handle to a master font in case of sub distance field font
     FontHandle masterFontHandle;
     int16_t padding;
 };
 
 #define MAX_FONT_BUFFER_SIZE (512 * 512 * 4)
 
-FontManager::FontManager(Atlas *_atlas)
-        : m_ownAtlas(false), m_atlas(_atlas) {
+FontManager::FontManager(Atlas *_atlas) : m_ownAtlas(false), m_atlas(_atlas) {
     init();
 }
 
-FontManager::FontManager(uint16_t _textureSideWidth)
-        : m_ownAtlas(true), m_atlas(new Atlas(_textureSideWidth)) {
+FontManager::FontManager(uint16_t _textureSideWidth) : m_ownAtlas(true), m_atlas(new Atlas(_textureSideWidth)) {
     init();
 }
 
@@ -177,17 +57,6 @@ void FontManager::init() {
     m_cachedFiles = new CachedFile[MAX_OPENED_FILES];
     m_cachedFonts = new CachedFont[MAX_OPENED_FONT];
     m_buffer = new uint8_t[MAX_FONT_BUFFER_SIZE];
-
-    const uint32_t W = 3;
-    // Create filler rectangle
-    uint8_t buffer[W * W * 4];
-    bx::memSet(buffer, 255, W * W * 4);
-
-    m_blackGlyph.width = W;
-    m_blackGlyph.height = W;
-
-    ///make sure the black glyph doesn't bleed by using a one pixel inner outline
-    m_blackGlyph.regionIndex = m_atlas->addRegion(W, W, buffer, AtlasRegion::TYPE_GRAY, 1);
 }
 
 FontManager::~FontManager() {
@@ -220,7 +89,7 @@ void FontManager::destroyTtf(TrueTypeHandle _handle) {
     BX_ASSERT(isValid(_handle), "Invalid handle used");
     delete[] m_cachedFiles[_handle.idx].buffer;
     m_cachedFiles[_handle.idx].bufferSize = 0;
-    m_cachedFiles[_handle.idx].buffer = NULL;
+    m_cachedFiles[_handle.idx].buffer = nullptr;
     m_filesHandles.free(_handle.idx);
 }
 
@@ -273,7 +142,7 @@ FontHandle FontManager::createScaledFontToPixelSize(FontHandle _baseFontHandle, 
     CachedFont &font = m_cachedFonts[fontIdx];
     font.cachedGlyphs.clear();
     font.fontInfo = newFontInfo;
-    font.trueTypeFont = NULL;
+    font.trueTypeFont = nullptr;
     font.masterFontHandle = _baseFontHandle;
 
     FontHandle handle = {fontIdx};
@@ -285,9 +154,9 @@ void FontManager::destroyFont(FontHandle _handle) {
 
     CachedFont &font = m_cachedFonts[_handle.idx];
 
-    if (font.trueTypeFont != NULL) {
+    if (font.trueTypeFont != nullptr) {
         delete font.trueTypeFont;
-        font.trueTypeFont = NULL;
+        font.trueTypeFont = nullptr;
     }
 
     font.cachedGlyphs.clear();
@@ -298,7 +167,7 @@ bool FontManager::preloadGlyph(FontHandle _handle, const wchar_t *_string) {
     BX_ASSERT(isValid(_handle), "Invalid handle used");
     CachedFont &font = m_cachedFonts[_handle.idx];
 
-    if (NULL == font.trueTypeFont) {
+    if (nullptr == font.trueTypeFont) {
         return false;
     }
 
@@ -437,7 +306,7 @@ const GlyphInfo *FontManager::getGlyphInfo(FontHandle _handle, CodePoint _codePo
 
     if (it == cachedGlyphs.end()) {
         if (!preloadGlyph(_handle, _codePoint)) {
-            return NULL;
+            return nullptr;
         }
 
         it = cachedGlyphs.find(_codePoint);

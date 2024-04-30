@@ -9,32 +9,11 @@
 #pragma once
 
 #include "FontManager.h"
+#include "../FontAtlas/TextBuffer.h"
 
 BGFX_HANDLE(TextBufferHandle)
 
 #define MAX_TEXT_BUFFER_COUNT 64
-
-/// type of vertex and index buffer to use with a TextBuffer
-struct BufferType {
-    enum Enum {
-        Static,
-        Dynamic,
-        Transient,
-    };
-};
-
-/// special style effect (can be combined)
-enum TextStyleFlags {
-    STYLE_NORMAL = 0,
-    STYLE_OVERLINE = 1,
-    STYLE_UNDERLINE = 1 << 1,
-    STYLE_STRIKE_THROUGH = 1 << 2,
-    STYLE_BACKGROUND = 1 << 3,
-};
-
-struct TextRectangle {
-    float width, height;
-};
 
 class TextBuffer;
 

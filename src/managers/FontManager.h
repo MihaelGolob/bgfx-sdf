@@ -9,121 +9,26 @@
 
 #include <bx/handlealloc.h>
 #include <bx/string.h>
-#include <bgfx/bgfx.h>
+
+#include "../FontAtlas/GlyphInfo.h"
+#include "../FontAtlas/FontInfo.h"
+#include "../FontAtlas/FontHandles.h"
 
 class Atlas;
 
 #define MAX_OPENED_FILES 64
 #define MAX_OPENED_FONT  64
-
 #define FONT_TYPE_ALPHA UINT32_C(0x00000100)
-
-struct FontInfo {
-    /// The font height in pixel.
-    uint16_t pixelSize;
-    /// Rendering type used for the font.
-    int16_t fontType;
-
-    /// The pixel extents above the baseline in pixels (typically positive).
-    float ascender;
-    /// The extents below the baseline in pixels (typically negative).
-    float descender;
-    /// The spacing in pixels between one row's descent and the next row's ascent.
-    float lineGap;
-    /// This field gives the maximum horizontal cursor advance for all glyphs in the font.
-    float maxAdvanceWidth;
-    /// The thickness of the under/hover/strike-trough line in pixels.
-    float underlineThickness;
-    /// The position of the underline relatively to the baseline.
-    float underlinePosition;
-
-    /// Scale to apply to glyph data.
-    float scale;
-};
-
-// Glyph metrics:
-// --------------
-//
-//                       xmin                     xmax
-//                        |                         |
-//                        |<-------- width -------->|
-//                        |                         |
-//              |         +-------------------------+----------------- ymax
-//              |         |    ggggggggg   ggggg    |     ^        ^
-//              |         |   g:::::::::ggg::::g    |     |        |
-//              |         |  g:::::::::::::::::g    |     |        |
-//              |         | g::::::ggggg::::::gg    |     |        |
-//              |         | g:::::g     g:::::g     |     |        |
-//    offset_x -|-------->| g:::::g     g:::::g     |  offset_y    |
-//              |         | g:::::g     g:::::g     |     |        |
-//              |         | g::::::g    g:::::g     |     |        |
-//              |         | g:::::::ggggg:::::g     |     |        |
-//              |         |  g::::::::::::::::g     |     |      height
-//              |         |   gg::::::::::::::g     |     |        |
-//  baseline ---*---------|---- gggggggg::::::g-----*--------      |
-//            / |         |             g:::::g     |              |
-//     origin   |         | gggggg      g:::::g     |              |
-//              |         | g:::::gg   gg:::::g     |              |
-//              |         |  g::::::ggg:::::::g     |              |
-//              |         |   gg:::::::::::::g      |              |
-//              |         |     ggg::::::ggg        |              |
-//              |         |         gggggg          |              v
-//              |         +-------------------------+----------------- ymin
-//              |                                   |
-//              |------------- advance_x ---------->|
 
 /// Unicode value of a character
 typedef int32_t CodePoint;
 
-/// A structure that describe a glyph.
-struct GlyphInfo {
-    /// Index for faster retrieval.
-    int32_t glyphIndex;
-
-    /// Glyph's width in pixels.
-    float width;
-
-    /// Glyph's height in pixels.
-    float height;
-
-    /// Glyph's left offset in pixels
-    float offset_x;
-
-    /// Glyph's top offset in pixels.
-    ///
-    /// @remark This is the distance from the baseline to the top-most glyph
-    ///   scan line, upwards y coordinates being positive.
-    float offset_y;
-
-    /// For horizontal text layouts, this is the unscaled horizontal
-    /// distance in pixels used to increment the pen position when the
-    /// glyph is drawn as part of a string of text.
-    float advance_x;
-
-    /// For vertical text layouts, this is the unscaled vertical distance
-    /// in pixels used to increment the pen position when the glyph is
-    /// drawn as part of a string of text.
-    float advance_y;
-
-    /// Amount to scale a bitmap image glyph.
-    float bitmapScale;
-
-    /// Region index in the atlas storing textures.
-    uint16_t regionIndex;
-};
-
-BGFX_HANDLE(TrueTypeHandle)
-
-BGFX_HANDLE(FontHandle)
-
 class FontManager {
 public:
-    /// Create the font manager using an external cube atlas (doesn't take
-    /// ownership of the atlas).
+    /// Create the font manager using an external cube atlas (doesn't take ownership of the atlas).
     FontManager(Atlas *_atlas);
 
-    /// Create the font manager and create the texture cube as BGRA8 with
-    /// linear filtering.
+    /// Create the font manager and create the texture cube as BGRA8 with linear filtering.
     FontManager(uint16_t _textureSideWidth = 512);
 
     ~FontManager();

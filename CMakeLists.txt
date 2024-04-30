@@ -9,10 +9,10 @@ add_executable(bgfx-sdf
 		src/main.cpp
 		src/managers/FontManager.cpp
 		src/managers/FontManager.h
-		src/bgfx_example/cube_atlas.cpp
-		src/bgfx_example/cube_atlas.h
-		src/bgfx_example/utf8.cpp
-		src/bgfx_example/utf8.h
+		src/FontAtlas/CubeAtlas.cpp
+		src/FontAtlas/CubeAtlas.h
+		src/FontAtlas/utf8.cpp
+		src/FontAtlas/utf8.h
 		
 		libs/stb/stb_truetype.h
 		src/utilities.cpp
@@ -21,6 +21,18 @@ add_executable(bgfx-sdf
 		src/utilities.h
 		src/managers/InputManager.cpp
 		src/managers/InputManager.h
+		src/FontAtlas/RectanglePacker.cpp
+		src/FontAtlas/RectanglePacker.h
+		src/FontAtlas/AtlasRegion.cpp
+		src/FontAtlas/AtlasRegion.h
+		src/FontAtlas/FontInfo.h
+		src/FontAtlas/GlyphInfo.h
+		src/FontAtlas/TrueTypeFont.cpp
+		src/FontAtlas/TrueTypeFont.h
+		src/FontAtlas/NumberTypes.h
+		src/FontAtlas/TextBuffer.cpp
+		src/FontAtlas/TextBuffer.h
+		src/FontAtlas/FontHandles.h
 )
 
 target_compile_features(bgfx-sdf PUBLIC cxx_std_17)
