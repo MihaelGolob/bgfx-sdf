@@ -23,7 +23,7 @@ public:
 
     ~TextBufferManager();
 
-    TextBufferHandle createTextBuffer(uint32_t _type, BufferType::Enum _bufferType);
+    TextBufferHandle createTextBuffer(FontType _type, BufferType::Enum _bufferType);
 
     void destroyTextBuffer(TextBufferHandle _handle);
 
@@ -75,7 +75,7 @@ private:
         uint16_t vertexBufferHandleIdx;
         TextBuffer *textBuffer;
         BufferType::Enum bufferType;
-        uint32_t fontType;
+        FontType fontType;
     };
 
     BufferCache *m_textBuffers;

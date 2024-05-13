@@ -66,7 +66,7 @@ TextBufferManager::~TextBufferManager() {
     bgfx::destroy(m_basicProgram);
 }
 
-TextBufferHandle TextBufferManager::createTextBuffer(uint32_t _type, BufferType::Enum _bufferType) {
+TextBufferHandle TextBufferManager::createTextBuffer(FontType _type, BufferType::Enum _bufferType) {
     uint16_t textIdx = m_textBufferHandles.alloc();
     BufferCache &bc = m_textBuffers[textIdx];
 
@@ -135,13 +135,17 @@ void TextBufferManager::submitTextBuffer(TextBufferHandle _handle, bgfx::ViewId 
 
     bgfx::ProgramHandle program = BGFX_INVALID_HANDLE;
     // todo mihael: add support for other font types (sdf, msdf, ...)
+    // Load the correct shader program based on the font type
     switch (bc.fontType) {
-        case FONT_TYPE_ALPHA:
+        case FontType::Bitmap:
             program = m_basicProgram;
-            bgfx::setState(0
-                           | BGFX_STATE_WRITE_RGB
-                           | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA)
-            );
+            bgfx::setState(0 | BGFX_STATE_WRITE_RGB | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA));
+            break;
+        case FontType::SDF:
+            // todo mihael:
+            break;
+        default: 
+            BX_ASSERT(false, "Shader for font type %d not found", bc.fontType);
             break;
     }
 
@@ -292,8 +296,7 @@ void TextBufferManager::setPenPosition(TextBufferHandle _handle, float _x, float
     bc.textBuffer->setPenPosition(_x, _y);
 }
 
-void
-TextBufferManager::appendText(TextBufferHandle _handle, FontHandle _fontHandle, const char *_string, const char *_end) {
+void TextBufferManager::appendText(TextBufferHandle _handle, FontHandle _fontHandle, const char *_string, const char *_end) {
     BX_ASSERT(isValid(_handle), "Invalid handle used");
     BufferCache &bc = m_textBuffers[_handle.idx];
     bc.textBuffer->appendText(_fontHandle, _string, _end);

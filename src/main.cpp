@@ -79,9 +79,9 @@ void InitFonts() {
     text_buffer_manager_ = new TextBufferManager(font_manager_);
     
     font_file_ = LoadTTF("../assets/fonts/droidsans.ttf");
-    font_ = font_manager_->createFontByPixelSize(font_file_, 0, 40);
-    static_text_buffer_ = text_buffer_manager_->createTextBuffer(FONT_TYPE_ALPHA, BufferType::Transient);
-    dynamic_text_buffer_ = text_buffer_manager_->createTextBuffer(FONT_TYPE_ALPHA, BufferType::Transient);
+    font_ = font_manager_->createFontByPixelSize(font_file_, 0, 40, FontType::SDF);
+    static_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::Bitmap, BufferType::Transient);
+    dynamic_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::Bitmap, BufferType::Transient);
 }
 
 void HandleKeyPressed(int key) {

@@ -54,28 +54,6 @@ void TextBuffer::appendText(FontHandle _fontHandle, const char *_string, const c
     BX_ASSERT(_end >= _string, "");
 
     const FontInfo &font = m_fontManager->getFontInfo(_fontHandle);
-//    if (font.fontType & FONT_TYPE_MASK_DISTANCE_DROP_SHADOW)
-//    {
-//        float savePenX = m_penX;
-//        float savePenY = m_penY;
-//        CodePoint savePreviousCodePoint = m_previousCodePoint;
-//        TextRectangle saveRectangle = m_rectangle;
-//
-//        const char* origString = _string;
-//        for (; *_string && _string < _end ; ++_string)
-//        {
-//            if (utf8_decode(&state, (uint32_t*)&codepoint, *_string) == UTF8_ACCEPT )
-//            {
-//                appendGlyph(_fontHandle, codepoint, true);
-//            }
-//        }
-//        _string = origString;
-//
-//        m_penX = savePenX;
-//        m_penY = savePenY;
-//        m_previousCodePoint = savePreviousCodePoint;
-//        m_rectangle = saveRectangle;
-//    }
 
     for (; *_string && _string < _end; ++_string) {
         if (utf8_decode(&state, (uint32_t *) &codepoint, *_string) == UTF8_ACCEPT) {

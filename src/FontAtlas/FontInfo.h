@@ -4,11 +4,16 @@
 
 #pragma once
 
+enum class FontType {
+    Bitmap, // normal
+    SDF, // signed distance field
+};
+
 struct FontInfo {
     /// The font height in pixel.
     unsigned short pixelSize;
     /// Rendering type used for the font.
-    unsigned short fontType;
+    FontType fontType;
 
     /// The pixel extents above the baseline in pixels (typically positive).
     float ascender;

@@ -94,8 +94,7 @@ void FontManager::destroyTtf(TrueTypeHandle _handle) {
 }
 
 FontHandle FontManager::createFontByPixelSize(TrueTypeHandle _ttfHandle, uint32_t _typefaceIndex, uint32_t _pixelSize,
-                                              uint32_t _fontType,
-                                              uint16_t _glyphWidthPadding, uint16_t _glyphHeightPadding) {
+                                              FontType _fontType, uint16_t _glyphWidthPadding, uint16_t _glyphHeightPadding) {
     BX_ASSERT(isValid(_ttfHandle), "Invalid handle used");
 
     TrueTypeFont *ttf = new TrueTypeFont();
@@ -112,7 +111,7 @@ FontHandle FontManager::createFontByPixelSize(TrueTypeHandle _ttfHandle, uint32_
     CachedFont &font = m_cachedFonts[fontIdx];
     font.trueTypeFont = ttf;
     font.fontInfo = ttf->getFontInfo();
-    font.fontInfo.fontType = int16_t(_fontType);
+    font.fontInfo.fontType = _fontType;
     font.fontInfo.pixelSize = uint16_t(_pixelSize);
     font.cachedGlyphs.clear();
     font.masterFontHandle.idx = bx::kInvalidHandle;
@@ -196,7 +195,11 @@ bool FontManager::preloadGlyph(FontHandle _handle, CodePoint _codePoint) {
 
         // todo mihael: add support for distance field font
         switch (font.fontInfo.fontType) {
-            case FONT_TYPE_ALPHA:
+            case FontType::Bitmap:
+                font.trueTypeFont->bakeGlyphAlpha(_codePoint, glyphInfo, m_buffer);
+                break;
+                
+            case FontType::SDF:
                 font.trueTypeFont->bakeGlyphAlpha(_codePoint, glyphInfo, m_buffer);
                 break;
 
