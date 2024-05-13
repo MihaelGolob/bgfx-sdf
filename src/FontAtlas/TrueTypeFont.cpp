@@ -106,6 +106,22 @@ bool TrueTypeFont::BakeGlyphSDF(CodePoint _codePoint, GlyphInfo &_outGlyphInfo, 
     uint32_t dstPitch = ww * bpp;
 
     stbtt_MakeCodepointBitmap(&m_font, _outBuffer, ww, hh, dstPitch, scale, scale, _codePoint);
+
+#ifdef DEBUG_LOG_GLYPH_BUFFER
+    std::cout << "Glyph " << (char)_codePoint  << std::endl;
+    
+    for (int i = 0; i < hh; i++) {
+        for (int j = 0; j < ww; j++) {
+            auto x = _outBuffer[ww*i + j];
+            if (x != 0) {
+                std::cout << ".";
+            } else {
+                std::cout << " ";
+            }
+        }
+        std::cout << std::endl;
+    }
+#endif
     
     BuildSignedDistanceField();
     
