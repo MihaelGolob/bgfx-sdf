@@ -200,7 +200,7 @@ bool FontManager::preloadGlyph(FontHandle _handle, CodePoint _codePoint) {
                 break;
                 
             case FontType::SDF:
-                font.trueTypeFont->bakeGlyphAlpha(_codePoint, glyphInfo, m_buffer);
+                font.trueTypeFont->BakeGlyphSDF(_codePoint, glyphInfo, m_buffer);
                 break;
 
             default:

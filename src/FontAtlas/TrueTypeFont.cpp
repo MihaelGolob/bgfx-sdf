@@ -6,6 +6,7 @@
 
 #include "TrueTypeFont.h"
 #include "../utilities.h"
+#include "../sdf/sdf.h"
 
 TrueTypeFont::TrueTypeFont() : m_font(), m_widthPadding(6), m_heightPadding(6) { }
 
@@ -77,5 +78,36 @@ bool TrueTypeFont::bakeGlyphAlpha(CodePoint _codePoint, GlyphInfo &_glyphInfo, u
 
     stbtt_MakeCodepointBitmap(&m_font, _outBuffer, ww, hh, dstPitch, scale, scale, _codePoint);
 
+    return true;
+}
+
+bool TrueTypeFont::BakeGlyphSDF(CodePoint _codePoint, GlyphInfo &_outGlyphInfo, uint8_t *_outBuffer) {
+    int32_t ascent, descent, lineGap;
+    stbtt_GetFontVMetrics(&m_font, &ascent, &descent, &lineGap);
+
+    int32_t advance, lsb;
+    stbtt_GetCodepointHMetrics(&m_font, _codePoint, &advance, &lsb);
+
+    const float scale = m_scale;
+    int32_t x0, y0, x1, y1;
+    stbtt_GetCodepointBitmapBox(&m_font, _codePoint, scale, scale, &x0, &y0, &x1, &y1);
+
+    const int32_t ww = x1 - x0;
+    const int32_t hh = y1 - y0;
+
+    _outGlyphInfo.offset_x = (float) x0;
+    _outGlyphInfo.offset_y = (float) y0;
+    _outGlyphInfo.width = (float) ww;
+    _outGlyphInfo.height = (float) hh;
+    _outGlyphInfo.advance_x = bx::round(((float) advance) * scale);
+    _outGlyphInfo.advance_y = bx::round(((float) (ascent + descent + lineGap)) * scale);
+
+    uint32_t bpp = 1;
+    uint32_t dstPitch = ww * bpp;
+
+    stbtt_MakeCodepointBitmap(&m_font, _outBuffer, ww, hh, dstPitch, scale, scale, _codePoint);
+    
+    BuildSignedDistanceField();
+    
     return true;
 }

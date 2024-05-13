@@ -32,10 +32,8 @@ public:
     /// @ remark buffer min size: glyphInfo.m_width * glyphInfo * height * sizeof(char)
     bool bakeGlyphAlpha(CodePoint _codePoint, GlyphInfo &_outGlyphInfo, uint8_t *_outBuffer);
 
-    /// raster a glyph as 8bit signed distance to a memory buffer
-    /// update the GlyphInfo according to the raster strategy
-    /// @ remark buffer min size: glyphInfo.m_width * glyphInfo * height * sizeof(char)
-    bool bakeGlyphDistance(CodePoint _codePoint, GlyphInfo &_outGlyphInfo, uint8_t *_outBuffer);
+    // raster a glyph as 8bit signed distance field to a memory buffer
+    bool BakeGlyphSDF(CodePoint _codePoint, GlyphInfo &_outGlyphInfo, uint8_t *_outBuffer);
 
 private:
     friend class FontManager;
