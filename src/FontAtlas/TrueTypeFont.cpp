@@ -126,22 +126,22 @@ bool TrueTypeFont::BakeGlyphSDF(CodePoint _codePoint, GlyphInfo &_outGlyphInfo, 
 #endif
     
     if (glyphWidth * glyphHeight <= 0) return false;
-    
+
     uint32_t newGlyphWidth = glyphWidth + 2 * m_widthPadding;
     uint32_t newGlyphHeight = glyphHeight + 2 * m_heightPadding;
-    
+
     BX_ASSERT(newGlyphHeight * newGlyphWidth < 128 * 128, "Glyph buffer overflow (size %d)", newGlyphHeight * newGlyphWidth)
-    
+
     auto buffer = (uint8_t*)malloc(newGlyphHeight * newGlyphWidth * sizeof(uint8_t));
     bx::memSet(buffer, 0, newGlyphHeight * newGlyphWidth * sizeof(uint8_t));
-    
+
     // copy the original glyph to the center of the new buffer
     for (uint32_t i = m_heightPadding; i < newGlyphHeight - m_heightPadding; i++) {
         bx::memCopy(buffer + i * newGlyphWidth + m_widthPadding, _outBuffer + (i - m_heightPadding) * glyphWidth, glyphWidth);
     }
-    
-    BuildSignedDistanceField();
-    
+
+    BuildSignedDistanceField(_outBuffer, buffer, newGlyphWidth, newGlyphHeight, std::min(m_widthPadding, m_heightPadding));
+
     free(buffer);
 
     _outGlyphInfo.offset_x -= (float)m_widthPadding;

@@ -79,7 +79,7 @@ void InitFonts() {
     text_buffer_manager_ = new TextBufferManager(font_manager_);
     
     font_file_ = LoadTTF("../assets/fonts/droidsans.ttf");
-    font_ = font_manager_->createFontByPixelSize(font_file_, 0, 40, FontType::SDF);
+    font_ = font_manager_->createFontByPixelSize(font_file_, 0, 40, FontType::SDF, 10, 10);
     static_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::Bitmap, BufferType::Transient);
     dynamic_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::Bitmap, BufferType::Transient);
 }
