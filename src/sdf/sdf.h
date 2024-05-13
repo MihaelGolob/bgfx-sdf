@@ -4,6 +4,6 @@
 
 #pragma once
 
-bool BuildSignedDistanceField() {
+bool BuildSignedDistanceField(uint8_t* buffer) {
     return true;
 }

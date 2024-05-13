@@ -2,6 +2,8 @@
 // Created by MihaelGolob on 30. 04. 2024.
 //
 
+//#define DEBUG_LOG_GLYPH_BUFFER // uncomment to enable debug logging of glyph buffer
+
 #include <stb_truetype.h>
 
 #include "TrueTypeFont.h"
@@ -92,27 +94,27 @@ bool TrueTypeFont::BakeGlyphSDF(CodePoint _codePoint, GlyphInfo &_outGlyphInfo, 
     int32_t x0, y0, x1, y1;
     stbtt_GetCodepointBitmapBox(&m_font, _codePoint, scale, scale, &x0, &y0, &x1, &y1);
 
-    const int32_t ww = x1 - x0;
-    const int32_t hh = y1 - y0;
+    const int32_t glyphWidth = x1 - x0;
+    const int32_t glyphHeight = y1 - y0;
 
     _outGlyphInfo.offset_x = (float) x0;
     _outGlyphInfo.offset_y = (float) y0;
-    _outGlyphInfo.width = (float) ww;
-    _outGlyphInfo.height = (float) hh;
+    _outGlyphInfo.width = (float) glyphWidth;
+    _outGlyphInfo.height = (float) glyphHeight;
     _outGlyphInfo.advance_x = bx::round(((float) advance) * scale);
     _outGlyphInfo.advance_y = bx::round(((float) (ascent + descent + lineGap)) * scale);
 
     uint32_t bpp = 1;
-    uint32_t dstPitch = ww * bpp;
+    uint32_t dstPitch = glyphWidth * bpp;
 
-    stbtt_MakeCodepointBitmap(&m_font, _outBuffer, ww, hh, dstPitch, scale, scale, _codePoint);
+    stbtt_MakeCodepointBitmap(&m_font, _outBuffer, glyphWidth, glyphHeight, dstPitch, scale, scale, _codePoint);
 
 #ifdef DEBUG_LOG_GLYPH_BUFFER
-    std::cout << "Glyph " << (char)_codePoint  << std::endl;
+    std::cout << "Glyph " << (char)_codePoint << " buffer size is (" << glyphWidth << "," << glyphHeight << ")"  << std::endl;
     
-    for (int i = 0; i < hh; i++) {
-        for (int j = 0; j < ww; j++) {
-            auto x = _outBuffer[ww*i + j];
+    for (int i = 0; i < glyphHeight; i++) {
+        for (int j = 0; j < glyphWidth; j++) {
+            auto x = _outBuffer[glyphWidth*i + j];
             if (x != 0) {
                 std::cout << ".";
             } else {
@@ -123,7 +125,29 @@ bool TrueTypeFont::BakeGlyphSDF(CodePoint _codePoint, GlyphInfo &_outGlyphInfo, 
     }
 #endif
     
+    if (glyphWidth * glyphHeight <= 0) return false;
+    
+    uint32_t newGlyphWidth = glyphWidth + 2 * m_widthPadding;
+    uint32_t newGlyphHeight = glyphHeight + 2 * m_heightPadding;
+    
+    BX_ASSERT(newGlyphHeight * newGlyphWidth < 128 * 128, "Glyph buffer overflow (size %d)", newGlyphHeight * newGlyphWidth)
+    
+    auto buffer = (uint8_t*)malloc(newGlyphHeight * newGlyphWidth * sizeof(uint8_t));
+    bx::memSet(buffer, 0, newGlyphHeight * newGlyphWidth * sizeof(uint8_t));
+    
+    // copy the original glyph to the center of the new buffer
+    for (uint32_t i = m_heightPadding; i < newGlyphHeight - m_heightPadding; i++) {
+        bx::memCopy(buffer + i * newGlyphWidth + m_widthPadding, _outBuffer + (i - m_heightPadding) * glyphWidth, glyphWidth);
+    }
+    
     BuildSignedDistanceField();
+    
+    free(buffer);
+
+    _outGlyphInfo.offset_x -= (float)m_widthPadding;
+    _outGlyphInfo.offset_y -= (float)m_heightPadding;
+    _outGlyphInfo.width = (float)newGlyphWidth;
+    _outGlyphInfo.height = (float)newGlyphHeight;
     
     return true;
 }
