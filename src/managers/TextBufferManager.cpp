@@ -13,9 +13,9 @@
 #include "../FontAtlas/CubeAtlas.h"
 
 // shaders
-#include "../FontAtlas/shaders/vs_font_basic.bin.h"
-#include "../FontAtlas/shaders/fs_font_basic.bin.h"
-#include "../FontAtlas/shaders/fs_font_distance_field.bin.h"
+#include "../shaders/vs_font_basic.bin.h"
+#include "../shaders/fs_font_basic.bin.h"
+#include "../shaders/fs_font_distance_field.bin.h"
 
 static const bgfx::EmbeddedShader s_embeddedShaders[] =
         {
