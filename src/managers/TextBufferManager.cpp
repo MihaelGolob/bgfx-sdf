@@ -15,12 +15,13 @@
 // shaders
 #include "../FontAtlas/shaders/vs_font_basic.bin.h"
 #include "../FontAtlas/shaders/fs_font_basic.bin.h"
+#include "../FontAtlas/shaders/fs_font_distance_field.bin.h"
 
 static const bgfx::EmbeddedShader s_embeddedShaders[] =
         {
                 BGFX_EMBEDDED_SHADER(vs_font_basic),
                 BGFX_EMBEDDED_SHADER(fs_font_basic),
-
+                BGFX_EMBEDDED_SHADER(fs_font_distance_field),
                 BGFX_EMBEDDED_SHADER_END()
         };
 
@@ -33,6 +34,11 @@ TextBufferManager::TextBufferManager(FontManager *_fontManager) : m_fontManager(
     m_basicProgram = bgfx::createProgram(
             bgfx::createEmbeddedShader(s_embeddedShaders, type, "vs_font_basic"),
             bgfx::createEmbeddedShader(s_embeddedShaders, type, "fs_font_basic"), true
+    );
+    
+    m_sdfProgram = bgfx::createProgram(
+            bgfx::createEmbeddedShader(s_embeddedShaders, type, "vs_font_basic"),
+            bgfx::createEmbeddedShader(s_embeddedShaders, type, "fs_font_distance_field"), true
     );
 
     m_vertexLayout
@@ -64,6 +70,7 @@ TextBufferManager::~TextBufferManager() {
 
     // destroy shader programs
     bgfx::destroy(m_basicProgram);
+    bgfx::destroy(m_sdfProgram);
 }
 
 TextBufferHandle TextBufferManager::createTextBuffer(FontType _type, BufferType::Enum _bufferType) {
@@ -141,9 +148,14 @@ void TextBufferManager::submitTextBuffer(TextBufferHandle _handle, bgfx::ViewId 
             program = m_basicProgram;
             bgfx::setState(0 | BGFX_STATE_WRITE_RGB | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA));
             break;
-        case FontType::SDF:
-            // todo mihael:
+        case FontType::SDF: {
+            program = m_sdfProgram;
+            bgfx::setState(0 | BGFX_STATE_WRITE_RGB | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA));
+
+            float params[4] = { 0.0f, (float)m_fontManager->getAtlas()->getTextureSize() / 512.0f, 0.0f, 0.0f };
+            bgfx::setUniform(u_params, &params);
             break;
+        }
         default: 
             BX_ASSERT(false, "Shader for font type %d not found", bc.fontType);
             break;
