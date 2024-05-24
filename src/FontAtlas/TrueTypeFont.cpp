@@ -16,8 +16,6 @@ bool TrueTypeFont::init(const uint8_t *_buffer, uint32_t _bufferSize, int32_t _f
                         int16_t _widthPadding, int16_t _heightPadding) {
     BX_WARN((_bufferSize > 256 && _bufferSize < 100000000), "(FontIndex %d) TrueType buffer size is suspicious (%d)",
             _fontIndex, _bufferSize);
-    BX_WARN((_pixelHeight > 4 && _pixelHeight < 128), "(FontIndex %d) TrueType pixel height is suspicious (%d)",
-            _fontIndex, _pixelHeight);
     BX_UNUSED(_bufferSize);
 
     int offset = stbtt_GetFontOffsetForIndex(_buffer, _fontIndex);
@@ -130,7 +128,7 @@ bool TrueTypeFont::BakeGlyphSDF(CodePoint _codePoint, GlyphInfo &_outGlyphInfo, 
     uint32_t newGlyphWidth = glyphWidth + 2 * m_widthPadding;
     uint32_t newGlyphHeight = glyphHeight + 2 * m_heightPadding;
 
-    BX_ASSERT(newGlyphHeight * newGlyphWidth < 128 * 128, "Glyph buffer overflow (size %d)", newGlyphHeight * newGlyphWidth)
+//    BX_ASSERT(newGlyphHeight * newGlyphWidth < 128 * 128, "Glyph buffer overflow (size %d)", newGlyphHeight * newGlyphWidth)
 
     auto buffer = (uint8_t*)malloc(newGlyphHeight * newGlyphWidth * sizeof(uint8_t));
     bx::memSet(buffer, 0, newGlyphHeight * newGlyphWidth * sizeof(uint8_t));

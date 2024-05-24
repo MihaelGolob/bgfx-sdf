@@ -75,11 +75,11 @@ void InitFonts() {
         PrintError("Could not init FreeType Library");
     } 
     
-    font_manager_ = new FontManager(256);
+    font_manager_ = new FontManager(1024);
     text_buffer_manager_ = new TextBufferManager(font_manager_);
     
     font_file_ = LoadTTF("../assets/fonts/droidsans.ttf");
-    font_ = font_manager_->createFontByPixelSize(font_file_, 0, 70, FontType::SDF, 15, 15);
+    font_ = font_manager_->createFontByPixelSize(font_file_, 0, 200, FontType::SDF, 15, 15);
     static_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::SDF, BufferType::Transient);
     dynamic_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::SDF, BufferType::Transient);
 }
