@@ -15,14 +15,12 @@
 // shaders
 #include "../shaders/vertex/vs_font_basic.bin.h"
 #include "../shaders/fragment/fs_font_basic.bin.h"
-#include "../shaders/fragment/fs_font_distance_field.bin.h"
 #include "../shaders/fragment/fs_font_sdf.bin.h"
 
 static const bgfx::EmbeddedShader s_embeddedShaders[] =
         {
                 BGFX_EMBEDDED_SHADER(vs_font_basic),
                 BGFX_EMBEDDED_SHADER(fs_font_basic),
-                BGFX_EMBEDDED_SHADER(fs_font_distance_field),
                 BGFX_EMBEDDED_SHADER(fs_font_sdf),
                 BGFX_EMBEDDED_SHADER_END()
         };
@@ -40,7 +38,7 @@ TextBufferManager::TextBufferManager(FontManager *_fontManager) : m_fontManager(
     
     m_sdfProgram = bgfx::createProgram(
             bgfx::createEmbeddedShader(s_embeddedShaders, type, "vs_font_basic"),
-            bgfx::createEmbeddedShader(s_embeddedShaders, type, "fs_font_distance_field"), true
+            bgfx::createEmbeddedShader(s_embeddedShaders, type, "fs_font_sdf"), true
     );
 
     m_vertexLayout
