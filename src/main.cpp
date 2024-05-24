@@ -14,8 +14,8 @@
 #include "utilities.h"
 
 // constants
-constexpr int k_window_width_ = 1000; 
-constexpr int k_window_height_ = 600;
+constexpr int k_window_width_ = 1400; 
+constexpr int k_window_height_ = 900;
 
 // global variables
 GLFWwindow* window_;
@@ -79,9 +79,9 @@ void InitFonts() {
     text_buffer_manager_ = new TextBufferManager(font_manager_);
     
     font_file_ = LoadTTF("../assets/fonts/droidsans.ttf");
-    font_ = font_manager_->createFontByPixelSize(font_file_, 0, 100, FontType::SDF, 15, 15);
+    font_ = font_manager_->createFontByPixelSize(font_file_, 0, 70, FontType::SDF, 15, 15);
     static_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::SDF, BufferType::Transient);
-    dynamic_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::Bitmap, BufferType::Transient);
+    dynamic_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::SDF, BufferType::Transient);
 }
 
 void HandleKeyPressed(int key) {

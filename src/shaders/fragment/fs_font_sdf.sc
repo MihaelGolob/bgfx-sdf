@@ -12,6 +12,15 @@ void main() {
                   index < 3 ? color.x : color.w;
         
     float threshold = 0.5;
-    vec4 out_color = alpha > threshold ? vec4(1.0, 1.0, 1.0, 1.0) : vec4(0.0, 0.0, 0.0, 0.0);
+    vec4 out_color = vec4(0,0,0,0);
+    
+    if (alpha > 0.5) {
+        out_color = vec4(1.0, 1.0, 1.0, 1.0);
+    } else if (alpha > 0.4) {
+        out_color = vec4(0.8, 0.8, 0.0, 1.0);
+    } else {
+        out_color = vec4(0.0, 0.0, 0.0, 0.0);
+    }
+    
     gl_FragColor = out_color;
 }
