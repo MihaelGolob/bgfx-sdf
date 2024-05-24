@@ -79,9 +79,9 @@ void InitFonts() {
     text_buffer_manager_ = new TextBufferManager(font_manager_);
     
     font_file_ = LoadTTF("../assets/fonts/droidsans.ttf");
-    font_ = font_manager_->createFontByPixelSize(font_file_, 0, 40, FontType::SDF, 10, 10);
+    font_ = font_manager_->createFontByPixelSize(font_file_, 0, 100, FontType::SDF, 15, 15);
     static_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::SDF, BufferType::Transient);
-    dynamic_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::SDF, BufferType::Transient);
+    dynamic_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::Bitmap, BufferType::Transient);
 }
 
 void HandleKeyPressed(int key) {
@@ -167,7 +167,7 @@ void Update() {
         
         // draw dynamic text
         text_buffer_manager_->clearTextBuffer(dynamic_text_buffer_);
-        text_buffer_manager_->setPenPosition(dynamic_text_buffer_, 10.0f, 100.0f);
+        text_buffer_manager_->setPenPosition(dynamic_text_buffer_, 10.0f, 200.0f);
         text_buffer_manager_->appendText(dynamic_text_buffer_, font_, dynamic_text_.c_str());
         
         SetViewTransform();

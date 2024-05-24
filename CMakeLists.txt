@@ -53,6 +53,12 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 
+# command for compiling shaders
+#add_custom_target(run_shader_compilation
+#	COMMAND bash -c "make -C ${CMAKE_SOURCE_DIR}/src/shaders rebuild"
+#	COMMENT "Compiling shaders"
+#)
+
 include_directories(bgfx-sdf
 	SYSTEM 
 		libs/bgfx.cmake/bgfx/include
@@ -68,3 +74,5 @@ include_directories(bgfx-sdf
 target_link_libraries(bgfx-sdf
 	bgfx bx bimg glfw freetype
 )
+
+#add_dependencies(bgfx-sdf run_shader_compilation)

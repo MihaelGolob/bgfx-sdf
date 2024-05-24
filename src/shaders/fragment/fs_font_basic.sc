@@ -1,6 +1,6 @@
 $input v_color0, v_texcoord0
 
-#include "../../common/common.sh"
+#include "../common/common.sh"
 
 SAMPLERCUBE(s_texColor, 0);
 
