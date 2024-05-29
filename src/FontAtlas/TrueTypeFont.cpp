@@ -138,6 +138,7 @@ bool TrueTypeFont::BakeGlyphSDF(CodePoint _codePoint, GlyphInfo &_outGlyphInfo, 
         bx::memCopy(buffer + i * newGlyphWidth + m_widthPadding, _outBuffer + (i - m_heightPadding) * glyphWidth, glyphWidth);
     }
 
+    // todo: build the signed distance field from a a super-sampled version of the glyph (check BGFX implementation!)
     BuildSignedDistanceField(_outBuffer, buffer, newGlyphWidth, newGlyphHeight, std::min(m_widthPadding, m_heightPadding));
 
     free(buffer);
