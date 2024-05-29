@@ -86,7 +86,9 @@ void InitFonts() {
 
 void HandleKeyPressed(int key) {
     if (key == GLFW_KEY_BACKSPACE) {
-        dynamic_text_.pop_back();
+        if (!dynamic_text_.empty()) {
+            dynamic_text_.pop_back();
+        }
     } else {
         dynamic_text_ += InputManager::GetKeyChar(key);
     }
