@@ -12,3 +12,9 @@ V diplomski nalogi bom podrobno preučil delovanje SDF in MSDF in ti dve metodi 
 - Prenesite vse module projekta (`git submodule update --init --recursive`)
 - Odprite bgfx-sdf projekt z urejevalnikom, ki podpira Cmake (na primer JetBrains CLion). Alternativno lahko ročno prevedete kodo z ukazom `make`.
 - V mapi `src` najdete vso izvorno kodo
+
+## Navodila za prevajanje senčilnikov
+
+- V direktoriju `src/shaders/` najdete vse senčilnike
+- Če naredite v spremembo v senčilniku, ga morate prevesti, preden se bo sprememba poznala
+- To naredite tako, da v programu `bash` v direktoriju `src/shaders/` poženete ukaz `make rebuild`
