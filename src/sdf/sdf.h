@@ -4,56 +4,225 @@
 
 #pragma once
 
-int GetPixel(uint8_t* bitmap, int width, int height, int x, int y) {
-    if (x < 0 || x >= width || y < 0 || y >= height)
-        return 0;
-    
-    return bitmap[y * width + x] == 0 ? 0 : 1;
+#define MAX_FLOAT 1e+37f
+#define MAX_PASSES 10
+#define SLACK 0.001f
+#define SQRT2 1.41421356237f
+
+struct SdfPoint {
+    float x, y;
+    float distance;
+};
+
+float GetSquareDistance(SdfPoint* p1, SdfPoint* p2) {
+    float dx = p1->x - p2->x;
+    float dy = p1->y - p2->y;
+    return dx * dx + dy * dy;
 }
 
-float FindDistanceToGlyph(uint8_t* glyphBitmap, int width, int height, int x, int y, int spread = 6) {
-    const int state = GetPixel(glyphBitmap, width, height, x, y);
-    const int minX = std::max(x - spread, 0);
-    const int minY = std::max(y - spread, 0);
-    const int maxX = std::min(x + spread, width - 1);
-    const int maxY = std::min(y + spread, height - 1);
+float GetEdgeDistance(float gradient_x, float gradient_y, float value) {
+    if ((gradient_x == 0.0f) || (gradient_y == 0.0f)) return 0.5f - value; // if gradients are very small, pixel is either inside or outside 
     
-    float minDistance = spread*spread;
-    for (int j = minY; j <= maxY; j++) {
-        for (int i = minX; i <= maxX; i++) {
-            const int pixelState = GetPixel(glyphBitmap, width, height, i, j);
-            if (pixelState == state) {
-                continue;
+    // use symmetry
+    gradient_x = bx::abs(gradient_x);
+    gradient_y = bx::abs(gradient_y);
+    if (gradient_x < gradient_y) std::swap(gradient_x, gradient_y);
+    
+    // calculate distance
+    float value1 = 0.5f * gradient_y / gradient_x;
+    if (value < value1) return 0.5f * (gradient_x + gradient_y) - bx::sqrt(2.0f * gradient_x * gradient_y * value);
+    else if (value < (1.0f - value1)) return (0.5f - value) * gradient_x;
+    return -0.5f * (gradient_x + gradient_y) + bx::sqrt(2.0f * gradient_x * gradient_y * (1.0f - value)); 
+}
+
+void CalculateBoundary(const uint8_t* glyph, int width, int height, SdfPoint* points) {
+    for (int y = 1; y < height-1; y++) {
+        for (int x = 1; x < width-1; x++) {
+            auto index = y * width + x;
+            SdfPoint point = {(float)x, (float)y, 0.0f};
+            
+            // skip non-boundary pixels
+            if (glyph[index] == 255) continue;
+            if (glyph[index] == 0) {
+                bool horizontal_check = glyph[index-1] == 255 || glyph[index+1] == 255;
+                bool vertical_check = glyph[index-width] == 255 || glyph[index+width] == 255;
+                if (!horizontal_check && !vertical_check) continue;
             }
             
-            float dxSquared = (i - x) * (i - x);
-            float dySquared = (j - y) * (j - y);
-            float dSquared = dxSquared + dySquared;
-        
-            minDistance = std::min(minDistance, dSquared);
+            // calculate gradient
+            float gradient_x = -(float)glyph[index - width - 1] - SQRT2 * (float)glyph[index - 1] - (float)glyph[index + width - 1]
+                               +(float)glyph[index - width + 1] + SQRT2 * (float)glyph[index + 1] + (float)glyph[index + width + 1];
+            float gradient_y = -(float)glyph[index - width - 1] - SQRT2 * (float)glyph[index - width] - (float)glyph[index - width + 1]
+                               +(float)glyph[index + width - 1] + SQRT2 * (float)glyph[index + width] + (float)glyph[index + width + 1];
+            
+            if (bx::abs(gradient_x) < SLACK && bx::abs(gradient_y) < SLACK) continue;
+            float gradient_len = gradient_x * gradient_x + gradient_y * gradient_y;
+            // normalize gradient
+            if (gradient_len > SLACK) {
+                gradient_len = 1.0f / bx::sqrt(gradient_len);
+                gradient_x *= gradient_len;
+                gradient_y *= gradient_len;
+            }
+            
+            auto tk = x + y * width;
+            float distance = GetEdgeDistance(gradient_x, gradient_y, (float)glyph[index] / 255.0f);
+            points[index].x = (float)x + distance * gradient_x;
+            points[index].y = (float)y + distance * gradient_y;
+            points[index].distance = GetSquareDistance(&point, &points[tk]);
         }
     }
-    
-    minDistance = bx::sqrt(minDistance);
-    minDistance = std::min(minDistance, (float) spread);
-    // map from [0, spread] to [0, 1]
-    float output = (minDistance - 0.5f) / (spread - 0.5f);
-    
-    output *= state == 0 ? -1.0f : 1.0f;
-    
-    // map from [-1, 1] to [0, 1]
-    output = (output + 1.0f) / 2.0f;
-    return output;
 }
 
-bool BuildSignedDistanceField(uint8_t* outBuffer, uint8_t* glyphBitmap, int width, int height, int spread = 6) {
-    // Compute the distance field
+// use the sweep & update algorithm to build antialiased signed distance field
+bool BuildSignedDistanceField(uint8_t* out_buffer, uint8_t* glyph_bitmap, int width, int height, int spread = 6) {
+    auto points = (SdfPoint*)malloc(width * height * sizeof(SdfPoint));
+    if (!points) return false;
+    
+    // initialize points
+    for (int i = 0; i < width * height; i++) {
+        points[i].x = 0;
+        points[i].y = 0;
+        points[i].distance = MAX_FLOAT;
+    }
+
+    CalculateBoundary(glyph_bitmap, width, height, points); 
+    
+    // Calculate distances with sweep & update
+    for (int pass = 0; pass < MAX_PASSES; pass++) {
+        bool changed = false;
+        
+        // bottom-left to top right
+        for (int y = 1; y < height-1; y++) {
+            for (int x = 1; x < width-1; x++) {
+                auto index = y * width + x;
+                SdfPoint point = {(float)x, (float)y, points[index].distance};
+                SdfPoint result = {};
+                bool changed_inner = false;
+                
+                auto neighbor = index - width - 1; // (x-1, y-1)
+                if (points[neighbor].distance < point.distance) {
+                    auto distance = GetSquareDistance(&point, &points[neighbor]);
+                    if (distance + SLACK < point.distance) {
+                        result = points[neighbor];
+                        result.distance = distance;
+                        point.distance = distance;
+                        changed_inner = true;
+                    }
+                }
+                
+                neighbor = index - width; // (x, y-1)
+                if (points[neighbor].distance < point.distance) {
+                    auto distance = GetSquareDistance(&point, &points[neighbor]);
+                    if (distance + SLACK < point.distance) {
+                        result = points[neighbor];
+                        result.distance = distance;
+                        point.distance = distance;
+                        changed_inner = true;
+                    }
+                }
+                
+                neighbor = index - width + 1; // (x+1, y-1)
+                if (points[neighbor].distance < point.distance) {
+                    auto distance = GetSquareDistance(&point, &points[neighbor]);
+                    if (distance + SLACK < point.distance) {
+                        result = points[neighbor];
+                        result.distance = distance;
+                        point.distance = distance;
+                        changed_inner = true;
+                    }
+                }
+                
+                neighbor = index - 1; // (x-1, y)
+                if (points[neighbor].distance < point.distance) {
+                    auto distance = GetSquareDistance(&point, &points[neighbor]);
+                    if (distance + SLACK < point.distance) {
+                        result = points[neighbor];
+                        result.distance = distance;
+                        point.distance = distance;
+                        changed_inner = true;
+                    }
+                }
+                
+                if (changed_inner) {
+                    points[index] = result;
+                    changed = true;
+                }
+            }
+        }
+        
+        // top-right to bottom-left
+        for (int y = height-2; y > 0; y--) {
+            for (int x = width-2; x > 0; x--) {
+                auto index = y * width + x;
+                SdfPoint point = {(float)x, (float)y, points[index].distance};
+                SdfPoint result = {};
+                bool changed_inner = false;
+
+                auto neighbor = index + 1; // (x+1, y)
+                if (points[neighbor].distance < point.distance) {
+                    auto distance = GetSquareDistance(&point, &points[neighbor]);
+                    if (distance + SLACK < point.distance) {
+                        result = points[neighbor];
+                        result.distance = distance;
+                        point.distance = distance;
+                        changed_inner = true;
+                    }
+                }
+                
+                neighbor = index + width - 1; // (x-1, y+1)
+                if (points[neighbor].distance < point.distance) {
+                    auto distance = GetSquareDistance(&point, &points[neighbor]);
+                    if (distance + SLACK < point.distance) {
+                        result = points[neighbor];
+                        result.distance = distance;
+                        point.distance = distance;
+                        changed_inner = true;
+                    }
+                }
+                
+                neighbor = index + width; // (x, y+1)
+                if (points[neighbor].distance < point.distance) {
+                    auto distance = GetSquareDistance(&point, &points[neighbor]);
+                    if (distance + SLACK < point.distance) {
+                        result = points[neighbor];
+                        result.distance = distance;
+                        point.distance = distance;
+                        changed_inner = true;
+                    }
+                }
+                
+                neighbor = index + width + 1; // (x+1, y+1)
+                if (points[neighbor].distance < point.distance) {
+                    auto distance = GetSquareDistance(&point, &points[neighbor]);
+                    if (distance + SLACK < point.distance) {
+                        result = points[neighbor];
+                        result.distance = distance;
+                        point.distance = distance;
+                        changed_inner = true;
+                    }
+                }
+
+                if (changed_inner) {
+                    points[index] = result;
+                    changed = true;
+                }
+            }
+        } 
+        
+        if (!changed) break;
+    }
+    
+    // map to good range
+    float scale = 1.0f / (float)spread;
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
-            float dist = FindDistanceToGlyph(glyphBitmap, width, height, x, y, spread);
-            outBuffer[y * width + x] = (uint8_t) (bx::floor(dist * 255.0f));
+            float distance = bx::sqrt(points[y * width + x].distance) * scale;
+            if (glyph_bitmap[y * width + x] > 127) distance = -distance;
+            out_buffer[y * width + x] = (uint8_t)(bx::clamp(0.5f - distance * 0.5f, 0.0f, 1.0f) * 255.0f);
         }
     }
     
+    // clean up
+    free(points);
     return true;
 }

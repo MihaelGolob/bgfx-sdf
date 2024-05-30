@@ -3,6 +3,7 @@
 //
 
 //#define DEBUG_LOG_GLYPH_BUFFER // uncomment to enable debug logging of glyph buffer
+//#define DEBUG_LOG_SDF_BUFFER // uncomment to enable SDf debug logging of glyph buffer
 
 #include <stb_truetype.h>
 
@@ -102,8 +103,8 @@ bool TrueTypeFont::BakeGlyphSDF(CodePoint _codePoint, GlyphInfo &_outGlyphInfo, 
     _outGlyphInfo.advance_x = bx::round(((float) advance) * scale);
     _outGlyphInfo.advance_y = bx::round(((float) (ascent + descent + lineGap)) * scale);
 
-    uint32_t bpp = 1;
-    uint32_t dstPitch = glyphWidth * bpp;
+    int bpp = 1;
+    int dstPitch = glyphWidth * bpp;
 
     stbtt_MakeCodepointBitmap(&m_font, _outBuffer, glyphWidth, glyphHeight, dstPitch, scale, scale, _codePoint);
 
@@ -114,9 +115,9 @@ bool TrueTypeFont::BakeGlyphSDF(CodePoint _codePoint, GlyphInfo &_outGlyphInfo, 
         for (int j = 0; j < glyphWidth; j++) {
             auto x = _outBuffer[glyphWidth*i + j];
             if (x != 0) {
-                std::cout << ".";
+                printf("%4d", x);
             } else {
-                std::cout << " ";
+                std::cout << "    ";
             }
         }
         std::cout << std::endl;
@@ -125,8 +126,8 @@ bool TrueTypeFont::BakeGlyphSDF(CodePoint _codePoint, GlyphInfo &_outGlyphInfo, 
     
     if (glyphWidth * glyphHeight <= 0) return false;
 
-    uint32_t newGlyphWidth = glyphWidth + 2 * m_widthPadding;
-    uint32_t newGlyphHeight = glyphHeight + 2 * m_heightPadding;
+    int newGlyphWidth = glyphWidth + 2 * m_widthPadding;
+    int newGlyphHeight = glyphHeight + 2 * m_heightPadding;
 
 //    BX_ASSERT(newGlyphHeight * newGlyphWidth < 128 * 128, "Glyph buffer overflow (size %d)", newGlyphHeight * newGlyphWidth)
 
@@ -134,12 +135,27 @@ bool TrueTypeFont::BakeGlyphSDF(CodePoint _codePoint, GlyphInfo &_outGlyphInfo, 
     bx::memSet(buffer, 0, newGlyphHeight * newGlyphWidth * sizeof(uint8_t));
 
     // copy the original glyph to the center of the new buffer
-    for (uint32_t i = m_heightPadding; i < newGlyphHeight - m_heightPadding; i++) {
+    for (int i = m_heightPadding; i < newGlyphHeight - m_heightPadding; i++) {
         bx::memCopy(buffer + i * newGlyphWidth + m_widthPadding, _outBuffer + (i - m_heightPadding) * glyphWidth, glyphWidth);
     }
 
-    // todo: build the signed distance field from a a super-sampled version of the glyph (check BGFX implementation!)
     BuildSignedDistanceField(_outBuffer, buffer, newGlyphWidth, newGlyphHeight, std::min(m_widthPadding, m_heightPadding));
+
+#ifdef DEBUG_LOG_SDF_BUFFER
+    std::cout << "SDF glyph " << (char)_codePoint << " buffer size is (" << glyphWidth << "," << glyphHeight << ")"  << std::endl;
+
+    for (int i = 0; i < glyphHeight; i++) {
+        for (int j = 0; j < glyphWidth; j++) {
+            auto x = _outBuffer[glyphWidth*i + j];
+            if (x != 0) {
+                printf("%4d", x);
+            } else {
+                std::cout << "    ";
+            }
+        }
+        std::cout << std::endl;
+    }
+#endif
 
     free(buffer);
 
