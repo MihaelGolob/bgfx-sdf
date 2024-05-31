@@ -52,8 +52,6 @@ TextBufferManager::TextBufferManager(FontManager *_fontManager) : m_fontManager(
             .end();
 
     s_texColor = bgfx::createUniform("s_texColor", bgfx::UniformType::Sampler);
-    u_dropShadowColor = bgfx::createUniform("u_dropShadowColor", bgfx::UniformType::Vec4);
-    u_params = bgfx::createUniform("u_params", bgfx::UniformType::Vec4);
 }
 
 TextBufferManager::~TextBufferManager() {
@@ -63,9 +61,6 @@ TextBufferManager::~TextBufferManager() {
     );
     delete[] m_textBuffers;
 
-    bgfx::destroy(u_params);
-
-    bgfx::destroy(u_dropShadowColor);
     bgfx::destroy(s_texColor);
 
     // destroy shader programs
@@ -151,9 +146,6 @@ void TextBufferManager::submitTextBuffer(TextBufferHandle _handle, bgfx::ViewId 
         case FontType::SDF: {
             program = m_sdfProgram;
             bgfx::setState(0 | BGFX_STATE_WRITE_RGB | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA));
-
-            float params[4] = { 0.0f, (float)m_fontManager->getAtlas()->getTextureSize() / 512.0f, 0.0f, 0.0f };
-            bgfx::setUniform(u_params, &params);
             break;
         }
         default: 
@@ -234,72 +226,6 @@ void TextBufferManager::submitTextBuffer(TextBufferHandle _handle, bgfx::ViewId 
     }
 
     bgfx::submit(_id, program, _depth);
-}
-
-void TextBufferManager::setStyle(TextBufferHandle _handle, uint32_t _flags) {
-    BX_ASSERT(isValid(_handle), "Invalid handle used");
-    BufferCache &bc = m_textBuffers[_handle.idx];
-    bc.textBuffer->setStyle(_flags);
-}
-
-void TextBufferManager::setTextColor(TextBufferHandle _handle, uint32_t _rgba) {
-    BX_ASSERT(isValid(_handle), "Invalid handle used");
-    BufferCache &bc = m_textBuffers[_handle.idx];
-    bc.textBuffer->setTextColor(_rgba);
-}
-
-void TextBufferManager::setBackgroundColor(TextBufferHandle _handle, uint32_t _rgba) {
-    BX_ASSERT(isValid(_handle), "Invalid handle used");
-    BufferCache &bc = m_textBuffers[_handle.idx];
-    bc.textBuffer->setBackgroundColor(_rgba);
-}
-
-void TextBufferManager::setOverlineColor(TextBufferHandle _handle, uint32_t _rgba) {
-    BX_ASSERT(isValid(_handle), "Invalid handle used");
-    BufferCache &bc = m_textBuffers[_handle.idx];
-    bc.textBuffer->setOverlineColor(_rgba);
-}
-
-void TextBufferManager::setUnderlineColor(TextBufferHandle _handle, uint32_t _rgba) {
-    BX_ASSERT(isValid(_handle), "Invalid handle used");
-    BufferCache &bc = m_textBuffers[_handle.idx];
-    bc.textBuffer->setUnderlineColor(_rgba);
-}
-
-void TextBufferManager::setStrikeThroughColor(TextBufferHandle _handle, uint32_t _rgba) {
-    BX_ASSERT(isValid(_handle), "Invalid handle used");
-    BufferCache &bc = m_textBuffers[_handle.idx];
-    bc.textBuffer->setStrikeThroughColor(_rgba);
-}
-
-void TextBufferManager::setOutlineColor(TextBufferHandle _handle, uint32_t _rgba) {
-    BX_ASSERT(isValid(_handle), "Invalid handle used");
-    BufferCache &bc = m_textBuffers[_handle.idx];
-    bc.textBuffer->setOutlineColor(_rgba);
-}
-
-void TextBufferManager::setOutlineWidth(TextBufferHandle _handle, float _outlineWidth) {
-    BX_ASSERT(isValid(_handle), "Invalid handle used");
-    BufferCache &bc = m_textBuffers[_handle.idx];
-    bc.textBuffer->setOutlineWidth(_outlineWidth);
-}
-
-void TextBufferManager::setDropShadowColor(TextBufferHandle _handle, uint32_t _rgba) {
-    BX_ASSERT(isValid(_handle), "Invalid handle used");
-    BufferCache &bc = m_textBuffers[_handle.idx];
-    bc.textBuffer->setDropShadowColor(_rgba);
-}
-
-void TextBufferManager::setDropShadowOffset(TextBufferHandle _handle, float _u, float _v) {
-    BX_ASSERT(isValid(_handle), "Invalid handle used");
-    BufferCache &bc = m_textBuffers[_handle.idx];
-    bc.textBuffer->setDropShadowOffset(_u, _v);
-}
-
-void TextBufferManager::setDropShadowSoftener(TextBufferHandle _handle, float smoother) {
-    BX_ASSERT(isValid(_handle), "Invalid handle used");
-    BufferCache &bc = m_textBuffers[_handle.idx];
-    bc.textBuffer->setDropShadowSoftener(smoother);
 }
 
 void TextBufferManager::setPenPosition(TextBufferHandle _handle, float _x, float _y) {
