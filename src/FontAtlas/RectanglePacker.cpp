@@ -12,8 +12,8 @@ RectanglePacker::RectanglePacker(uint32_t _width, uint32_t _height) : m_width(_w
 }
 
 void RectanglePacker::init(uint32_t _width, uint32_t _height) {
-    BX_ASSERT(_width > 2, "_width must be > 2");
-    BX_ASSERT(_height > 2, "_height must be > 2");
+    BX_ASSERT(_width > 2, "_width must be > 2")
+    BX_ASSERT(_height > 2, "_height must be > 2")
 
     m_width = _width;
     m_height = _height;
@@ -82,7 +82,7 @@ bool RectanglePacker::addRectangle(uint16_t _width, uint16_t _height, uint16_t &
     return true;
 }
 
-float RectanglePacker::getUsageRatio() {
+float RectanglePacker::getUsageRatio() const {
     uint32_t total = m_width * m_height;
     if (total > 0) {
         return (float) m_usedSpace / (float) total;

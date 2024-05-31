@@ -21,17 +21,17 @@ public:
     bool addRectangle(uint16_t _width, uint16_t _height, uint16_t &_outX, uint16_t &_outY);
 
     /// return the used surface in squared unit
-    uint32_t getUsedSurface() {
+    [[nodiscard]] uint32_t getUsedSurface() const {
         return m_usedSpace;
     }
 
     /// return the total available surface in squared unit
-    uint32_t getTotalSurface() {
+    [[nodiscard]] uint32_t getTotalSurface() const {
         return m_width * m_height;
     }
 
     /// return the usage ratio of the available surface [0:1]
-    float getUsageRatio();
+    [[nodiscard]] float getUsageRatio() const;
 
     /// reset to initial state
     void clear();

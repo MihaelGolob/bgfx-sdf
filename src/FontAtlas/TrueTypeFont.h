@@ -38,7 +38,7 @@ private:
     friend class FontManager;
 
     stbtt_fontinfo m_font;
-    float m_scale;
+    float m_scale{};
 
     int16_t m_padding;
 };

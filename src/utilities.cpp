@@ -25,12 +25,12 @@ void PrintInfo(const std::string& _info) {
 // file reading 
 
 bx::AllocatorI* getDefaultAllocator() {
-    BX_PRAGMA_DIAGNOSTIC_PUSH();
-    BX_PRAGMA_DIAGNOSTIC_IGNORED_MSVC(4459); // warning C4459: declaration of 's_allocator' hides global declaration
-    BX_PRAGMA_DIAGNOSTIC_IGNORED_CLANG_GCC("-Wshadow");
+    BX_PRAGMA_DIAGNOSTIC_PUSH()
+    BX_PRAGMA_DIAGNOSTIC_IGNORED_MSVC(4459) // warning C4459: declaration of "s_allocator" hides global declaration
+    BX_PRAGMA_DIAGNOSTIC_IGNORED_CLANG_GCC("-Wshadow")
     static bx::DefaultAllocator s_allocator;
     return &s_allocator;
-    BX_PRAGMA_DIAGNOSTIC_POP();
+    BX_PRAGMA_DIAGNOSTIC_POP()
 }
 
 void* load(const bx::FilePath& filePath, uint32_t* size) {

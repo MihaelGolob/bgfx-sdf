@@ -24,7 +24,7 @@ public:
     /// create an empty dynamic atlas (region can be updated and added)
     /// @param textureSize an atlas creates a texture cube of 6 faces with size equal to (textureSize*textureSize * sizeof(RGBA) )
     /// @param maxRegionCount maximum number of region allowed in the atlas
-    Atlas(uint16_t _textureSize, uint16_t _maxRegionsCount = 4096);
+    explicit Atlas(uint16_t _textureSize, uint16_t _maxRegionsCount = 4096);
 
     /// initialize a static atlas with serialized data	(region can be updated but not added)
     /// @param textureSize an atlas creates a texture cube of 6 faces with size equal to (textureSize*textureSize * sizeof(RGBA) )
@@ -40,7 +40,7 @@ public:
     uint16_t addRegion(uint16_t _width, uint16_t _height, const uint8_t *_bitmapBuffer,
                        AtlasRegion::Type _type = AtlasRegion::TYPE_BGRA8, uint16_t outline = 0);
 
-    /// update a preallocated region
+    /// update a pre allocated region
     void updateRegion(const AtlasRegion &_region, const uint8_t *_bitmapBuffer);
 
     /// Pack the UV coordinates of the four corners of a region to a vertex buffer using the supplied vertex format.
@@ -60,17 +60,17 @@ public:
     void packFaceLayerUV(uint32_t _idx, uint8_t *_vertexBuffer, uint32_t _offset, uint32_t _stride) const;
 
     /// return the TextureHandle (cube) of the atlas
-    bgfx::TextureHandle getTextureHandle() const {
+    [[nodiscard]] bgfx::TextureHandle getTextureHandle() const {
         return m_textureHandle;
     }
 
     //retrieve a region info
-    const AtlasRegion &getRegion(uint16_t _handle) const {
+    [[nodiscard]] const AtlasRegion &getRegion(uint16_t _handle) const {
         return m_regions[_handle];
     }
 
     /// retrieve the size of side of a texture in pixels
-    uint16_t getTextureSize() const {
+    [[nodiscard]] uint16_t getTextureSize() const {
         return m_textureSize;
     }
 
@@ -78,35 +78,35 @@ public:
     //float getUsageRatio() const { return 0.0f; }
 
     /// retrieve the numbers of region in the atlas
-    uint16_t getRegionCount() const {
+    [[nodiscard]] uint16_t getRegionCount() const {
         return m_regionCount;
     }
 
     /// retrieve a pointer to the region buffer (in order to serialize it)
-    const AtlasRegion *getRegionBuffer() const {
+    [[nodiscard]] const AtlasRegion *getRegionBuffer() const {
         return m_regions;
     }
 
     /// retrieve the byte size of the texture
-    uint32_t getTextureBufferSize() const {
+    [[nodiscard]] uint32_t getTextureBufferSize() const {
         return 6 * m_textureSize * m_textureSize * 4;
     }
 
     /// retrieve the mirrored texture buffer (to serialize it)
-    const uint8_t *getTextureBuffer() const {
+    [[nodiscard]] const uint8_t *getTextureBuffer() const {
         return m_textureBuffer;
     }
 
 private:
     struct PackedLayer;
-    PackedLayer *m_layers;
+    PackedLayer *m_layers{};
     AtlasRegion *m_regions;
     uint8_t *m_textureBuffer;
 
     uint32_t m_usedLayers;
     uint32_t m_usedFaces;
 
-    bgfx::TextureHandle m_textureHandle;
+    bgfx::TextureHandle m_textureHandle{};
     uint16_t m_textureSize;
     float m_texelSize;
 

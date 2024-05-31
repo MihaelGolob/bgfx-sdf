@@ -38,7 +38,7 @@ public:
 
     /// TextBuffer is bound to a fontManager for glyph retrieval
     /// @remark the ownership of the manager is not taken
-    TextBuffer(FontManager *_fontManager);
+    explicit TextBuffer(FontManager *_fontManager);
 
     ~TextBuffer();
 
@@ -68,35 +68,35 @@ public:
     }
 
     /// Number of vertex in the vertex buffer.
-    uint32_t getVertexCount() const {
+    [[nodiscard]] uint32_t getVertexCount() const {
         return m_vertexCount;
     }
 
     /// Size in bytes of a vertex.
-    uint32_t getVertexSize() const {
+    [[nodiscard]] static uint32_t getVertexSize() {
         return sizeof(TextVertex);
     }
 
     /// get a pointer to the index buffer to submit it to the graphic
-    const uint16_t *getIndexBuffer() const {
+    [[nodiscard]] const uint16_t *getIndexBuffer() const {
         return m_indexBuffer;
     }
 
     /// number of index in the index buffer
-    uint32_t getIndexCount() const {
+    [[nodiscard]] uint32_t getIndexCount() const {
         return m_indexCount;
     }
 
     /// Size in bytes of an index.
-    uint32_t getIndexSize() const {
+    [[nodiscard]] static uint32_t getIndexSize() {
         return sizeof(uint16_t);
     }
 
-    uint32_t getTextColor() const {
+    [[nodiscard]] uint32_t getTextColor() const {
         return toABGR(m_textColor);
     }
 
-    TextRectangle getRectangle() const {
+    [[nodiscard]] TextRectangle getRectangle() const {
         return m_rectangle;
     }
 
@@ -147,7 +147,7 @@ private:
     uint32_t m_outlineColor;
 
     // drop shadow state
-    float m_dropShadowOffset[2];
+    float m_dropShadowOffset[2]{};
     uint32_t m_dropShadowColor;
     float m_dropShadowSoftener;
 
@@ -164,7 +164,7 @@ private:
 
     CodePoint m_previousCodePoint;
 
-    TextRectangle m_rectangle;
+    TextRectangle m_rectangle{};
     FontManager *m_fontManager;
 
     TextVertex *m_vertexBuffer;

@@ -16,11 +16,9 @@ struct Atlas::PackedLayer {
     AtlasRegion faceRegion{};
 };
 
-Atlas::Atlas(uint16_t _textureSize, uint16_t _maxRegionsCount)
-        : m_usedLayers(0), m_usedFaces(0), m_textureSize(_textureSize), m_regionCount(0),
-          m_maxRegionCount(_maxRegionsCount) {
-    BX_ASSERT(_textureSize >= 64 && _textureSize <= 4096, "Invalid _textureSize %d.", _textureSize);
-    BX_ASSERT(_maxRegionsCount >= 64 && _maxRegionsCount <= 32000, "Invalid _maxRegionsCount %d.", _maxRegionsCount);
+Atlas::Atlas(uint16_t _textureSize, uint16_t _maxRegionsCount) : m_usedLayers(0), m_usedFaces(0), m_textureSize(_textureSize), m_regionCount(0), m_maxRegionCount(_maxRegionsCount) {
+    BX_ASSERT(_textureSize >= 64 && _textureSize <= 4096, "Invalid _textureSize %d.", _textureSize)
+    BX_ASSERT(_maxRegionsCount >= 64 && _maxRegionsCount <= 32000, "Invalid _maxRegionsCount %d.", _maxRegionsCount)
 
     m_texelSize = float(UINT16_MAX) / float(m_textureSize);
 
@@ -37,10 +35,8 @@ Atlas::Atlas(uint16_t _textureSize, uint16_t _maxRegionsCount)
 }
 
 Atlas::Atlas(uint16_t _textureSize, const uint8_t *_textureBuffer, uint16_t _regionCount, const uint8_t *_regionBuffer, uint16_t _maxRegionsCount)
-        : m_usedLayers(6), m_usedFaces(6), m_textureSize(_textureSize), m_regionCount(_regionCount),
-        m_maxRegionCount(_regionCount < _maxRegionsCount ? _regionCount : _maxRegionsCount) {
-    BX_ASSERT(_regionCount <= 64 && _maxRegionsCount <= 4096, "_regionCount %d, _maxRegionsCount %d", _regionCount,
-              _maxRegionsCount);
+        : m_usedLayers(6), m_usedFaces(6), m_textureSize(_textureSize), m_regionCount(_regionCount), m_maxRegionCount(_regionCount < _maxRegionsCount ? _regionCount : _maxRegionsCount) {
+    BX_ASSERT(_regionCount <= 64 && _maxRegionsCount <= 4096, "_regionCount %d, _maxRegionsCount %d", _regionCount, _maxRegionsCount)
 
     m_texelSize = float(UINT16_MAX) / float(m_textureSize);
 
@@ -63,8 +59,7 @@ Atlas::~Atlas() {
     delete[] m_textureBuffer;
 }
 
-uint16_t Atlas::addRegion(uint16_t _width, uint16_t _height, const uint8_t *_bitmapBuffer, AtlasRegion::Type _type,
-                          uint16_t outline) {
+uint16_t Atlas::addRegion(uint16_t _width, uint16_t _height, const uint8_t *_bitmapBuffer, AtlasRegion::Type _type, uint16_t outline) {
     if (m_regionCount >= m_maxRegionCount) {
         return UINT16_MAX;
     }
@@ -126,8 +121,7 @@ void Atlas::updateRegion(const AtlasRegion &_region, const uint8_t *_bitmapBuffe
         bx::memSet(mem->data, 0, mem->size);
         if (_region.getType() == AtlasRegion::TYPE_BGRA8) {
             const uint8_t *inLineBuffer = _bitmapBuffer;
-            uint8_t *outLineBuffer = &m_textureBuffer[_region.getFaceIndex() * (m_textureSize * m_textureSize * 4) +
-                                     (((_region.y * m_textureSize) + _region.x) * 4)];
+            uint8_t *outLineBuffer = &m_textureBuffer[_region.getFaceIndex() * (m_textureSize * m_textureSize * 4) + (((_region.y * m_textureSize) + _region.x) * 4)];
 
             // copy the region to the texture buffer
             for (int yy = 0; yy < _region.height; ++yy) {
@@ -140,8 +134,7 @@ void Atlas::updateRegion(const AtlasRegion &_region, const uint8_t *_bitmapBuffe
         } else {
             uint32_t layer = _region.getComponentIndex();
             const uint8_t *inLineBuffer = _bitmapBuffer;
-            uint8_t *outLineBuffer = (m_textureBuffer + _region.getFaceIndex() * (m_textureSize * m_textureSize * 4) +
-                                      (((_region.y * m_textureSize) + _region.x) * 4));
+            uint8_t *outLineBuffer = (m_textureBuffer + _region.getFaceIndex() * (m_textureSize * m_textureSize * 4) + (((_region.y * m_textureSize) + _region.x) * 4));
 
             for (int yy = 0; yy < _region.height; ++yy) {
                 for (int xx = 0; xx < _region.width; ++xx) {
@@ -154,8 +147,7 @@ void Atlas::updateRegion(const AtlasRegion &_region, const uint8_t *_bitmapBuffe
             }
         }
 
-        bgfx::updateTextureCube(m_textureHandle, 0, (uint8_t) _region.getFaceIndex(), 0, _region.x, _region.y,
-                                _region.width, _region.height, mem);
+        bgfx::updateTextureCube(m_textureHandle, 0, (uint8_t) _region.getFaceIndex(), 0, _region.x, _region.y, _region.width, _region.height, mem);
     }
 }
 
@@ -169,7 +161,7 @@ void Atlas::packUV(uint16_t _regionHandle, uint8_t *_vertexBuffer, uint32_t _off
 }
 
 static void writeUV(uint8_t *_vertexBuffer, int16_t _x, int16_t _y, int16_t _z, int16_t _w) {
-    uint16_t *xyzw = (uint16_t *) _vertexBuffer;
+    auto xyzw = (uint16_t *) _vertexBuffer;
     xyzw[0] = _x;
     xyzw[1] = _y;
     xyzw[2] = _z;
@@ -177,11 +169,11 @@ static void writeUV(uint8_t *_vertexBuffer, int16_t _x, int16_t _y, int16_t _z, 
 }
 
 void Atlas::packUV(const AtlasRegion &_region, uint8_t *_vertexBuffer, uint32_t _offset, uint32_t _stride) const {
-    int16_t x0 = (int16_t) (((float) _region.x * m_texelSize) - float(INT16_MAX));
-    int16_t y0 = (int16_t) (((float) _region.y * m_texelSize) - float(INT16_MAX));
-    int16_t x1 = (int16_t) ((((float) _region.x + _region.width) * m_texelSize) - float(INT16_MAX));
-    int16_t y1 = (int16_t) ((((float) _region.y + _region.height) * m_texelSize) - float(INT16_MAX));
-    int16_t ww = (int16_t) ((float(INT16_MAX) / 4.0f) * (float) _region.getComponentIndex());
+    auto x0 = (int16_t) (((float) _region.x * m_texelSize) - float(INT16_MAX));
+    auto y0 = (int16_t) (((float) _region.y * m_texelSize) - float(INT16_MAX));
+    auto x1 = (int16_t) ((((float) _region.x + _region.width) * m_texelSize) - float(INT16_MAX));
+    auto y1 = (int16_t) ((((float) _region.y + _region.height) * m_texelSize) - float(INT16_MAX));
+    auto ww = (int16_t) ((float(INT16_MAX) / 4.0f) * (float) _region.getComponentIndex());
 
     _vertexBuffer += _offset;
     switch (_region.getFaceIndex()) {
@@ -197,7 +189,6 @@ void Atlas::packUV(const AtlasRegion &_region, uint8_t *_vertexBuffer, uint32_t 
             writeUV(_vertexBuffer, INT16_MAX, y1, x1, ww);
             _vertexBuffer += _stride;
             writeUV(_vertexBuffer, INT16_MAX, y0, x1, ww);
-            _vertexBuffer += _stride;
             break;
 
         case 1: // -X
@@ -210,7 +201,6 @@ void Atlas::packUV(const AtlasRegion &_region, uint8_t *_vertexBuffer, uint32_t 
             writeUV(_vertexBuffer, INT16_MIN, y1, x1, ww);
             _vertexBuffer += _stride;
             writeUV(_vertexBuffer, INT16_MIN, y0, x1, ww);
-            _vertexBuffer += _stride;
             break;
 
         case 2: // +Y
@@ -221,7 +211,6 @@ void Atlas::packUV(const AtlasRegion &_region, uint8_t *_vertexBuffer, uint32_t 
             writeUV(_vertexBuffer, x1, INT16_MAX, y1, ww);
             _vertexBuffer += _stride;
             writeUV(_vertexBuffer, x1, INT16_MAX, y0, ww);
-            _vertexBuffer += _stride;
             break;
 
         case 3: // -Y
@@ -234,7 +223,6 @@ void Atlas::packUV(const AtlasRegion &_region, uint8_t *_vertexBuffer, uint32_t 
             writeUV(_vertexBuffer, x1, INT16_MIN, y1, ww);
             _vertexBuffer += _stride;
             writeUV(_vertexBuffer, x1, INT16_MIN, y0, ww);
-            _vertexBuffer += _stride;
             break;
 
         case 4: // +Z
@@ -247,7 +235,6 @@ void Atlas::packUV(const AtlasRegion &_region, uint8_t *_vertexBuffer, uint32_t 
             writeUV(_vertexBuffer, x1, y1, INT16_MAX, ww);
             _vertexBuffer += _stride;
             writeUV(_vertexBuffer, x1, y0, INT16_MAX, ww);
-            _vertexBuffer += _stride;
             break;
 
         case 5: // -Z
@@ -262,7 +249,6 @@ void Atlas::packUV(const AtlasRegion &_region, uint8_t *_vertexBuffer, uint32_t 
             writeUV(_vertexBuffer, x1, y1, INT16_MIN, ww);
             _vertexBuffer += _stride;
             writeUV(_vertexBuffer, x1, y0, INT16_MIN, ww);
-            _vertexBuffer += _stride;
             break;
     }
 }

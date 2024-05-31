@@ -13,11 +13,9 @@
 
 TrueTypeFont::TrueTypeFont() : m_font(), m_padding(6) { }
 
-bool TrueTypeFont::init(const uint8_t *_buffer, uint32_t _bufferSize, int32_t _fontIndex, uint32_t _pixelHeight,
-                        int16_t _padding) {
-    BX_WARN((_bufferSize > 256 && _bufferSize < 100000000), "(FontIndex %d) TrueType buffer size is suspicious (%d)",
-            _fontIndex, _bufferSize);
-    BX_UNUSED(_bufferSize);
+bool TrueTypeFont::init(const uint8_t *_buffer, uint32_t _bufferSize, int32_t _fontIndex, uint32_t _pixelHeight, int16_t _padding) {
+    BX_WARN((_bufferSize > 256 && _bufferSize < 100000000), "(FontIndex %d) TrueType buffer size is suspicious (%d)", _fontIndex, _bufferSize)
+    BX_UNUSED(_bufferSize)
 
     int offset = stbtt_GetFontOffsetForIndex(_buffer, _fontIndex);
 
@@ -28,6 +26,7 @@ bool TrueTypeFont::init(const uint8_t *_buffer, uint32_t _bufferSize, int32_t _f
     m_padding = _padding;
     return true;
 }
+#pragma clang diagnostic pop
 
 FontInfo TrueTypeFont::getFontInfo() {
     int ascent;
@@ -40,7 +39,7 @@ FontInfo TrueTypeFont::getFontInfo() {
     int x0, y0, x1, y1;
     stbtt_GetFontBoundingBox(&m_font, &x0, &y0, &x1, &y1);
 
-    FontInfo outFontInfo;
+    FontInfo outFontInfo {};
     outFontInfo.scale = 1.0f;
     outFontInfo.ascender = bx::round(ascent * scale);
     outFontInfo.descender = bx::round(descent * scale);
