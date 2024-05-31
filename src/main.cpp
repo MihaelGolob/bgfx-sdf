@@ -86,15 +86,15 @@ void InitFonts() {
     text_buffer_manager_ = new TextBufferManager(font_manager_);
     
     font_file_ = LoadTTF("../assets/fonts/droidsans.ttf");
-    bitmap_font_ = font_manager_->createFontByPixelSize(font_file_, 0, 16, FontType::Bitmap, 10);
+    
+    bitmap_font_ = font_manager_->createFontByPixelSize(font_file_, 0, 16, FontType::Bitmap, 0);
     bitmap_scaled_font_ = font_manager_->createScaledFontToPixelSize(bitmap_font_, 64); // create scaled fonts to show the power of SDF
     
-    sdf_font_ = font_manager_->createFontByPixelSize(font_file_, 0, 16, FontType::SDF, 10);
-    sdf_scaled_font_ = font_manager_->createScaledFontToPixelSize(bitmap_font_, 64);
+    sdf_font_ = font_manager_->createFontByPixelSize(font_file_, 0, 16, FontType::SDF, 8);
+    sdf_scaled_font_ = font_manager_->createScaledFontToPixelSize(sdf_font_, 64);
     
     static_bitmap_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::Bitmap, BufferType::Static);
     static_sdf_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::SDF, BufferType::Static);
-    
     dynamic_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::SDF, BufferType::Transient);
 }
 
