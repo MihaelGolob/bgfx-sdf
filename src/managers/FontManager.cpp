@@ -10,23 +10,14 @@
 
 #include <bx/bx.h>
 #include <bx/math.h>
-#include <bgfx/bgfx.h>
-
-BX_PRAGMA_DIAGNOSTIC_PUSH()
-BX_PRAGMA_DIAGNOSTIC_IGNORED_MSVC(4244) //  warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-BX_PRAGMA_DIAGNOSTIC_IGNORED_MSVC(4701) //  warning C4701: potentially uninitialized local variable 'pt' used
-BX_PRAGMA_DIAGNOSTIC_POP()
-
 #include <cwchar> 
 #include <tinystl/allocator.h>
 #include <tinystl/unordered_map.h>
-
-namespace stl = tinystl;
-
 #include "FontManager.h"
 #include "../FontAtlas/CubeAtlas.h"
 #include "../FontAtlas/TrueTypeFont.h"
 
+namespace stl = tinystl;
 typedef stl::unordered_map<CodePoint, GlyphInfo> GlyphHashMap;
 
 // cache font data
@@ -35,12 +26,12 @@ struct FontManager::CachedFont {
         masterFontHandle.idx = bx::kInvalidHandle;
     }
 
-    FontInfo fontInfo;
+    FontInfo fontInfo{};
     GlyphHashMap cachedGlyphs;
     TrueTypeFont *trueTypeFont;
     // a handle to a master font in case of sub distance field font
-    FontHandle masterFontHandle;
-    int16_t padding;
+    FontHandle masterFontHandle{};
+    int16_t padding{};
 };
 
 #define MAX_FONT_BUFFER_SIZE (512 * 512 * 4)
@@ -75,7 +66,7 @@ FontManager::~FontManager() {
 
 TrueTypeHandle FontManager::createTtf(const uint8_t *_buffer, uint32_t _size) {
     uint16_t id = m_filesHandles.alloc();
-    BX_ASSERT(id != bx::kInvalidHandle, "Invalid handle used");
+    BX_ASSERT(id != bx::kInvalidHandle, "Invalid handle used")
     m_cachedFiles[id].buffer = new uint8_t[_size];
     m_cachedFiles[id].bufferSize = _size;
     bx::memCopy(m_cachedFiles[id].buffer, _buffer, _size);
@@ -92,13 +83,11 @@ void FontManager::destroyTtf(TrueTypeHandle _handle) {
     m_filesHandles.free(_handle.idx);
 }
 
-FontHandle FontManager::createFontByPixelSize(TrueTypeHandle _ttfHandle, uint32_t _typefaceIndex, uint32_t _pixelSize,
-                                              FontType _fontType, uint16_t _glyphPadding) {
+FontHandle FontManager::createFontByPixelSize(TrueTypeHandle _ttfHandle, uint32_t _typefaceIndex, uint32_t _pixelSize, FontType _fontType, uint16_t _glyphPadding) {
     BX_ASSERT(isValid(_ttfHandle), "Invalid handle used")
 
-    TrueTypeFont *ttf = new TrueTypeFont();
-    if (!ttf->init(m_cachedFiles[_ttfHandle.idx].buffer, m_cachedFiles[_ttfHandle.idx].bufferSize, _typefaceIndex,
-                   _pixelSize, _glyphPadding)) {
+    auto ttf = new TrueTypeFont();
+    if (!ttf->init(m_cachedFiles[_ttfHandle.idx].buffer, m_cachedFiles[_ttfHandle.idx].bufferSize, _typefaceIndex, _pixelSize, _glyphPadding)) {
         delete ttf;
         FontHandle invalid = {bx::kInvalidHandle};
         return invalid;
@@ -190,7 +179,7 @@ bool FontManager::preloadGlyph(FontHandle _handle, CodePoint _codePoint) {
     }
 
     if (font.trueTypeFont != nullptr) {
-        GlyphInfo glyphInfo;
+        GlyphInfo glyphInfo {};
 
         // todo mihael: add support for distance field font
         switch (font.fontInfo.fontType) {
@@ -203,12 +192,10 @@ bool FontManager::preloadGlyph(FontHandle _handle, CodePoint _codePoint) {
                 break;
 
             default:
-                BX_ASSERT(false, "TextureType not supported yet");
+                BX_ASSERT(false, "TextureType not supported yet")
         }
 
-        if (!addBitmap(glyphInfo, m_buffer)) {
-            return false;
-        }
+        addBitmap(glyphInfo, m_buffer);
 
         glyphInfo.advance_x = (glyphInfo.advance_x * fontInfo.scale);
         glyphInfo.advance_y = (glyphInfo.advance_y * fontInfo.scale);
@@ -240,18 +227,17 @@ bool FontManager::preloadGlyph(FontHandle _handle, CodePoint _codePoint) {
     return false;
 }
 
-bool FontManager::addGlyphBitmap(FontHandle _handle, CodePoint _codePoint, uint16_t _width, uint16_t _height,
-                                 uint16_t _pitch, float extraScale, const uint8_t *_bitmapBuffer, float glyphOffsetX,
-                                 float glyphOffsetY) {
-    BX_ASSERT(isValid(_handle), "Invalid handle used");
+void FontManager::addGlyphBitmap(FontHandle _handle, CodePoint _codePoint, uint16_t _width, uint16_t _height,
+                                 uint16_t _pitch, float extraScale, const uint8_t *_bitmapBuffer, float glyphOffsetX, float glyphOffsetY) {
+    BX_ASSERT(isValid(_handle), "Invalid handle used")
     CachedFont &font = m_cachedFonts[_handle.idx];
 
     GlyphHashMap::iterator iter = font.cachedGlyphs.find(_codePoint);
     if (iter != font.cachedGlyphs.end()) {
-        return true;
+        return;
     }
 
-    GlyphInfo glyphInfo;
+    GlyphInfo glyphInfo {};
 
     float glyphScale = extraScale;
     glyphInfo.offset_x = glyphOffsetX * glyphScale;
@@ -276,16 +262,15 @@ bool FontManager::addGlyphBitmap(FontHandle _handle, CodePoint _codePoint, uint1
     }
 
     glyphInfo.regionIndex = m_atlas->addRegion(
-            (uint16_t) bx::ceil(glyphInfo.width), (uint16_t) bx::ceil(glyphInfo.height), m_buffer,
-            AtlasRegion::TYPE_BGRA8
+        (uint16_t) bx::ceil(glyphInfo.width), (uint16_t) bx::ceil(glyphInfo.height), m_buffer,
+        AtlasRegion::TYPE_BGRA8
     );
 
     font.cachedGlyphs[_codePoint] = glyphInfo;
-    return true;
 }
 
 const FontInfo &FontManager::getFontInfo(FontHandle _handle) const {
-    BX_ASSERT(isValid(_handle), "Invalid handle used");
+    BX_ASSERT(isValid(_handle), "Invalid handle used")
     return m_cachedFonts[_handle.idx].fontInfo;
 }
 
@@ -314,14 +299,12 @@ const GlyphInfo *FontManager::getGlyphInfo(FontHandle _handle, CodePoint _codePo
         it = cachedGlyphs.find(_codePoint);
     }
 
-    BX_ASSERT(it != cachedGlyphs.end(), "Failed to preload glyph.");
+    BX_ASSERT(it != cachedGlyphs.end(), "Failed to preload glyph.")
     return &it->second;
 }
 
 bool FontManager::addBitmap(GlyphInfo &_glyphInfo, const uint8_t *_data) {
-    _glyphInfo.regionIndex = m_atlas->addRegion(
-            (uint16_t) bx::ceil(_glyphInfo.width), (uint16_t) bx::ceil(_glyphInfo.height), _data, AtlasRegion::TYPE_GRAY
-    );
+    _glyphInfo.regionIndex = m_atlas->addRegion((uint16_t) bx::ceil(_glyphInfo.width), (uint16_t) bx::ceil(_glyphInfo.height), _data, AtlasRegion::TYPE_GRAY);
     return true;
 }
 

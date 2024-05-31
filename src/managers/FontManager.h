@@ -66,7 +66,7 @@ public:
     /// Preload a single glyph, return true on success.
     bool preloadGlyph(FontHandle _handle, CodePoint _character);
 
-    bool addGlyphBitmap(FontHandle _handle, CodePoint _character, uint16_t _width, uint16_t height, uint16_t _pitch,
+    void addGlyphBitmap(FontHandle _handle, CodePoint _character, uint16_t _width, uint16_t height, uint16_t _pitch,
                         float extraScale, const uint8_t *_bitmapBuffer, float glyphOffsetX, float glyphOffsetY);
 
     /// Return the font descriptor of a font.
@@ -100,13 +100,13 @@ private:
     Atlas *m_atlas;
 
     bx::HandleAllocT<MAX_OPENED_FONT> m_fontHandles;
-    CachedFont *m_cachedFonts;
+    CachedFont *m_cachedFonts{};
 
     bx::HandleAllocT<MAX_OPENED_FILES> m_filesHandles;
-    CachedFile *m_cachedFiles;
+    CachedFile *m_cachedFiles{};
 
-    GlyphInfo m_blackGlyph;
+    GlyphInfo m_blackGlyph{};
 
     //temporary buffer to raster glyph
-    uint8_t *m_buffer;
+    uint8_t *m_buffer{};
 };
