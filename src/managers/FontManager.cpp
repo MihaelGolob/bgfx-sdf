@@ -93,12 +93,12 @@ void FontManager::destroyTtf(TrueTypeHandle _handle) {
 }
 
 FontHandle FontManager::createFontByPixelSize(TrueTypeHandle _ttfHandle, uint32_t _typefaceIndex, uint32_t _pixelSize,
-                                              FontType _fontType, uint16_t _glyphWidthPadding, uint16_t _glyphHeightPadding) {
+                                              FontType _fontType, uint16_t _glyphPadding) {
     BX_ASSERT(isValid(_ttfHandle), "Invalid handle used")
 
     TrueTypeFont *ttf = new TrueTypeFont();
     if (!ttf->init(m_cachedFiles[_ttfHandle.idx].buffer, m_cachedFiles[_ttfHandle.idx].bufferSize, _typefaceIndex,
-                   _pixelSize, _glyphWidthPadding, _glyphHeightPadding)) {
+                   _pixelSize, _glyphPadding)) {
         delete ttf;
         FontHandle invalid = {bx::kInvalidHandle};
         return invalid;

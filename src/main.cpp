@@ -35,7 +35,7 @@ TextBufferHandle dynamic_text_buffer_;
 // function handlers
 FunctionId key_pressed_id_;
 
-const std::string static_text_ = "Use your keyboard to write something down!";
+const std::string static_text_ = "ABCDEFabcdef";
 std::string dynamic_text_;
 
 GLFWwindow* CreateAndLinkWindow() {
@@ -79,7 +79,7 @@ void InitFonts() {
     text_buffer_manager_ = new TextBufferManager(font_manager_);
     
     font_file_ = LoadTTF("../assets/fonts/droidsans.ttf");
-    font_ = font_manager_->createFontByPixelSize(font_file_, 0, 200, FontType::SDF, 15, 15);
+    font_ = font_manager_->createFontByPixelSize(font_file_, 0, 80, FontType::SDF, 10);
     static_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::SDF, BufferType::Transient);
     dynamic_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::SDF, BufferType::Transient);
 }
@@ -152,7 +152,7 @@ void Update() {
         
         // update
         timer += delta_time;
-        if (timer > 0.1) {
+        if (timer > 0.05) {
             text += static_text_[index];
             index++;
             timer = 0;

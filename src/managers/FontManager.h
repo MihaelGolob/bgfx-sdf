@@ -49,7 +49,7 @@ public:
 
     /// Return a font whose height is a fixed pixel size.
     FontHandle createFontByPixelSize(TrueTypeHandle _handle, uint32_t _typefaceIndex, uint32_t _pixelSize,
-                                     FontType _fontType = FontType::Bitmap, uint16_t _glyphWidthPadding = 6, uint16_t glyphHeightPadding = 6);
+                                     FontType _fontType = FontType::Bitmap, uint16_t _glyphPadding = 6);
 
     /// Return a scaled child font whose height is a fixed pixel size.
     FontHandle createScaledFontToPixelSize(FontHandle _baseFontHandle, uint32_t _pixelSize);

@@ -21,8 +21,7 @@ public:
     /// Initialize from  an external buffer
     /// @remark The ownership of the buffer is external, and you must ensure it stays valid up to this object lifetime
     /// @return true if the initialization succeed
-    bool init(const uint8_t *_buffer, uint32_t _bufferSize, int32_t _fontIndex, uint32_t _pixelHeight,
-              int16_t _widthPadding, int16_t _heightPadding);
+    bool init(const uint8_t *_buffer, uint32_t _bufferSize, int32_t _fontIndex, uint32_t _pixelHeight, int16_t _padding);
 
     /// return the font descriptor of the current font
     FontInfo getFontInfo();
@@ -41,6 +40,5 @@ private:
     stbtt_fontinfo m_font;
     float m_scale;
 
-    int16_t m_widthPadding;
-    int16_t m_heightPadding;
+    int16_t m_padding;
 };

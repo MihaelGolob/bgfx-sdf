@@ -11,10 +11,10 @@
 #include "../utilities.h"
 #include "../sdf/sdf.h"
 
-TrueTypeFont::TrueTypeFont() : m_font(), m_widthPadding(6), m_heightPadding(6) { }
+TrueTypeFont::TrueTypeFont() : m_font(), m_padding(6) { }
 
 bool TrueTypeFont::init(const uint8_t *_buffer, uint32_t _bufferSize, int32_t _fontIndex, uint32_t _pixelHeight,
-                        int16_t _widthPadding, int16_t _heightPadding) {
+                        int16_t _padding) {
     BX_WARN((_bufferSize > 256 && _bufferSize < 100000000), "(FontIndex %d) TrueType buffer size is suspicious (%d)",
             _fontIndex, _bufferSize);
     BX_UNUSED(_bufferSize);
@@ -25,8 +25,7 @@ bool TrueTypeFont::init(const uint8_t *_buffer, uint32_t _bufferSize, int32_t _f
 
     m_scale = stbtt_ScaleForMappingEmToPixels(&m_font, (float) _pixelHeight);
 
-    m_widthPadding = _widthPadding;
-    m_heightPadding = _heightPadding;
+    m_padding = _padding;
     return true;
 }
 
@@ -126,8 +125,8 @@ bool TrueTypeFont::BakeGlyphSDF(CodePoint _codePoint, GlyphInfo &_outGlyphInfo, 
     
     if (glyphWidth * glyphHeight <= 0) return false;
 
-    int newGlyphWidth = glyphWidth + 2 * m_widthPadding;
-    int newGlyphHeight = glyphHeight + 2 * m_heightPadding;
+    int newGlyphWidth = glyphWidth + 2 * m_padding;
+    int newGlyphHeight = glyphHeight + 2 * m_padding;
 
 //    BX_ASSERT(newGlyphHeight * newGlyphWidth < 128 * 128, "Glyph buffer overflow (size %d)", newGlyphHeight * newGlyphWidth)
 
@@ -135,11 +134,13 @@ bool TrueTypeFont::BakeGlyphSDF(CodePoint _codePoint, GlyphInfo &_outGlyphInfo, 
     bx::memSet(buffer, 0, newGlyphHeight * newGlyphWidth * sizeof(uint8_t));
 
     // copy the original glyph to the center of the new buffer
-    for (int i = m_heightPadding; i < newGlyphHeight - m_heightPadding; i++) {
-        bx::memCopy(buffer + i * newGlyphWidth + m_widthPadding, _outBuffer + (i - m_heightPadding) * glyphWidth, glyphWidth);
+    for (int i = m_padding; i < newGlyphHeight - m_padding; i++) {
+        bx::memCopy(buffer + i * newGlyphWidth + m_padding, _outBuffer + (i - m_padding) * glyphWidth, glyphWidth);
     }
 
-    BuildSignedDistanceField(_outBuffer, buffer, newGlyphWidth, newGlyphHeight, std::min(m_widthPadding, m_heightPadding));
+    if (!BuildSignedDistanceField(_outBuffer, buffer, newGlyphWidth, newGlyphHeight, std::min(m_padding, m_padding))) {
+        BX_ASSERT(false, "Failed to build SDF for glyph %c", _codePoint)
+    }
 
 #ifdef DEBUG_LOG_SDF_BUFFER
     std::cout << "SDF glyph " << (char)_codePoint << " buffer size is (" << glyphWidth << "," << glyphHeight << ")"  << std::endl;
@@ -159,8 +160,8 @@ bool TrueTypeFont::BakeGlyphSDF(CodePoint _codePoint, GlyphInfo &_outGlyphInfo, 
 
     free(buffer);
 
-    _outGlyphInfo.offset_x -= (float)m_widthPadding;
-    _outGlyphInfo.offset_y -= (float)m_heightPadding;
+    _outGlyphInfo.offset_x -= (float)m_padding;
+    _outGlyphInfo.offset_y -= (float)m_padding;
     _outGlyphInfo.width = (float)newGlyphWidth;
     _outGlyphInfo.height = (float)newGlyphHeight;
     
