@@ -55,10 +55,7 @@ TextBufferManager::TextBufferManager(FontManager *_fontManager) : m_fontManager(
 }
 
 TextBufferManager::~TextBufferManager() {
-    BX_ASSERT(
-            m_textBufferHandles.getNumHandles() == 0,
-            "All the text buffers must be destroyed before destroying the manager"
-    );
+    BX_ASSERT(m_textBufferHandles.getNumHandles() == 0, "All the text buffers must be destroyed before destroying the manager")
     delete[] m_textBuffers;
 
     bgfx::destroy(s_texColor);
@@ -83,12 +80,12 @@ TextBufferHandle TextBufferManager::createTextBuffer(FontType _type, BufferType:
 }
 
 void TextBufferManager::destroyTextBuffer(TextBufferHandle _handle) {
-    BX_ASSERT(isValid(_handle), "Invalid handle used");
+    BX_ASSERT(isValid(_handle), "Invalid handle used")
 
     BufferCache &bc = m_textBuffers[_handle.idx];
     m_textBufferHandles.free(_handle.idx);
     delete bc.textBuffer;
-    bc.textBuffer = NULL;
+    bc.textBuffer = nullptr;
 
     if (bc.vertexBufferHandleIdx == bgfx::kInvalidHandle) {
         return;
@@ -96,33 +93,32 @@ void TextBufferManager::destroyTextBuffer(TextBufferHandle _handle) {
 
     switch (bc.bufferType) {
         case BufferType::Static: {
-            bgfx::IndexBufferHandle ibh;
-            bgfx::VertexBufferHandle vbh;
+            bgfx::IndexBufferHandle ibh {};
+            bgfx::VertexBufferHandle vbh {};
             ibh.idx = bc.indexBufferHandleIdx;
             vbh.idx = bc.vertexBufferHandleIdx;
             bgfx::destroy(ibh);
             bgfx::destroy(vbh);
+            
+            break;
         }
-
-            break;
-
-        case BufferType::Dynamic:
-            bgfx::DynamicIndexBufferHandle ibh;
-            bgfx::DynamicVertexBufferHandle vbh;
+        case BufferType::Dynamic: {
+            bgfx::DynamicIndexBufferHandle ibh {};
+            bgfx::DynamicVertexBufferHandle vbh {};
             ibh.idx = bc.indexBufferHandleIdx;
             vbh.idx = bc.vertexBufferHandleIdx;
             bgfx::destroy(ibh);
             bgfx::destroy(vbh);
 
             break;
-
+        }
         case BufferType::Transient: // destroyed every frame
             break;
     }
 }
 
 void TextBufferManager::submitTextBuffer(TextBufferHandle _handle, bgfx::ViewId _id, int32_t _depth) {
-    BX_ASSERT(isValid(_handle), "Invalid handle used");
+    BX_ASSERT(isValid(_handle), "Invalid handle used")
 
     BufferCache &bc = m_textBuffers[_handle.idx];
 
@@ -149,23 +145,18 @@ void TextBufferManager::submitTextBuffer(TextBufferHandle _handle, bgfx::ViewId 
             break;
         }
         default: 
-            BX_ASSERT(false, "Shader for font type %d not found", bc.fontType);
+            BX_ASSERT(false, "Shader for font type %d not found", bc.fontType)
             break;
     }
 
     switch (bc.bufferType) {
         case BufferType::Static: {
-            bgfx::IndexBufferHandle ibh;
-            bgfx::VertexBufferHandle vbh;
+            bgfx::IndexBufferHandle ibh {};
+            bgfx::VertexBufferHandle vbh {};
 
             if (bgfx::kInvalidHandle == bc.vertexBufferHandleIdx) {
-                ibh = bgfx::createIndexBuffer(
-                        bgfx::copy(bc.textBuffer->getIndexBuffer(), indexSize)
-                );
-
-                vbh = bgfx::createVertexBuffer(
-                        bgfx::copy(bc.textBuffer->getVertexBuffer(), vertexSize), m_vertexLayout
-                );
+                ibh = bgfx::createIndexBuffer(bgfx::copy(bc.textBuffer->getIndexBuffer(), indexSize));
+                vbh = bgfx::createVertexBuffer(bgfx::copy(bc.textBuffer->getVertexBuffer(), vertexSize), m_vertexLayout);
 
                 bc.vertexBufferHandleIdx = vbh.idx;
                 bc.indexBufferHandleIdx = ibh.idx;
@@ -180,17 +171,12 @@ void TextBufferManager::submitTextBuffer(TextBufferHandle _handle, bgfx::ViewId 
             break;
 
         case BufferType::Dynamic: {
-            bgfx::DynamicIndexBufferHandle ibh;
-            bgfx::DynamicVertexBufferHandle vbh;
+            bgfx::DynamicIndexBufferHandle ibh {};
+            bgfx::DynamicVertexBufferHandle vbh {};
 
             if (bgfx::kInvalidHandle == bc.vertexBufferHandleIdx) {
-                ibh = bgfx::createDynamicIndexBuffer(
-                        bgfx::copy(bc.textBuffer->getIndexBuffer(), indexSize)
-                );
-
-                vbh = bgfx::createDynamicVertexBuffer(
-                        bgfx::copy(bc.textBuffer->getVertexBuffer(), vertexSize), m_vertexLayout
-                );
+                ibh = bgfx::createDynamicIndexBuffer(bgfx::copy(bc.textBuffer->getIndexBuffer(), indexSize));
+                vbh = bgfx::createDynamicVertexBuffer(bgfx::copy(bc.textBuffer->getVertexBuffer(), vertexSize), m_vertexLayout);
 
                 bc.indexBufferHandleIdx = ibh.idx;
                 bc.vertexBufferHandleIdx = vbh.idx;
@@ -198,13 +184,8 @@ void TextBufferManager::submitTextBuffer(TextBufferHandle _handle, bgfx::ViewId 
                 ibh.idx = bc.indexBufferHandleIdx;
                 vbh.idx = bc.vertexBufferHandleIdx;
 
-                bgfx::update(
-                        ibh, 0, bgfx::copy(bc.textBuffer->getIndexBuffer(), indexSize)
-                );
-
-                bgfx::update(
-                        vbh, 0, bgfx::copy(bc.textBuffer->getVertexBuffer(), vertexSize)
-                );
+                bgfx::update(ibh, 0, bgfx::copy(bc.textBuffer->getIndexBuffer(), indexSize));
+                bgfx::update(vbh, 0, bgfx::copy(bc.textBuffer->getVertexBuffer(), vertexSize));
             }
 
             bgfx::setVertexBuffer(0, vbh, 0, bc.textBuffer->getVertexCount());
@@ -213,8 +194,8 @@ void TextBufferManager::submitTextBuffer(TextBufferHandle _handle, bgfx::ViewId 
             break;
 
         case BufferType::Transient: {
-            bgfx::TransientIndexBuffer tib;
-            bgfx::TransientVertexBuffer tvb;
+            bgfx::TransientIndexBuffer tib {};
+            bgfx::TransientVertexBuffer tvb {};
             bgfx::allocTransientIndexBuffer(&tib, bc.textBuffer->getIndexCount());
             bgfx::allocTransientVertexBuffer(&tvb, bc.textBuffer->getVertexCount(), m_vertexLayout);
             bx::memCopy(tib.data, bc.textBuffer->getIndexBuffer(), indexSize);
@@ -229,38 +210,38 @@ void TextBufferManager::submitTextBuffer(TextBufferHandle _handle, bgfx::ViewId 
 }
 
 void TextBufferManager::setPenPosition(TextBufferHandle _handle, float _x, float _y) {
-    BX_ASSERT(isValid(_handle), "Invalid handle used");
+    BX_ASSERT(isValid(_handle), "Invalid handle used")
     BufferCache &bc = m_textBuffers[_handle.idx];
     bc.textBuffer->setPenPosition(_x, _y);
 }
 
 void TextBufferManager::appendText(TextBufferHandle _handle, FontHandle _fontHandle, const char *_string, const char *_end) {
-    BX_ASSERT(isValid(_handle), "Invalid handle used");
+    BX_ASSERT(isValid(_handle), "Invalid handle used")
     BufferCache &bc = m_textBuffers[_handle.idx];
     bc.textBuffer->appendText(_fontHandle, _string, _end);
 }
 
 void TextBufferManager::appendText(TextBufferHandle _handle, FontHandle _fontHandle, const wchar_t *_string,
                                    const wchar_t *_end) {
-    BX_ASSERT(isValid(_handle), "Invalid handle used");
+    BX_ASSERT(isValid(_handle), "Invalid handle used")
     BufferCache &bc = m_textBuffers[_handle.idx];
     bc.textBuffer->appendText(_fontHandle, _string, _end);
 }
 
 void TextBufferManager::appendAtlasFace(TextBufferHandle _handle, uint16_t _faceIndex) {
-    BX_ASSERT(isValid(_handle), "Invalid handle used");
+    BX_ASSERT(isValid(_handle), "Invalid handle used")
     BufferCache &bc = m_textBuffers[_handle.idx];
     bc.textBuffer->appendAtlasFace(_faceIndex);
 }
 
 void TextBufferManager::clearTextBuffer(TextBufferHandle _handle) {
-    BX_ASSERT(isValid(_handle), "Invalid handle used");
+    BX_ASSERT(isValid(_handle), "Invalid handle used")
     BufferCache &bc = m_textBuffers[_handle.idx];
     bc.textBuffer->clearTextBuffer();
 }
 
 TextRectangle TextBufferManager::getRectangle(TextBufferHandle _handle) const {
-    BX_ASSERT(isValid(_handle), "Invalid handle used");
+    BX_ASSERT(isValid(_handle), "Invalid handle used")
     BufferCache &bc = m_textBuffers[_handle.idx];
     return bc.textBuffer->getRectangle();
 }

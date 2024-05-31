@@ -32,11 +32,11 @@ public:
     void setPenPosition(TextBufferHandle _handle, float _x, float _y);
 
     /// Append an ASCII/utf-8 string to the buffer using current pen position and color.
-    void appendText(TextBufferHandle _handle, FontHandle _fontHandle, const char *_string, const char *_end = NULL);
+    void appendText(TextBufferHandle _handle, FontHandle _fontHandle, const char *_string, const char *_end = nullptr);
 
     /// Append a wide char unicode string to the buffer using current pen position and color.
     void
-    appendText(TextBufferHandle _handle, FontHandle _fontHandle, const wchar_t *_string, const wchar_t *_end = NULL);
+    appendText(TextBufferHandle _handle, FontHandle _fontHandle, const wchar_t *_string, const wchar_t *_end = nullptr);
 
     /// Append a whole face of the atlas cube, mostly used for debugging and visualizing atlas.
     void appendAtlasFace(TextBufferHandle _handle, uint16_t _faceIndex);
@@ -60,7 +60,7 @@ private:
     bx::HandleAllocT<MAX_TEXT_BUFFER_COUNT> m_textBufferHandles;
     FontManager *m_fontManager;
     bgfx::VertexLayout m_vertexLayout;
-    bgfx::UniformHandle s_texColor;
-    bgfx::ProgramHandle m_basicProgram;
-    bgfx::ProgramHandle m_sdfProgram;
+    bgfx::UniformHandle s_texColor{};
+    bgfx::ProgramHandle m_basicProgram{};
+    bgfx::ProgramHandle m_sdfProgram{};
 };
