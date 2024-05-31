@@ -28,15 +28,22 @@ InputManager* input_manager_;
 
 // fonts
 TrueTypeHandle font_file_;
-FontHandle font_;
-TextBufferHandle static_text_buffer_;
+FontHandle bitmap_font_;
+FontHandle bitmap_scaled_font_;
+FontHandle sdf_font_;
+FontHandle sdf_scaled_font_;
+
+TextBufferHandle static_bitmap_text_buffer_;
+TextBufferHandle static_sdf_text_buffer_;
 TextBufferHandle dynamic_text_buffer_;
 
 // function handlers
 FunctionId key_pressed_id_;
+FunctionId key_released_id_;
 
-const std::string static_text_ = "ABCDEFabcdef";
 std::string dynamic_text_;
+
+bool shift_pressed_ = false;
 
 GLFWwindow* CreateAndLinkWindow() {
     glfwInit();
@@ -79,8 +86,15 @@ void InitFonts() {
     text_buffer_manager_ = new TextBufferManager(font_manager_);
     
     font_file_ = LoadTTF("../assets/fonts/droidsans.ttf");
-    font_ = font_manager_->createFontByPixelSize(font_file_, 0, 80, FontType::SDF, 10);
-    static_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::SDF, BufferType::Transient);
+    bitmap_font_ = font_manager_->createFontByPixelSize(font_file_, 0, 16, FontType::Bitmap, 10);
+    bitmap_scaled_font_ = font_manager_->createScaledFontToPixelSize(bitmap_font_, 64); // create scaled fonts to show the power of SDF
+    
+    sdf_font_ = font_manager_->createFontByPixelSize(font_file_, 0, 16, FontType::SDF, 10);
+    sdf_scaled_font_ = font_manager_->createScaledFontToPixelSize(bitmap_font_, 64);
+    
+    static_bitmap_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::Bitmap, BufferType::Static);
+    static_sdf_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::SDF, BufferType::Static);
+    
     dynamic_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::SDF, BufferType::Transient);
 }
 
@@ -89,11 +103,20 @@ void HandleKeyPressed(int key) {
         if (!dynamic_text_.empty()) {
             dynamic_text_.pop_back();
         }
+    } else if (key == GLFW_KEY_LEFT_SHIFT) {
+        shift_pressed_ = true;
     } else {
-        dynamic_text_ += InputManager::GetKeyChar(key);
+        int offset = shift_pressed_ ? 'A' - 'a' : 0; // if shift is pressed, convert to uppercase
+        dynamic_text_ += (char) (InputManager::GetKeyChar(key) + offset);
     }
     
     PrintInfo(dynamic_text_);
+}
+
+void HandleKeyReleased(int key) {
+    if (key == GLFW_KEY_LEFT_SHIFT) {
+        shift_pressed_ = false;
+    }
 }
 
 void InitInputManager() {
@@ -106,6 +129,7 @@ void InitInputManager() {
     
     keys_to_track.push_back(GLFW_KEY_SPACE);
     keys_to_track.push_back(GLFW_KEY_BACKSPACE);
+    keys_to_track.push_back(GLFW_KEY_LEFT_SHIFT);
     
     // include numbers
     for (int i = 48; i <= 57; i++) {
@@ -114,6 +138,7 @@ void InitInputManager() {
     
     input_manager_ = new InputManager(window_, keys_to_track);
     key_pressed_id_ = InputManager::SubscribeKeyPressed(HandleKeyPressed);
+    key_released_id_ = InputManager::SubscribeKeyReleased(HandleKeyReleased);
 }
 
 void SetViewTransform() {
@@ -138,44 +163,35 @@ void SetViewTransform() {
     bgfx::setViewRect(0, 0, 0, uint16_t(k_window_width_), uint16_t(k_window_height_) );
 }
 
-void Update() {
-    double last_time = glfwGetTime();
-    std::string text;
-    int index = 0;
-    double timer = 0;
+void DrawStaticText() {
+    text_buffer_manager_->clearTextBuffer(static_bitmap_text_buffer_);
+    text_buffer_manager_->clearTextBuffer(static_sdf_text_buffer_);
     
+    // draw static bitmap text
+    text_buffer_manager_->setPenPosition(static_bitmap_text_buffer_, 10.0f, 10.0f);
+    text_buffer_manager_->appendText(static_bitmap_text_buffer_, bitmap_scaled_font_, "Bitmap font scaled from 16px to 64px");
+    // draw static sdf text
+    text_buffer_manager_->setPenPosition(static_sdf_text_buffer_, 10.0f, 80.0f);
+    text_buffer_manager_->appendText(static_sdf_text_buffer_, sdf_scaled_font_, "SDF font scaled from 16px to 64px");
+}
+
+void Update() {
     while(!glfwWindowShouldClose(window_)) {
-        // calculate delta time
-        double current_time = glfwGetTime();
-        double delta_time = current_time - last_time;
-        last_time = current_time;
-        
-        // update
-        timer += delta_time;
-        if (timer > 0.05) {
-            text += static_text_[index];
-            index++;
-            timer = 0;
-        }
-        
         // rendering
         glfwPollEvents();
         bgfx::touch(0);
         
-        // draw static text
-        text_buffer_manager_->clearTextBuffer(static_text_buffer_);
-        text_buffer_manager_->setPenPosition(static_text_buffer_, 10.0f, 20.0f);
-        text_buffer_manager_->appendText(static_text_buffer_, font_, text.c_str());
-        
-        // draw dynamic text
+        // draw dynamically typed text
         text_buffer_manager_->clearTextBuffer(dynamic_text_buffer_);
-        text_buffer_manager_->setPenPosition(dynamic_text_buffer_, 10.0f, 200.0f);
-        text_buffer_manager_->appendText(dynamic_text_buffer_, font_, dynamic_text_.c_str());
+        text_buffer_manager_->setPenPosition(dynamic_text_buffer_, 10.0f, 150.0f);
+        text_buffer_manager_->appendText(dynamic_text_buffer_, sdf_scaled_font_, dynamic_text_.c_str());
         
         SetViewTransform();
 
-        text_buffer_manager_->submitTextBuffer(static_text_buffer_, 0);
+        // draw text buffers
         text_buffer_manager_->submitTextBuffer(dynamic_text_buffer_, 0);
+        text_buffer_manager_->submitTextBuffer(static_bitmap_text_buffer_, 0);
+        text_buffer_manager_->submitTextBuffer(static_sdf_text_buffer_, 0);
 
         bgfx::frame();
     }
@@ -189,14 +205,19 @@ void Shutdown() {
     font_manager_->destroyTtf(font_file_);
     
     // destroy font handles
-    font_manager_->destroyFont(font_);
+    font_manager_->destroyFont(bitmap_font_);
+    font_manager_->destroyFont(bitmap_scaled_font_);
+    font_manager_->destroyFont(sdf_font_);
+    font_manager_->destroyFont(sdf_scaled_font_);
     
     // destroy text buffer handles
-    text_buffer_manager_->destroyTextBuffer(static_text_buffer_);
+    text_buffer_manager_->destroyTextBuffer(static_bitmap_text_buffer_);
+    text_buffer_manager_->destroyTextBuffer(static_sdf_text_buffer_);
     text_buffer_manager_->destroyTextBuffer(dynamic_text_buffer_);
     
     // unsubscribe from input manager
     InputManager::UnsubscribeKeyPressed(key_pressed_id_);
+    InputManager::UnsubscribeKeyReleased(key_released_id_);
     
     // destroy managers
     delete font_manager_;
@@ -212,6 +233,7 @@ int main() {
     InitFonts();
     InitInputManager();
     
+    DrawStaticText();
     // update loop
     Update();
     
