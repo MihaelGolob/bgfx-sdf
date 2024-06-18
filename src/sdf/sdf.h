@@ -45,6 +45,7 @@ void CalculateEdgeDistancesWithGradients(const uint8_t* glyph, int width, int he
             // skip non-edge pixels
             if (glyph[index] == 255) continue;
             if (glyph[index] == 0) {
+                // in general, we assume that the edges are soft but
                 // some edges might be very hard (... 0 0 255 255 ...) so don't skip them
                 bool horizontal_check = glyph[index-1] == 255 || glyph[index+1] == 255;
                 bool vertical_check = glyph[index-width] == 255 || glyph[index+width] == 255;
@@ -57,7 +58,7 @@ void CalculateEdgeDistancesWithGradients(const uint8_t* glyph, int width, int he
             float gradient_y = -(float)glyph[index - width - 1] - SQRT2 * (float)glyph[index - width] - (float)glyph[index - width + 1]
                                +(float)glyph[index + width - 1] + SQRT2 * (float)glyph[index + width] + (float)glyph[index + width + 1];
             
-            if (bx::abs(gradient_x) < SLACK && bx::abs(gradient_y) < SLACK) continue;
+            if (bx::abs(gradient_x) < SLACK && bx::abs(gradient_y) < SLACK) continue; // skip if gradient is too small
             float gradient_len = gradient_x * gradient_x + gradient_y * gradient_y;
             // normalize gradient
             if (gradient_len > SLACK) {
@@ -66,11 +67,10 @@ void CalculateEdgeDistancesWithGradients(const uint8_t* glyph, int width, int he
                 gradient_y *= gradient_len;
             }
             
-            auto tk = x + y * width;
             float distance = GetEdgeDistance(gradient_x, gradient_y, (float)glyph[index] / 255.0f);
             points[index].x = (float)x + distance * gradient_x;
             points[index].y = (float)y + distance * gradient_y;
-            points[index].distance = GetSquareDistance(&point, &points[tk]);
+            points[index].distance = GetSquareDistance(&point, &points[y * width + x]);
         }
     }
 }
