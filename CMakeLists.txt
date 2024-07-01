@@ -34,6 +34,8 @@ add_executable(bgfx-sdf
 		src/FontAtlas/TextBuffer.h
 		src/FontAtlas/FontHandles.h
 		src/sdf/sdf.h
+		src/sdf/msdfGenerator.cpp
+		src/sdf/msdfGenerator.h
 )
 
 target_compile_features(bgfx-sdf PUBLIC cxx_std_17)
