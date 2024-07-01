@@ -9,10 +9,10 @@ add_executable(bgfx-sdf
 		src/main.cpp
 		src/managers/FontManager.cpp
 		src/managers/FontManager.h
-		src/FontAtlas/CubeAtlas.cpp
-		src/FontAtlas/CubeAtlas.h
-		src/FontAtlas/utf8.cpp
-		src/FontAtlas/utf8.h
+		src/font_processing/CubeAtlas.cpp
+		src/font_processing/CubeAtlas.h
+		src/font_processing/utf8.cpp
+		src/font_processing/utf8.h
 		
 		libs/stb/stb_truetype.h
 		src/utilities.cpp
@@ -21,18 +21,18 @@ add_executable(bgfx-sdf
 		src/utilities.h
 		src/managers/InputManager.cpp
 		src/managers/InputManager.h
-		src/FontAtlas/RectanglePacker.cpp
-		src/FontAtlas/RectanglePacker.h
-		src/FontAtlas/AtlasRegion.cpp
-		src/FontAtlas/AtlasRegion.h
-		src/FontAtlas/FontInfo.h
-		src/FontAtlas/GlyphInfo.h
-		src/FontAtlas/TrueTypeFont.cpp
-		src/FontAtlas/TrueTypeFont.h
-		src/FontAtlas/NumberTypes.h
-		src/FontAtlas/TextBuffer.cpp
-		src/FontAtlas/TextBuffer.h
-		src/FontAtlas/FontHandles.h
+		src/font_processing/RectanglePacker.cpp
+		src/font_processing/RectanglePacker.h
+		src/font_processing/AtlasRegion.cpp
+		src/font_processing/AtlasRegion.h
+		src/font_processing/FontInfo.h
+		src/font_processing/GlyphInfo.h
+		src/font_processing/TrueTypeFont.cpp
+		src/font_processing/TrueTypeFont.h
+		src/font_processing/NumberTypes.h
+		src/font_processing/TextBuffer.cpp
+		src/font_processing/TextBuffer.h
+		src/font_processing/FontHandles.h
 		src/sdf/sdf.h
 		src/sdf/msdfGenerator.cpp
 		src/sdf/msdfGenerator.h

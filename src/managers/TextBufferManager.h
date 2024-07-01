@@ -9,7 +9,8 @@
 #pragma once
 
 #include "FontManager.h"
-#include "../FontAtlas/TextBuffer.h"
+#include "../font_processing/TextBuffer.h"
+#include "../font_processing/FontInfo.h"
 
 BGFX_HANDLE(TextBufferHandle)
 

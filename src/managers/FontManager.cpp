@@ -14,8 +14,8 @@
 #include <tinystl/allocator.h>
 #include <tinystl/unordered_map.h>
 #include "FontManager.h"
-#include "../FontAtlas/CubeAtlas.h"
-#include "../FontAtlas/TrueTypeFont.h"
+#include "../font_processing/CubeAtlas.h"
+#include "../font_processing/TrueTypeFont.h"
 
 namespace stl = tinystl;
 typedef stl::unordered_map<CodePoint, GlyphInfo> GlyphHashMap;

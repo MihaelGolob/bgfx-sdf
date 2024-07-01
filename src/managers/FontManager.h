@@ -10,9 +10,9 @@
 #include <bx/handlealloc.h>
 #include <bx/string.h>
 
-#include "../FontAtlas/GlyphInfo.h"
-#include "../FontAtlas/FontInfo.h"
-#include "../FontAtlas/FontHandles.h"
+#include "../font_processing/GlyphInfo.h"
+#include "../font_processing/FontInfo.h"
+#include "../font_processing/FontHandles.h"
 
 class Atlas;
 

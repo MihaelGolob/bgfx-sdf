@@ -10,7 +10,7 @@
 #include <bgfx/embedded_shader.h>
 
 #include "TextBufferManager.h"
-#include "../FontAtlas/CubeAtlas.h"
+#include "../font_processing/CubeAtlas.h"
 
 // shaders
 #include "../shaders/vertex/vs_font_basic.bin.h"
