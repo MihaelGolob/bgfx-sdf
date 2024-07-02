@@ -6,5 +6,5 @@
 #include <bgfx/bgfx.h>
 
 BGFX_HANDLE(TrueTypeHandle)
-BGFX_HANDLE(FreeTypeHandle)
 BGFX_HANDLE(FontHandle)
+BGFX_HANDLE(FontFaceHandle)

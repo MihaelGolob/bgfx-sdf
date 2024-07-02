@@ -7,6 +7,7 @@
 enum class FontType {
     Bitmap, // normal
     SDF, // signed distance field
+    MSDF, // multichannel signed distance field
 };
 
 struct FontInfo {

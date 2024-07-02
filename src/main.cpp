@@ -19,7 +19,6 @@ constexpr int k_window_height_ = 900;
 
 // global variables
 GLFWwindow* window_;
-FT_Library  ft_;
 
 // managers
 FontManager* font_manager_;
@@ -28,14 +27,16 @@ InputManager* input_manager_;
 
 // fonts
 TrueTypeHandle font_file_;
-FreeTypeHandle ft_font_file_;
 FontHandle bitmap_font_;
 FontHandle bitmap_scaled_font_;
 FontHandle sdf_font_;
 FontHandle sdf_scaled_font_;
+FontHandle msdf_font_;
+FontHandle msdf_scaled_font_;
 
 TextBufferHandle static_bitmap_text_buffer_;
 TextBufferHandle static_sdf_text_buffer_;
+TextBufferHandle static_msdf_text_buffer_;
 TextBufferHandle dynamic_text_buffer_;
 
 // function handlers
@@ -65,28 +66,11 @@ GLFWwindow* CreateAndLinkWindow() {
     return window;
 }
 
-TrueTypeHandle LoadTTF(const char* file_path) {
-    uint32_t size;
-    void* data = load(file_path, &size);
-
-    if (nullptr != data) {
-        TrueTypeHandle handle = font_manager_->createTtf( (uint8_t*)data, size);
-        return handle;
-    }
-
-    return BGFX_INVALID_HANDLE;
-}
-
 void InitFonts() {
-    if (FT_Init_FreeType(&ft_)) {
-        PrintError("Could not init FreeType Library");
-    } 
-    
     font_manager_ = new FontManager(1024);
     text_buffer_manager_ = new TextBufferManager(font_manager_);
     
-    font_file_ = LoadTTF("../assets/fonts/droidsans.ttf");
-    ft_font_file_ = font_manager_->createFtFace(&ft_, "../assets/fonts/droidsans.ttf");
+    font_file_ = font_manager_->createTtf("../assets/fonts/droidsans.ttf");
     
     bitmap_font_ = font_manager_->createFontByPixelSize(font_file_, 0, 16, FontType::Bitmap, 0);
     bitmap_scaled_font_ = font_manager_->createScaledFontToPixelSize(bitmap_font_, 64); // create scaled fonts to show the power of SDF
@@ -94,9 +78,12 @@ void InitFonts() {
     sdf_font_ = font_manager_->createFontByPixelSize(font_file_, 0, 16, FontType::SDF, 8);
     sdf_scaled_font_ = font_manager_->createScaledFontToPixelSize(sdf_font_, 64);
     
+    msdf_font_ = font_manager_->createFontByPixelSize(font_file_, 0, 16, FontType::SDF, 8);
+    msdf_scaled_font_ = font_manager_->createScaledFontToPixelSize(msdf_font_, 64);
+    
     static_bitmap_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::Bitmap, BufferType::Static);
     static_sdf_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::SDF, BufferType::Static);
-    dynamic_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::SDF, BufferType::Transient);
+    dynamic_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::Bitmap, BufferType::Transient);
 }
 
 void HandleKeyPressed(int key) {
@@ -174,6 +161,9 @@ void DrawStaticText() {
     // draw static sdf text
     text_buffer_manager_->setPenPosition(static_sdf_text_buffer_, 10.0f, 80.0f);
     text_buffer_manager_->appendText(static_sdf_text_buffer_, sdf_scaled_font_, "SDF font scaled from 16px to 64px");
+    // draw static msdf text
+    text_buffer_manager_->setPenPosition(static_msdf_text_buffer_, 10.0f, 150.0f);
+    text_buffer_manager_->appendText(static_msdf_text_buffer_, msdf_scaled_font_, "MSDF font scaled from 16px to 64px");
 }
 
 void Update() {
@@ -184,7 +174,7 @@ void Update() {
         
         // draw dynamically typed text
         text_buffer_manager_->clearTextBuffer(dynamic_text_buffer_);
-        text_buffer_manager_->setPenPosition(dynamic_text_buffer_, 10.0f, 150.0f);
+        text_buffer_manager_->setPenPosition(dynamic_text_buffer_, 10.0f, 220.0f);
         text_buffer_manager_->appendText(dynamic_text_buffer_, sdf_scaled_font_, dynamic_text_.c_str());
         
         SetViewTransform();
@@ -204,17 +194,19 @@ void Shutdown() {
     
     // destroy ttf file handles
     font_manager_->destroyTtf(font_file_);
-    font_manager_->destroyFtFace(ft_font_file_);
     
     // destroy font handles
     font_manager_->destroyFont(bitmap_font_);
     font_manager_->destroyFont(bitmap_scaled_font_);
     font_manager_->destroyFont(sdf_font_);
     font_manager_->destroyFont(sdf_scaled_font_);
+    font_manager_->destroyFont(msdf_font_);
+    font_manager_->destroyFont(msdf_scaled_font_);
     
     // destroy text buffer handles
     text_buffer_manager_->destroyTextBuffer(static_bitmap_text_buffer_);
     text_buffer_manager_->destroyTextBuffer(static_sdf_text_buffer_);
+    text_buffer_manager_->destroyTextBuffer(static_msdf_text_buffer_);
     text_buffer_manager_->destroyTextBuffer(dynamic_text_buffer_);
     
     // unsubscribe from input manager

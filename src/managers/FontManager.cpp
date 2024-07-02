@@ -28,7 +28,12 @@ FontManager::FontManager(uint16_t _textureSideWidth) : m_ownAtlas(true), m_atlas
 void FontManager::init() {
     m_cachedFiles = new CachedFile[MAX_OPENED_FILES];
     m_cachedFonts = new CachedFont[MAX_OPENED_FONT];
+    m_cachedFaces = new FT_Face[MAX_OPENED_FONT];
     m_buffer = new uint8_t[MAX_FONT_BUFFER_SIZE];
+    
+    if (FT_Init_FreeType(&ft_library)) {
+        BX_ASSERT(false, "Failed to initialize freetype library")
+    }
 }
 
 FontManager::~FontManager() {
@@ -38,11 +43,9 @@ FontManager::~FontManager() {
     BX_ASSERT(m_filesHandles.getNumHandles() == 0, "All the font files must be destroyed before destroying the manager")
     delete[] m_cachedFiles;
     
-    BX_ASSERT(m_ftFaces.empty(), "All the font faces must be destroyed before destroying the manager")
-    for (FT_Face face : m_ftFaces) {
-        FT_Done_Face(face);
-    }
-    m_ftFaces.clear();
+    // todo: why does this assert?
+//    BX_ASSERT(m_faceHandles.getNumHandles() == 0, "All the font faces must be destroyed before destroying the manager")
+    delete[] m_cachedFaces;
 
     delete[] m_buffer;
 
@@ -51,27 +54,20 @@ FontManager::~FontManager() {
     }
 }
 
-TrueTypeHandle FontManager::createTtf(const uint8_t *_buffer, uint32_t _size) {
+TrueTypeHandle FontManager::createTtf(const char* file_path) {
+    // Load the file
+    uint32_t size;
+    void* data = load(file_path, &size);
+    
     uint16_t id = m_filesHandles.alloc();
     BX_ASSERT(id != bx::kInvalidHandle, "Invalid handle used")
-    m_cachedFiles[id].buffer = new uint8_t[_size];
-    m_cachedFiles[id].bufferSize = _size;
-    bx::memCopy(m_cachedFiles[id].buffer, _buffer, _size);
+    m_cachedFiles[id].buffer = new uint8_t[size];
+    m_cachedFiles[id].bufferSize = size;
+    m_cachedFiles[id].path = file_path;
+    bx::memCopy(m_cachedFiles[id].buffer, data, size);
 
     TrueTypeHandle ret = {id};
     return ret;
-}
-
-FreeTypeHandle FontManager::createFtFace(FT_Library *ft, const char* file_path) {
-    uint16_t id = m_ftFaces.size();
-    FT_Face face;
-    if (FT_New_Face(*ft, file_path, 0, &face)) {
-        PrintError("Failed to load font face");
-        return {bx::kInvalidHandle};
-    }
-    m_ftFaces.push_back(face);
-    
-    return {id};
 }
 
 void FontManager::destroyTtf(TrueTypeHandle _handle) {
@@ -79,15 +75,8 @@ void FontManager::destroyTtf(TrueTypeHandle _handle) {
     delete[] m_cachedFiles[_handle.idx].buffer;
     m_cachedFiles[_handle.idx].bufferSize = 0;
     m_cachedFiles[_handle.idx].buffer = nullptr;
+    m_cachedFiles[_handle.idx].path = nullptr;
     m_filesHandles.free(_handle.idx);
-}
-
-void FontManager::destroyFtFace(FreeTypeHandle _handle) {
-    BX_ASSERT(isValid(_handle), "Invalid handle used")
-    for (FT_Face face : m_ftFaces) {
-        FT_Done_Face(face);
-    }
-    m_ftFaces.clear();
 }
 
 FontHandle FontManager::createFontByPixelSize(TrueTypeHandle _ttfHandle, uint32_t _typefaceIndex, uint32_t _pixelSize, FontType _fontType, uint16_t _glyphPadding) {
@@ -110,14 +99,24 @@ FontHandle FontManager::createFontByPixelSize(TrueTypeHandle _ttfHandle, uint32_
     font.fontInfo.pixelSize = uint16_t(_pixelSize);
     font.cachedGlyphs.clear();
     font.masterFontHandle.idx = bx::kInvalidHandle;
+    font.faceHandle = _fontType == FontType::MSDF ? createFace(&m_cachedFiles[_ttfHandle.idx]) : FontFaceHandle{bx::kInvalidHandle};
 
     FontHandle handle = {fontIdx};
     return handle;
 }
 
-FontHandle FontManager::createFontByPixelSize(FreeTypeHandle handle, uint32_t typefaceIndex, uint32_t pixelSize, FontType fontType, uint16_t glyphPadding) {
-    BX_ASSERT(isValid(handle), "Invalid handle used")
+FontFaceHandle FontManager::createFace(CachedFile* font_file) {
+    auto handle = FontFaceHandle{m_faceHandles.alloc()};
+    BX_ASSERT(handle.idx != bx::kInvalidHandle, "Invalid handle used")
+    
+    if (FT_New_Face(ft_library, font_file->path, 0, &m_cachedFaces[handle.idx])) {
+        m_faceHandles.free(handle.idx);
+        return FontFaceHandle{bx::kInvalidHandle};
+    }
+    
+    return handle;
 }
+
 
 FontHandle FontManager::createScaledFontToPixelSize(FontHandle _baseFontHandle, uint32_t _pixelSize) {
     BX_ASSERT(isValid(_baseFontHandle), "Invalid handle used")
@@ -159,6 +158,7 @@ void FontManager::destroyFont(FontHandle _handle) {
 
     font.cachedGlyphs.clear();
     m_fontHandles.free(_handle.idx);
+    m_faceHandles.free(font.faceHandle.idx);
 }
 
 bool FontManager::preloadGlyph(FontHandle _handle, const wchar_t *_string) {

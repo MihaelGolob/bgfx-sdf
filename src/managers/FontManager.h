@@ -23,6 +23,7 @@ class Atlas;
 
 #define MAX_OPENED_FILES 64
 #define MAX_OPENED_FONT  64
+#define MAX_OPENED_FACES 64
 #define FONT_TYPE_ALPHA UINT32_C(0x00000100)
 
 namespace stl = tinystl;
@@ -32,6 +33,27 @@ typedef int32_t CodePoint;
 typedef stl::unordered_map<CodePoint, GlyphInfo> GlyphHashMap;
 
 class FontManager {
+private:
+    struct CachedFont {
+        CachedFont() : trueTypeFont(nullptr) {
+            masterFontHandle.idx = bx::kInvalidHandle;
+        }
+
+        FontInfo fontInfo{};
+        GlyphHashMap cachedGlyphs;
+        TrueTypeFont *trueTypeFont;
+        // a handle to a master font in case of sub distance field font
+        FontHandle masterFontHandle{};
+        int16_t padding{};
+        // used for msdf rendering
+        FontFaceHandle faceHandle{};
+    };
+    struct CachedFile {
+        uint8_t *buffer;
+        uint32_t bufferSize;
+        const char* path;
+    }; 
+     
 public:
     /// Create the font manager using an external cube atlas (doesn't take ownership of the atlas).
     FontManager(Atlas *_atlas);
@@ -50,12 +72,8 @@ public:
     /// thus can be freed or reused after this call.
     ///
     /// @return invalid handle if the loading fail
-    TrueTypeHandle createTtf(const uint8_t *_buffer, uint32_t _size);
+    TrueTypeHandle createTtf(const char* font_path);
     
-    FreeTypeHandle createFtFace(FT_Library *ft, const char* path);
-    
-    void destroyFtFace(FreeTypeHandle _handle);
-
     /// Unload a TrueType font (free font memory) but keep loaded glyphs.
     void destroyTtf(TrueTypeHandle _handle);
 
@@ -63,8 +81,7 @@ public:
     FontHandle createFontByPixelSize(TrueTypeHandle _handle, uint32_t _typefaceIndex, uint32_t _pixelSize,
                                      FontType _fontType = FontType::Bitmap, uint16_t _glyphPadding = 6);
 
-    FontHandle createFontByPixelSize(FreeTypeHandle _handle, uint32_t _typefaceIndex, uint32_t _pixelSize,
-                                     FontType _fontType = FontType::Bitmap, uint16_t _glyphPadding = 6);
+    FontFaceHandle createFace(CachedFile* font_file);
 
     /// Return a scaled child font whose height is a fixed pixel size.
     FontHandle createScaledFontToPixelSize(FontHandle _baseFontHandle, uint32_t _pixelSize);
@@ -101,26 +118,10 @@ public:
     }
 
 private:
-    struct CachedFont {
-        CachedFont() : trueTypeFont(nullptr) {
-            masterFontHandle.idx = bx::kInvalidHandle;
-        }
-
-        FontInfo fontInfo{};
-        GlyphHashMap cachedGlyphs;
-        TrueTypeFont *trueTypeFont;
-        // a handle to a master font in case of sub distance field font
-        FontHandle masterFontHandle{};
-        int16_t padding{};
-    };
-    struct CachedFile {
-        uint8_t *buffer;
-        uint32_t bufferSize;
-    };
-
     void init();
-
     bool addBitmap(GlyphInfo &_glyphInfo, const uint8_t *_data);
+    
+    FT_Library ft_library;
 
     bool m_ownAtlas;
     Atlas *m_atlas;
@@ -131,7 +132,8 @@ private:
     bx::HandleAllocT<MAX_OPENED_FILES> m_filesHandles;
     CachedFile *m_cachedFiles{};
     
-    std::vector<FT_Face> m_ftFaces;
+    bx::HandleAllocT<MAX_OPENED_FACES> m_faceHandles;
+    FT_Face *m_cachedFaces{};
 
     GlyphInfo m_blackGlyph{};
 
