@@ -16,6 +16,7 @@
 #include "FontManager.h"
 #include "../font_processing/CubeAtlas.h"
 #include "../font_processing/TrueTypeFont.h"
+#include "../utilities.h"
 
 namespace stl = tinystl;
 typedef stl::unordered_map<CodePoint, GlyphInfo> GlyphHashMap;
@@ -56,6 +57,12 @@ FontManager::~FontManager() {
 
     BX_ASSERT(m_filesHandles.getNumHandles() == 0, "All the font files must be destroyed before destroying the manager")
     delete[] m_cachedFiles;
+    
+    BX_ASSERT(m_ftFaces.empty(), "All the font faces must be destroyed before destroying the manager")
+    for (FT_Face face : m_ftFaces) {
+        FT_Done_Face(face);
+    }
+    m_ftFaces.clear();
 
     delete[] m_buffer;
 
@@ -75,12 +82,32 @@ TrueTypeHandle FontManager::createTtf(const uint8_t *_buffer, uint32_t _size) {
     return ret;
 }
 
+FreeTypeHandle FontManager::createFtFace(FT_Library *ft, const char* file_path) {
+    uint16_t id = m_ftFaces.size();
+    FT_Face face;
+    if (FT_New_Face(*ft, file_path, 0, &face)) {
+        PrintError("Failed to load font face");
+        return {bx::kInvalidHandle};
+    }
+    m_ftFaces.push_back(face);
+    
+    return {id};
+}
+
 void FontManager::destroyTtf(TrueTypeHandle _handle) {
     BX_ASSERT(isValid(_handle), "Invalid handle used")
     delete[] m_cachedFiles[_handle.idx].buffer;
     m_cachedFiles[_handle.idx].bufferSize = 0;
     m_cachedFiles[_handle.idx].buffer = nullptr;
     m_filesHandles.free(_handle.idx);
+}
+
+void FontManager::destroyFtFace(FreeTypeHandle _handle) {
+    BX_ASSERT(isValid(_handle), "Invalid handle used")
+    for (FT_Face face : m_ftFaces) {
+        FT_Done_Face(face);
+    }
+    m_ftFaces.clear();
 }
 
 FontHandle FontManager::createFontByPixelSize(TrueTypeHandle _ttfHandle, uint32_t _typefaceIndex, uint32_t _pixelSize, FontType _fontType, uint16_t _glyphPadding) {
@@ -307,4 +334,3 @@ bool FontManager::addBitmap(GlyphInfo &_glyphInfo, const uint8_t *_data) {
     _glyphInfo.regionIndex = m_atlas->addRegion((uint16_t) bx::ceil(_glyphInfo.width), (uint16_t) bx::ceil(_glyphInfo.height), _data, AtlasRegion::TYPE_GRAY);
     return true;
 }
-

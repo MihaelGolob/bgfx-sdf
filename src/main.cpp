@@ -28,6 +28,7 @@ InputManager* input_manager_;
 
 // fonts
 TrueTypeHandle font_file_;
+FreeTypeHandle ft_font_file_;
 FontHandle bitmap_font_;
 FontHandle bitmap_scaled_font_;
 FontHandle sdf_font_;
@@ -73,8 +74,7 @@ TrueTypeHandle LoadTTF(const char* file_path) {
         return handle;
     }
 
-    TrueTypeHandle invalid = BGFX_INVALID_HANDLE;
-    return invalid;
+    return BGFX_INVALID_HANDLE;
 }
 
 void InitFonts() {
@@ -86,6 +86,7 @@ void InitFonts() {
     text_buffer_manager_ = new TextBufferManager(font_manager_);
     
     font_file_ = LoadTTF("../assets/fonts/droidsans.ttf");
+    ft_font_file_ = font_manager_->createFtFace(&ft_, "../assets/fonts/droidsans.ttf");
     
     bitmap_font_ = font_manager_->createFontByPixelSize(font_file_, 0, 16, FontType::Bitmap, 0);
     bitmap_scaled_font_ = font_manager_->createScaledFontToPixelSize(bitmap_font_, 64); // create scaled fonts to show the power of SDF
@@ -203,6 +204,7 @@ void Shutdown() {
     
     // destroy ttf file handles
     font_manager_->destroyTtf(font_file_);
+    font_manager_->destroyFtFace(ft_font_file_);
     
     // destroy font handles
     font_manager_->destroyFont(bitmap_font_);

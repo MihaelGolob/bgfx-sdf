@@ -9,6 +9,8 @@
 
 #include <bx/handlealloc.h>
 #include <bx/string.h>
+#include <freetype/freetype.h>
+#include <vector>
 
 #include "../font_processing/GlyphInfo.h"
 #include "../font_processing/FontInfo.h"
@@ -43,6 +45,10 @@ public:
     ///
     /// @return invalid handle if the loading fail
     TrueTypeHandle createTtf(const uint8_t *_buffer, uint32_t _size);
+    
+    FreeTypeHandle createFtFace(FT_Library *ft, const char* path);
+    
+    void destroyFtFace(FreeTypeHandle _handle);
 
     /// Unload a TrueType font (free font memory) but keep loaded glyphs.
     void destroyTtf(TrueTypeHandle _handle);
@@ -104,6 +110,8 @@ private:
 
     bx::HandleAllocT<MAX_OPENED_FILES> m_filesHandles;
     CachedFile *m_cachedFiles{};
+    
+    std::vector<FT_Face> m_ftFaces;
 
     GlyphInfo m_blackGlyph{};
 
