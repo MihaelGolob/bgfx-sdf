@@ -11,10 +11,13 @@
 #include <bx/string.h>
 #include <freetype/freetype.h>
 #include <vector>
+#include <tinystl/allocator.h>
+#include <tinystl/unordered_map.h>
 
 #include "../font_processing/GlyphInfo.h"
 #include "../font_processing/FontInfo.h"
 #include "../font_processing/FontHandles.h"
+#include "../font_processing/TrueTypeFont.h"
 
 class Atlas;
 
@@ -22,8 +25,11 @@ class Atlas;
 #define MAX_OPENED_FONT  64
 #define FONT_TYPE_ALPHA UINT32_C(0x00000100)
 
+namespace stl = tinystl;
+
 /// Unicode value of a character
 typedef int32_t CodePoint;
+typedef stl::unordered_map<CodePoint, GlyphInfo> GlyphHashMap;
 
 class FontManager {
 public:
@@ -55,6 +61,9 @@ public:
 
     /// Return a font whose height is a fixed pixel size.
     FontHandle createFontByPixelSize(TrueTypeHandle _handle, uint32_t _typefaceIndex, uint32_t _pixelSize,
+                                     FontType _fontType = FontType::Bitmap, uint16_t _glyphPadding = 6);
+
+    FontHandle createFontByPixelSize(FreeTypeHandle _handle, uint32_t _typefaceIndex, uint32_t _pixelSize,
                                      FontType _fontType = FontType::Bitmap, uint16_t _glyphPadding = 6);
 
     /// Return a scaled child font whose height is a fixed pixel size.
@@ -92,7 +101,18 @@ public:
     }
 
 private:
-    struct CachedFont;
+    struct CachedFont {
+        CachedFont() : trueTypeFont(nullptr) {
+            masterFontHandle.idx = bx::kInvalidHandle;
+        }
+
+        FontInfo fontInfo{};
+        GlyphHashMap cachedGlyphs;
+        TrueTypeFont *trueTypeFont;
+        // a handle to a master font in case of sub distance field font
+        FontHandle masterFontHandle{};
+        int16_t padding{};
+    };
     struct CachedFile {
         uint8_t *buffer;
         uint32_t bufferSize;

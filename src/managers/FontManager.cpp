@@ -11,29 +11,9 @@
 #include <bx/bx.h>
 #include <bx/math.h>
 #include <cwchar> 
-#include <tinystl/allocator.h>
-#include <tinystl/unordered_map.h>
 #include "FontManager.h"
 #include "../font_processing/CubeAtlas.h"
-#include "../font_processing/TrueTypeFont.h"
 #include "../utilities.h"
-
-namespace stl = tinystl;
-typedef stl::unordered_map<CodePoint, GlyphInfo> GlyphHashMap;
-
-// cache font data
-struct FontManager::CachedFont {
-    CachedFont() : trueTypeFont(nullptr) {
-        masterFontHandle.idx = bx::kInvalidHandle;
-    }
-
-    FontInfo fontInfo{};
-    GlyphHashMap cachedGlyphs;
-    TrueTypeFont *trueTypeFont;
-    // a handle to a master font in case of sub distance field font
-    FontHandle masterFontHandle{};
-    int16_t padding{};
-};
 
 #define MAX_FONT_BUFFER_SIZE (512 * 512 * 4)
 
@@ -133,6 +113,10 @@ FontHandle FontManager::createFontByPixelSize(TrueTypeHandle _ttfHandle, uint32_
 
     FontHandle handle = {fontIdx};
     return handle;
+}
+
+FontHandle FontManager::createFontByPixelSize(FreeTypeHandle handle, uint32_t typefaceIndex, uint32_t pixelSize, FontType fontType, uint16_t glyphPadding) {
+    BX_ASSERT(isValid(handle), "Invalid handle used")
 }
 
 FontHandle FontManager::createScaledFontToPixelSize(FontHandle _baseFontHandle, uint32_t _pixelSize) {
