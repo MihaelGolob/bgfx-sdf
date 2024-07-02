@@ -18,6 +18,7 @@
 #include "../font_processing/FontInfo.h"
 #include "../font_processing/FontHandles.h"
 #include "../font_processing/TrueTypeFont.h"
+#include "../sdf/MsdfGenerator.h"
 
 class Atlas;
 
@@ -122,6 +123,7 @@ private:
     bool addBitmap(GlyphInfo &_glyphInfo, const uint8_t *_data);
     
     FT_Library ft_library;
+    MsdfGenerator msdf_generator;
 
     bool m_ownAtlas;
     Atlas *m_atlas;

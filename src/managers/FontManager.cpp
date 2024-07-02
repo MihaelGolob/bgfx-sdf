@@ -197,11 +197,12 @@ bool FontManager::preloadGlyph(FontHandle _handle, CodePoint _codePoint) {
             case FontType::Bitmap:
                 font.trueTypeFont->bakeGlyphAlpha(_codePoint, glyphInfo, m_buffer);
                 break;
-                
             case FontType::SDF:
                 font.trueTypeFont->BakeGlyphSDF(_codePoint, glyphInfo, m_buffer);
                 break;
-
+            case FontType::MSDF:
+                msdf_generator.BakeGlyphMSDF(_codePoint, m_cachedFaces[font.faceHandle.idx], m_buffer);
+                break;
             default:
                 BX_ASSERT(false, "TextureType not supported yet")
         }

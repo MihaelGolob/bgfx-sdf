@@ -78,12 +78,13 @@ void InitFonts() {
     sdf_font_ = font_manager_->createFontByPixelSize(font_file_, 0, 16, FontType::SDF, 8);
     sdf_scaled_font_ = font_manager_->createScaledFontToPixelSize(sdf_font_, 64);
     
-    msdf_font_ = font_manager_->createFontByPixelSize(font_file_, 0, 16, FontType::SDF, 8);
+    msdf_font_ = font_manager_->createFontByPixelSize(font_file_, 0, 16, FontType::MSDF, 8);
     msdf_scaled_font_ = font_manager_->createScaledFontToPixelSize(msdf_font_, 64);
     
     static_bitmap_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::Bitmap, BufferType::Static);
     static_sdf_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::SDF, BufferType::Static);
-    dynamic_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::Bitmap, BufferType::Transient);
+    static_msdf_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::SDF, BufferType::Static);
+    dynamic_text_buffer_ = text_buffer_manager_->createTextBuffer(FontType::SDF, BufferType::Transient);
 }
 
 void HandleKeyPressed(int key) {
@@ -182,6 +183,7 @@ void Update() {
         // draw text buffers
         text_buffer_manager_->submitTextBuffer(dynamic_text_buffer_, 0);
         text_buffer_manager_->submitTextBuffer(static_bitmap_text_buffer_, 0);
+        text_buffer_manager_->submitTextBuffer(static_msdf_text_buffer_, 0);
         text_buffer_manager_->submitTextBuffer(static_sdf_text_buffer_, 0);
 
         bgfx::frame();

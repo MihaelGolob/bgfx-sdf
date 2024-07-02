@@ -34,8 +34,8 @@ add_executable(bgfx-sdf
 		src/font_processing/TextBuffer.h
 		src/font_processing/FontHandles.h
 		src/sdf/sdf.h
-		src/sdf/msdfGenerator.cpp
-		src/sdf/msdfGenerator.h
+		src/sdf/MsdfGenerator.cpp
+		src/sdf/MsdfGenerator.h
 )
 
 target_compile_features(bgfx-sdf PUBLIC cxx_std_17)
