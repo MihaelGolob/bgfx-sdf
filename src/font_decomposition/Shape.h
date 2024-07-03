@@ -8,6 +8,10 @@
 
 class Shape {
 public:
-    std::vector<Contour> contours;
     Contour& AddEmptyContour();
+    
+    void ApplyEdgeColoring(float max_angle);
+    
+public:
+    std::vector<Contour> contours;
 };

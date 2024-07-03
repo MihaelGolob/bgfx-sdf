@@ -6,8 +6,16 @@
 #include "MsdfGenerator.h"
 #include "../utilities.h"
 
-void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, FT_Face face, uint8_t *output) {
+void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &out_glyph_info, FT_Face face, uint8_t *output) const {
+    out_glyph_info.offset_x = face->bbox.xMin;
+    out_glyph_info.offset_y = face->bbox.yMin;
+    out_glyph_info.width = face->bbox.xMax - face->bbox.xMin;
+    out_glyph_info.height = face->bbox.yMax - face->bbox.yMin;
+    out_glyph_info.advance_x = bx::round(face->glyph->advance.x * scale_);
+    out_glyph_info.advance_y = bx::round(face->glyph->advance.y * scale_);
+    
     auto shape = ParseFtFace(code_point, face);
+    shape.ApplyEdgeColoring(3.0);
 }
 
 Shape MsdfGenerator::ParseFtFace(CodePoint code_point, FT_Face face) {

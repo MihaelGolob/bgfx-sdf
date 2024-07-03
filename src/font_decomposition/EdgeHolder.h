@@ -16,6 +16,12 @@ public:
     
     ~EdgeHolder();
     
+    // custom operator
+    EdgeSegment* operator->() { return edge_; }
+    const EdgeSegment* operator->() const { return edge_; }
+    EdgeSegment operator*() { return *edge_; }
+    const EdgeSegment operator*() const { return *edge_; }
+    
 private:
     EdgeSegment* edge_;
 };
