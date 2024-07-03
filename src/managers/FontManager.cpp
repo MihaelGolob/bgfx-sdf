@@ -192,7 +192,6 @@ bool FontManager::preloadGlyph(FontHandle _handle, CodePoint _codePoint) {
     if (font.trueTypeFont != nullptr) {
         GlyphInfo glyphInfo {};
 
-        // todo mihael: add support for distance field font
         switch (font.fontInfo.fontType) {
             case FontType::Bitmap:
                 font.trueTypeFont->bakeGlyphAlpha(_codePoint, glyphInfo, m_buffer);
