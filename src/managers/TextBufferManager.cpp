@@ -122,8 +122,8 @@ void TextBufferManager::submitTextBuffer(TextBufferHandle _handle, bgfx::ViewId 
 
     BufferCache &bc = m_textBuffers[_handle.idx];
 
-    uint32_t indexSize = bc.textBuffer->getIndexCount() * bc.textBuffer->getIndexSize();
-    uint32_t vertexSize = bc.textBuffer->getVertexCount() * bc.textBuffer->getVertexSize();
+    uint32_t indexSize = bc.textBuffer->getIndexCount() * TextBuffer::getIndexSize();
+    uint32_t vertexSize = bc.textBuffer->getVertexCount() * TextBuffer::getVertexSize();
 
     if (0 == indexSize || 0 == vertexSize) {
         return;

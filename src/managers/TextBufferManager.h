@@ -20,7 +20,7 @@ class TextBuffer;
 
 class TextBufferManager {
 public:
-    TextBufferManager(FontManager *_fontManager);
+    explicit TextBufferManager(FontManager *_fontManager);
 
     ~TextBufferManager();
 
@@ -46,7 +46,7 @@ public:
     void clearTextBuffer(TextBufferHandle _handle);
 
     /// Return the rectangular size of the current text buffer (including all its content).
-    TextRectangle getRectangle(TextBufferHandle _handle) const;
+    [[nodiscard]] TextRectangle getRectangle(TextBufferHandle _handle) const;
 
 private:
     struct BufferCache {

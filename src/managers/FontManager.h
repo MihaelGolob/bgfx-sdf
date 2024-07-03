@@ -57,15 +57,15 @@ private:
      
 public:
     /// Create the font manager using an external cube atlas (doesn't take ownership of the atlas).
-    FontManager(Atlas *_atlas);
+    explicit FontManager(Atlas *_atlas);
 
     /// Create the font manager and create the texture cube as BGRA8 with linear filtering.
-    FontManager(uint16_t _textureSideWidth = 512);
+    explicit FontManager(uint16_t _textureSideWidth = 512);
 
     ~FontManager();
 
     /// Retrieve the atlas used by the font manager (e.g. to add stuff to it)
-    const Atlas *getAtlas() const {
+    [[nodiscard]] const Atlas *getAtlas() const {
         return m_atlas;
     }
 
@@ -105,7 +105,7 @@ public:
     /// Return the font descriptor of a font.
     ///
     /// @remark the handle is required to be valid
-    const FontInfo &getFontInfo(FontHandle _handle) const;
+    [[nodiscard]] const FontInfo &getFontInfo(FontHandle _handle) const;
 
     /// Return the rendering information about the glyph region. Load the
     /// glyph from a TrueType font if possible
@@ -114,7 +114,7 @@ public:
 
     float getKerning(FontHandle _handle, CodePoint _prevCodePoint, CodePoint _codePoint);
 
-    const GlyphInfo &getBlackGlyph() const {
+    [[nodiscard]] const GlyphInfo &getBlackGlyph() const {
         return m_blackGlyph;
     }
 
@@ -122,7 +122,7 @@ private:
     void init();
     bool addBitmap(GlyphInfo &_glyphInfo, const uint8_t *_data);
     
-    FT_Library ft_library;
+    FT_Library ft_library{};
     MsdfGenerator msdf_generator;
 
     bool m_ownAtlas;

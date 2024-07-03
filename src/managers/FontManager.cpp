@@ -83,11 +83,7 @@ FontHandle FontManager::createFontByPixelSize(TrueTypeHandle _ttfHandle, uint32_
     BX_ASSERT(isValid(_ttfHandle), "Invalid handle used")
 
     auto ttf = new TrueTypeFont();
-    if (!ttf->init(m_cachedFiles[_ttfHandle.idx].buffer, m_cachedFiles[_ttfHandle.idx].bufferSize, _typefaceIndex, _pixelSize, _glyphPadding)) {
-        delete ttf;
-        FontHandle invalid = {bx::kInvalidHandle};
-        return invalid;
-    }
+    ttf->init(m_cachedFiles[_ttfHandle.idx].buffer, m_cachedFiles[_ttfHandle.idx].bufferSize, _typefaceIndex, _pixelSize, _glyphPadding);
 
     uint16_t fontIdx = m_fontHandles.alloc();
     BX_ASSERT(fontIdx != bx::kInvalidHandle, "Invalid handle used")

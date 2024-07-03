@@ -39,13 +39,13 @@ public:
     static FunctionId SubscribeKeyPressed(const std::function<void (int)>& callback);
     static FunctionId SubscribeKeyReleased(const std::function<void (int)>& callback);
     
-    static void UnsubscribeKeyPressed(const FunctionId);
-    static void UnsubscribeKeyReleased(const FunctionId);
+    static void UnsubscribeKeyPressed(FunctionId);
+    static void UnsubscribeKeyReleased(FunctionId);
     
     static char GetKeyChar(int key);
     
 private:
-    static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+    static void KeyCallback([[maybe_unused]] GLFWwindow* window, int key, [[maybe_unused]] int scancode, int action, [[maybe_unused]] int mods);
     static std::map<int, bool> keys_map_;
 
     static std::vector<FunctionHandler<void (int)>> key_pressed_callbacks_;

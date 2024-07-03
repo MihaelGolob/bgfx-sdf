@@ -9,7 +9,6 @@
 #include "../managers/FontManager.h"
 
 #include <bgfx/embedded_shader.h>
-#include <cwchar>  // wcslen
 
 #define MAX_BUFFERED_CHARACTERS (8192 - 5)
 

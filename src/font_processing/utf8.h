@@ -4,7 +4,7 @@
 #ifndef UTF8_H_HEADER_GUARD
 #define UTF8_H_HEADER_GUARD
 
-#include <stdint.h>
+#include <cstdint>
 
 #define UTF8_ACCEPT 0
 #define UTF8_REJECT 1

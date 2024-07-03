@@ -12,9 +12,9 @@ struct AtlasRegion {
         TYPE_BGRA8 = 4  // 4 components
     };
 
-    Type getType() const; 
-    uint32_t getFaceIndex() const; 
-    uint32_t getComponentIndex() const;
+    [[nodiscard]] Type getType() const; 
+    [[nodiscard]] uint32_t getFaceIndex() const; 
+    [[nodiscard]] uint32_t getComponentIndex() const;
     void setMask(Type _type, uint32_t _faceIndex, uint32_t _componentIndex); 
     
     uint16_t x, y;

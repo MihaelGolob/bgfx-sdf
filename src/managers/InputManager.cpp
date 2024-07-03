@@ -28,7 +28,7 @@ InputManager::~InputManager() {
     }
 }
 
-void InputManager::KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+void InputManager::KeyCallback([[maybe_unused]] GLFWwindow *window, int key, [[maybe_unused]] int scancode, int action, [[maybe_unused]] int mods) {
     if (action == GLFW_PRESS || action == GLFW_REPEAT) {
         keys_map_[key] = true;
         for (const auto& callback : key_pressed_callbacks_) {
