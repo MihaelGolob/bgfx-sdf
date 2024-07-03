@@ -7,7 +7,3 @@
 EdgeHolder::~EdgeHolder() {
 //    delete edge; todo: deleting edge causes SEG FAULT ???
 }
-
-void EdgeHolder::ToString() const {
-    edge->ToString();
-}

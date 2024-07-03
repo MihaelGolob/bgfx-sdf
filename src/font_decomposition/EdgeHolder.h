@@ -15,7 +15,6 @@ public:
     EdgeHolder(Point2 p0, Point2 p1, Point2 p2, Point2 p3) : edge(EdgeSegment::CreateEdgeSegment(p0, p1, p2, p3)) {};
     
     ~EdgeHolder();
-    void ToString() const;
     
 private:
     EdgeSegment* edge;

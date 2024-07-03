@@ -8,12 +8,6 @@
 
 void MsdfGenerator::BakeGlyphMSDF(CodePoint code_point, FT_Face face, uint8_t *output) {
     auto shape = ParseFtFace(code_point, face);
-    printf("Generating msdf for code point: %c\n", (char)code_point);
-    for (auto &contour : shape.contours) {
-        for (auto &edge : contour.edges) {
-            edge.ToString();
-        }
-    }
 }
 
 Shape MsdfGenerator::ParseFtFace(CodePoint code_point, FT_Face face) {

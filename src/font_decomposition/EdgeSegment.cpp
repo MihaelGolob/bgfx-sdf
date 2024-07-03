@@ -24,21 +24,10 @@ EdgeSegment *EdgeSegment::CreateEdgeSegment(const Vector2 &p0, const Vector2 &p1
 // linear segment -----------------------------------
 LinearSegment::LinearSegment(const Vector2 &p0, const Vector2 &p1) : points{p0, p1} {}
 
-void LinearSegment::ToString() {
-    printf("Linear segment: %f %f %f %f\n", points[0].x, points[0].y, points[1].x, points[1].y);
-}
 
 // quadratic segment --------------------------------
 QuadraticSegment::QuadraticSegment(const Vector2 &p0, const Vector2 &p1, const Vector2 &p2) : points{p0, p1, p2} {}
 
-void QuadraticSegment::ToString() {
-    printf("Quadratic segment: %f %f %f %f %f %f\n", points[0].x, points[0].y, points[1].x, points[1].y, points[2].x, points[2].y);
-}
 
 // cubic segment ------------------------------------
 CubicSegment::CubicSegment(const Vector2 &p0, const Vector2 &p1, const Vector2 &p2, const Vector2 &p3) : points{p0, p1, p2, p3} {}
-
-void CubicSegment::ToString() {
-    printf("Cubic segment: %f %f %f %f %f %f %f %f\n", points[0].x, points[0].y, points[1].x, points[1].y, points[2].x, points[2].y, points[3].x, points[3].y);
-}
-
