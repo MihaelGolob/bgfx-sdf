@@ -10,10 +10,6 @@ void PrintError(const char* error) {
     std::cerr << "ERROR: " << error << std::endl;
 }
 
-void PrintError(const std::string& error) {
-    PrintError(error.c_str());
-}
-
 void PrintInfo(const char* info) {
     std::cout << "INFO: " << info << std::endl;
 }
@@ -23,10 +19,9 @@ void PrintInfo(const std::string& info) {
 }
 
 // file reading 
-
 bx::AllocatorI* GetDefaultAllocator() {
     BX_PRAGMA_DIAGNOSTIC_PUSH()
-    BX_PRAGMA_DIAGNOSTIC_IGNORED_MSVC(4459) // warning C4459: declaration of "s_allocator" hides global declaration
+    BX_PRAGMA_DIAGNOSTIC_IGNORED_MSVC(4459) 
     BX_PRAGMA_DIAGNOSTIC_IGNORED_CLANG_GCC("-Wshadow")
     static bx::DefaultAllocator s_allocator;
     return &s_allocator;
