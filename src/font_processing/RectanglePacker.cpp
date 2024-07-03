@@ -4,49 +4,49 @@
 
 #include "RectanglePacker.h"
 
-RectanglePacker::RectanglePacker() : m_width(0), m_height(0), m_usedSpace(0) { }
+RectanglePacker::RectanglePacker() : width_(0), height_(0), used_space_(0) { }
 
-RectanglePacker::RectanglePacker(uint32_t _width, uint32_t _height) : m_width(_width), m_height(_height), m_usedSpace(0) {
+RectanglePacker::RectanglePacker(uint32_t width, uint32_t height) : width_(width), height_(height), used_space_(0) {
     // We want a one pixel border around the whole atlas to avoid any artefact when sampling texture
-    m_skyline.emplace_back(1, 1, uint16_t(_width - 2));
+    skyline_.emplace_back(1, 1, uint16_t(width - 2));
 }
 
-void RectanglePacker::init(uint32_t _width, uint32_t _height) {
-    BX_ASSERT(_width > 2, "_width must be > 2")
-    BX_ASSERT(_height > 2, "_height must be > 2")
+void RectanglePacker::Init(uint32_t width, uint32_t height) {
+    BX_ASSERT(width > 2, "_width must be > 2")
+    BX_ASSERT(height > 2, "_height must be > 2")
 
-    m_width = _width;
-    m_height = _height;
-    m_usedSpace = 0;
+    width_ = width;
+    height_ = height;
+    used_space_ = 0;
 
-    m_skyline.clear();
+    skyline_.clear();
     // We want a one pixel border around the whole atlas to avoid any artifact when
     // sampling texture
-    m_skyline.emplace_back(1, 1, uint16_t(_width - 2));
+    skyline_.emplace_back(1, 1, uint16_t(width - 2));
 }
 
-bool RectanglePacker::addRectangle(uint16_t _width, uint16_t _height, uint16_t &_outX, uint16_t &_outY) {
+bool RectanglePacker::AddRectangle(uint16_t width, uint16_t height, uint16_t &out_x, uint16_t &out_y) {
     int best_height, best_index;
     int32_t best_width;
     Node *node;
     Node *prev;
-    _outX = 0;
-    _outY = 0;
+    out_x = 0;
+    out_y = 0;
 
     best_height = INT_MAX;
     best_index = -1;
     best_width = INT_MAX;
-    for (uint16_t ii = 0, num = uint16_t(m_skyline.size()); ii < num; ++ii) {
-        int32_t yy = fit(ii, _width, _height);
+    for (uint16_t ii = 0, num = uint16_t(skyline_.size()); ii < num; ++ii) {
+        int32_t yy = Fit(ii, width, height);
         if (yy >= 0) {
-            node = &m_skyline[ii];
-            if (((yy + _height) < best_height)
-                || (((yy + _height) == best_height) && (node->width < best_width))) {
-                best_height = uint16_t(yy) + _height;
+            node = &skyline_[ii];
+            if (((yy + height) < best_height)
+                || (((yy + height) == best_height) && (node->width < best_width))) {
+                best_height = uint16_t(yy) + height;
                 best_index = ii;
                 best_width = node->width;
-                _outX = node->x;
-                _outY = uint16_t(yy);
+                out_x = node->x;
+                out_y = uint16_t(yy);
             }
         }
     }
@@ -55,18 +55,18 @@ bool RectanglePacker::addRectangle(uint16_t _width, uint16_t _height, uint16_t &
         return false;
     }
 
-    Node newNode(_outX, _outY + _height, _width);
-    m_skyline.insert(m_skyline.begin() + best_index, newNode);
+    Node new_node(out_x, out_y + height, width);
+    skyline_.insert(skyline_.begin() + best_index, new_node);
 
-    for (auto ii = uint16_t(best_index + 1), num = uint16_t(m_skyline.size()); ii < num; ++ii) {
-        node = &m_skyline[ii];
-        prev = &m_skyline[ii - 1];
+    for (auto ii = uint16_t(best_index + 1), num = uint16_t(skyline_.size()); ii < num; ++ii) {
+        node = &skyline_[ii];
+        prev = &skyline_[ii - 1];
         if (node->x < (prev->x + prev->width)) {
             auto shrink = uint16_t(prev->x + prev->width - node->x);
             node->x += shrink;
             node->width -= shrink;
             if (node->width <= 0) {
-                m_skyline.erase(m_skyline.begin() + ii);
+                skyline_.erase(skyline_.begin() + ii);
                 --ii;
                 --num;
             } else {
@@ -77,72 +77,72 @@ bool RectanglePacker::addRectangle(uint16_t _width, uint16_t _height, uint16_t &
         }
     }
 
-    merge();
-    m_usedSpace += _width * _height;
+    Merge();
+    used_space_ += width * height;
     return true;
 }
 
-float RectanglePacker::getUsageRatio() const {
-    uint32_t total = m_width * m_height;
+float RectanglePacker::GetUsageRatio() const {
+    uint32_t total = width_ * height_;
     if (total > 0) {
-        return (float) m_usedSpace / (float) total;
+        return (float) used_space_ / (float) total;
     }
 
     return 0.0f;
 }
 
-void RectanglePacker::clear() {
-    m_skyline.clear();
-    m_usedSpace = 0;
+void RectanglePacker::Clear() {
+    skyline_.clear();
+    used_space_ = 0;
 
     // We want a one pixel border around the whole atlas to avoid any artefact when
     // sampling texture
-    m_skyline.emplace_back(1, 1, uint16_t(m_width - 2));
+    skyline_.emplace_back(1, 1, uint16_t(width_ - 2));
 }
 
-int32_t RectanglePacker::fit(uint32_t _skylineNodeIndex, uint16_t _width, uint16_t _height) {
-    int32_t width = _width;
-    int32_t height = _height;
+int32_t RectanglePacker::Fit(uint32_t skyline_node_index, uint16_t w, uint16_t h) {
+    int32_t width = w;
+    int32_t height = h;
 
-    const Node &baseNode = m_skyline[_skylineNodeIndex];
+    const Node &base_node = skyline_[skyline_node_index];
 
-    int32_t xx = baseNode.x, yy;
-    int32_t widthLeft = width;
-    int32_t ii = _skylineNodeIndex;
+    int32_t xx = base_node.x, yy;
+    int32_t width_left = width;
+    int32_t ii = skyline_node_index;
 
-    if ((xx + width) > (int32_t) (m_width - 1)) {
+    if ((xx + width) > (int32_t) (width_ - 1)) {
         return -1;
     }
 
-    yy = baseNode.y;
-    while (widthLeft > 0) {
-        const Node &node = m_skyline[ii];
+    yy = base_node.y;
+    while (width_left > 0) {
+        const Node &node = skyline_[ii];
         if (node.y > yy) {
             yy = node.y;
         }
 
-        if ((yy + height) > (int32_t) (m_height - 1)) {
+        if ((yy + height) > (int32_t) (height_ - 1)) {
             return -1;
         }
 
-        widthLeft -= node.width;
+        width_left -= node.width;
         ++ii;
     }
 
     return yy;
 }
 
-void RectanglePacker::merge() {
+void RectanglePacker::Merge() {
     Node *node;
     Node *next;
     uint32_t ii;
 
-    for (ii = 0; ii < m_skyline.size() - 1; ++ii) {
-        node = (Node *) &m_skyline[ii];
-        next = (Node *) &m_skyline[ii + 1];
+    for (ii = 0; ii < skyline_.size() - 1; ++ii) {
+        node = (Node *) &skyline_[ii];
+        next = (Node *) &skyline_[ii + 1];
         if (node->y == next->y) {
             node->width += next->width;
-            m_skyline.erase(m_skyline.begin() + ii + 1);
+            skyline_.erase(skyline_.begin() + ii + 1);
             --ii;
         }
     }

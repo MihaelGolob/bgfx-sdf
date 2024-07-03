@@ -22,12 +22,12 @@ EdgeSegment *EdgeSegment::CreateEdgeSegment(const Vector2 &p0, const Vector2 &p1
 
 
 // linear segment -----------------------------------
-LinearSegment::LinearSegment(const Vector2 &p0, const Vector2 &p1) : points{p0, p1} {}
+LinearSegment::LinearSegment(const Vector2 &p0, const Vector2 &p1) : points_{p0, p1} {}
 
 
 // quadratic segment --------------------------------
-QuadraticSegment::QuadraticSegment(const Vector2 &p0, const Vector2 &p1, const Vector2 &p2) : points{p0, p1, p2} {}
+QuadraticSegment::QuadraticSegment(const Vector2 &p0, const Vector2 &p1, const Vector2 &p2) : points_{p0, p1, p2} {}
 
 
 // cubic segment ------------------------------------
-CubicSegment::CubicSegment(const Vector2 &p0, const Vector2 &p1, const Vector2 &p2, const Vector2 &p3) : points{p0, p1, p2, p3} {}
+CubicSegment::CubicSegment(const Vector2 &p0, const Vector2 &p1, const Vector2 &p2, const Vector2 &p3) : points_{p0, p1, p2, p3} {}

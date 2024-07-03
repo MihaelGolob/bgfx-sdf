@@ -20,48 +20,48 @@ class TextBuffer;
 
 class TextBufferManager {
 public:
-    explicit TextBufferManager(FontManager *_fontManager);
+    explicit TextBufferManager(FontManager *font_manager);
 
     ~TextBufferManager();
 
-    TextBufferHandle createTextBuffer(FontType _type, BufferType::Enum _bufferType);
+    TextBufferHandle CreateTextBuffer(FontType type, BufferType::Enum buffer_type);
 
-    void destroyTextBuffer(TextBufferHandle _handle);
+    void DestroyTextBuffer(TextBufferHandle handle);
 
-    void submitTextBuffer(TextBufferHandle _handle, bgfx::ViewId _id, int32_t _depth = 0);
+    void SubmitTextBuffer(TextBufferHandle handle, bgfx::ViewId id, int32_t depth = 0);
 
-    void setPenPosition(TextBufferHandle _handle, float _x, float _y);
+    void SetPenPosition(TextBufferHandle handle, float x, float y);
 
     /// Append an ASCII/utf-8 string to the buffer using current pen position and color.
-    void appendText(TextBufferHandle _handle, FontHandle _fontHandle, const char *_string, const char *_end = nullptr);
+    void AppendText(TextBufferHandle handle, FontHandle font_handle, const char *string, const char *end = nullptr);
 
     /// Append a wide char unicode string to the buffer using current pen position and color.
     void
-    appendText(TextBufferHandle _handle, FontHandle _fontHandle, const wchar_t *_string, const wchar_t *_end = nullptr);
+    AppendText(TextBufferHandle handle, FontHandle font_handle, const wchar_t *string, const wchar_t *end = nullptr);
 
     /// Append a whole face of the atlas cube, mostly used for debugging and visualizing atlas.
-    void appendAtlasFace(TextBufferHandle _handle, uint16_t _faceIndex);
+    void AppendAtlasFace(TextBufferHandle handle, uint16_t face_index);
 
     /// Clear the text buffer and reset its state (pen/color).
-    void clearTextBuffer(TextBufferHandle _handle);
+    void ClearTextBuffer(TextBufferHandle handle);
 
     /// Return the rectangular size of the current text buffer (including all its content).
-    [[nodiscard]] TextRectangle getRectangle(TextBufferHandle _handle) const;
+    [[nodiscard]] TextRectangle GetRectangle(TextBufferHandle handle) const;
 
 private:
     struct BufferCache {
-        uint16_t indexBufferHandleIdx;
-        uint16_t vertexBufferHandleIdx;
-        TextBuffer *textBuffer;
-        BufferType::Enum bufferType;
-        FontType fontType;
+        uint16_t index_buffer_handle_idx;
+        uint16_t vertex_buffer_handle_idx;
+        TextBuffer *text_buffer;
+        BufferType::Enum buffer_type;
+        FontType font_type;
     };
 
-    BufferCache *m_textBuffers;
-    bx::HandleAllocT<MAX_TEXT_BUFFER_COUNT> m_textBufferHandles;
-    FontManager *m_fontManager;
-    bgfx::VertexLayout m_vertexLayout;
-    bgfx::UniformHandle s_texColor{};
-    bgfx::ProgramHandle m_basicProgram{};
-    bgfx::ProgramHandle m_sdfProgram{};
+    BufferCache *text_buffers_;
+    bx::HandleAllocT<MAX_TEXT_BUFFER_COUNT> text_buffer_handles_;
+    FontManager *font_manager_;
+    bgfx::VertexLayout vertex_layout_;
+    bgfx::UniformHandle tex_color_{};
+    bgfx::ProgramHandle basic_program_{};
+    bgfx::ProgramHandle sdf_program_{};
 };

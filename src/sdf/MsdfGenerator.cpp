@@ -6,7 +6,7 @@
 #include "MsdfGenerator.h"
 #include "../utilities.h"
 
-void MsdfGenerator::BakeGlyphMSDF(CodePoint code_point, FT_Face face, uint8_t *output) {
+void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, FT_Face face, uint8_t *output) {
     auto shape = ParseFtFace(code_point, face);
 }
 

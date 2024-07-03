@@ -22,11 +22,11 @@ struct BufferType {
 
 /// special style effect (can be combined)
 enum TextStyleFlags {
-    STYLE_NORMAL = 0,
-    STYLE_OVERLINE = 1,
-    STYLE_UNDERLINE = 1 << 1,
-    STYLE_STRIKE_THROUGH = 1 << 2,
-    STYLE_BACKGROUND = 1 << 3,
+    StyleNormal = 0,
+    StyleOverline = 1,
+    StyleUnderline = 1 << 1,
+    StyleStrikeThrough = 1 << 2,
+    StyleBackground = 1 << 3,
 };
 
 struct TextRectangle {
@@ -38,89 +38,89 @@ public:
 
     /// TextBuffer is bound to a fontManager for glyph retrieval
     /// @remark the ownership of the manager is not taken
-    explicit TextBuffer(FontManager *_fontManager);
+    explicit TextBuffer(FontManager *font_manager);
 
     ~TextBuffer();
 
-    void setPenPosition(float _x, float _y) {
-        m_penX = _x;
-        m_penY = _y;
+    void SetPenPosition(float x, float y) {
+        pen_x_ = x;
+        pen_y_ = y;
     }
 
     /// Append an ASCII/utf-8 string to the buffer using current pen
     /// position and color.
-    void appendText(FontHandle _fontHandle, const char *_string, const char *_end = nullptr);
+    void AppendText(FontHandle font_handle, const char *string, const char *end = nullptr);
 
     /// Append a wide char unicode string to the buffer using current pen
     /// position and color.
-    void appendText(FontHandle _fontHandle, const wchar_t *_string, const wchar_t *_end = nullptr);
+    void AppendText(FontHandle font_handle, const wchar_t *string, const wchar_t *end = nullptr);
 
     /// Append a whole face of the atlas cube, mostly used for debugging
     /// and visualizing atlas.
-    void appendAtlasFace(uint16_t _faceIndex);
+    void AppendAtlasFace(uint16_t face_index);
 
     /// Clear the text buffer and reset its state (pen/color)
-    void clearTextBuffer();
+    void ClearTextBuffer();
 
     /// Get pointer to the vertex buffer to submit it to the graphic card.
-    const uint8_t *getVertexBuffer() {
-        return (uint8_t *) m_vertexBuffer;
+    const uint8_t *GetVertexBuffer() {
+        return (uint8_t *) vertex_buffer_;
     }
 
     /// Number of vertex in the vertex buffer.
-    [[nodiscard]] uint32_t getVertexCount() const {
-        return m_vertexCount;
+    [[nodiscard]] uint32_t GetVertexCount() const {
+        return vertex_count_;
     }
 
     /// Size in bytes of a vertex.
-    [[nodiscard]] static uint32_t getVertexSize() {
+    [[nodiscard]] static uint32_t GetVertexSize() {
         return sizeof(TextVertex);
     }
 
     /// get a pointer to the index buffer to submit it to the graphic
-    [[nodiscard]] const uint16_t *getIndexBuffer() const {
-        return m_indexBuffer;
+    [[nodiscard]] const uint16_t *GetIndexBuffer() const {
+        return index_buffer_;
     }
 
     /// number of index in the index buffer
-    [[nodiscard]] uint32_t getIndexCount() const {
-        return m_indexCount;
+    [[nodiscard]] uint32_t GetIndexCount() const {
+        return index_count_;
     }
 
     /// Size in bytes of an index.
-    [[nodiscard]] static uint32_t getIndexSize() {
+    [[nodiscard]] static uint32_t GetIndexSize() {
         return sizeof(uint16_t);
     }
 
-    [[nodiscard]] uint32_t getTextColor() const {
-        return toABGR(m_textColor);
+    [[nodiscard]] uint32_t GetTextColor() const {
+        return ToAbgr(text_color_);
     }
 
-    [[nodiscard]] TextRectangle getRectangle() const {
-        return m_rectangle;
+    [[nodiscard]] TextRectangle GetRectangle() const {
+        return rectangle_;
     }
 
 private:
-    void appendGlyph(FontHandle _handle, CodePoint _codePoint, bool shadow);
+    void AppendGlyph(FontHandle handle, CodePoint code_point, bool shadow);
 
-    void verticalCenterLastLine(float _txtDecalY, float _top, float _bottom);
+    void VerticalCenterLastLine(float txt_decal_y, float top, float bottom);
 
-    static uint32_t toABGR(uint32_t _rgba) {
-        return (((_rgba >> 0) & 0xff) << 24)
-               | (((_rgba >> 8) & 0xff) << 16)
-               | (((_rgba >> 16) & 0xff) << 8)
-               | (((_rgba >> 24) & 0xff) << 0);
+    static uint32_t ToAbgr(uint32_t rgba) {
+        return (((rgba >> 0) & 0xff) << 24)
+               | (((rgba >> 8) & 0xff) << 16)
+               | (((rgba >> 16) & 0xff) << 8)
+               | (((rgba >> 24) & 0xff) << 0);
     }
 
-    void setVertex(uint32_t _i, float _x, float _y, uint32_t _rgba, uint8_t _style = STYLE_NORMAL) {
-        m_vertexBuffer[_i].x = _x;
-        m_vertexBuffer[_i].y = _y;
-        m_vertexBuffer[_i].rgba = _rgba;
-        m_styleBuffer[_i] = _style;
+    void SetVertex(uint32_t i, float x, float y, uint32_t rgba, uint8_t style = StyleNormal) {
+        vertex_buffer_[i].x = x;
+        vertex_buffer_[i].y = y;
+        vertex_buffer_[i].rgba = rgba;
+        style_buffer_[i] = style;
     }
 
-    void setOutlineColor(uint32_t _i, uint32_t _rgbaOutline) {
-        m_vertexBuffer[_i].rgbaOutline = _rgbaOutline;
+    void SetOutlineColor(uint32_t i, uint32_t rgba_outline) {
+        vertex_buffer_[i].rgba_outline = rgba_outline;
     }
 
     struct TextVertex {
@@ -129,49 +129,49 @@ private:
         int16_t u1, v1, w1, t1;
         int16_t u2, v2, w2, t2;
         uint32_t rgba;
-        uint32_t rgbaOutline;
+        uint32_t rgba_outline;
     };
 
-    uint32_t m_styleFlags;
+    uint32_t style_flags_;
 
     // color states
-    uint32_t m_textColor;
+    uint32_t text_color_;
 
-    uint32_t m_backgroundColor;
-    uint32_t m_overlineColor;
-    uint32_t m_underlineColor;
-    uint32_t m_strikeThroughColor;
+    uint32_t background_color_;
+    uint32_t overline_color_;
+    uint32_t underline_color_;
+    uint32_t strike_through_color_;
 
     // outline state
-    float m_outlineWidth;
-    uint32_t m_outlineColor;
+    float outline_width_;
+    uint32_t outline_color_;
 
     // drop shadow state
-    float m_dropShadowOffset[2]{};
-    uint32_t m_dropShadowColor;
-    float m_dropShadowSoftener;
+    float drop_shadow_offset_[2]{};
+    uint32_t drop_shadow_color_;
+    float drop_shadow_softener_;
 
     //position states
-    float m_penX;
-    float m_penY;
+    float pen_x_;
+    float pen_y_;
 
-    float m_originX;
-    float m_originY;
+    float origin_x_;
+    float origin_y_;
 
-    float m_lineAscender;
-    float m_lineDescender;
-    float m_lineGap;
+    float line_ascender_;
+    float line_descender_;
+    float line_gap_;
 
-    CodePoint m_previousCodePoint;
+    CodePoint previous_code_point_;
 
-    TextRectangle m_rectangle{};
-    FontManager *m_fontManager;
+    TextRectangle rectangle_{};
+    FontManager *font_manager_;
 
-    TextVertex *m_vertexBuffer;
-    uint16_t *m_indexBuffer;
-    uint8_t *m_styleBuffer;
+    TextVertex *vertex_buffer_;
+    uint16_t *index_buffer_;
+    uint8_t *style_buffer_;
 
-    uint32_t m_indexCount;
-    uint32_t m_lineStartIndex;
-    uint16_t m_vertexCount;
+    uint32_t index_count_;
+    uint32_t line_start_index_;
+    uint16_t vertex_count_;
 };

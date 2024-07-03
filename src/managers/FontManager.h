@@ -36,109 +36,109 @@ typedef stl::unordered_map<CodePoint, GlyphInfo> GlyphHashMap;
 class FontManager {
 private:
     struct CachedFont {
-        CachedFont() : trueTypeFont(nullptr) {
-            masterFontHandle.idx = bx::kInvalidHandle;
+        CachedFont() : true_type_font(nullptr) {
+            master_font_handle.idx = bx::kInvalidHandle;
         }
 
-        FontInfo fontInfo{};
-        GlyphHashMap cachedGlyphs;
-        TrueTypeFont *trueTypeFont;
+        FontInfo font_info{};
+        GlyphHashMap cached_glyphs;
+        TrueTypeFont *true_type_font;
         // a handle to a master font in case of sub distance field font
-        FontHandle masterFontHandle{};
+        FontHandle master_font_handle{};
         int16_t padding{};
         // used for msdf rendering
-        FontFaceHandle faceHandle{};
+        FontFaceHandle face_handle{};
     };
     struct CachedFile {
         uint8_t *buffer;
-        uint32_t bufferSize;
+        uint32_t buffer_size;
         const char* path;
     }; 
      
 public:
     /// Create the font manager using an external cube atlas (doesn't take ownership of the atlas).
-    explicit FontManager(Atlas *_atlas);
+    explicit FontManager(Atlas *atlas);
 
     /// Create the font manager and create the texture cube as BGRA8 with linear filtering.
-    explicit FontManager(uint16_t _textureSideWidth = 512);
+    explicit FontManager(uint16_t texture_side_width = 512);
 
     ~FontManager();
 
     /// Retrieve the atlas used by the font manager (e.g. to add stuff to it)
-    [[nodiscard]] const Atlas *getAtlas() const {
-        return m_atlas;
+    [[nodiscard]] const Atlas *GetAtlas() const {
+        return atlas_;
     }
 
     /// Load a TrueType font from a given buffer. The buffer is copied and
     /// thus can be freed or reused after this call.
     ///
     /// @return invalid handle if the loading fail
-    TrueTypeHandle createTtf(const char* font_path);
+    TrueTypeHandle CreateTtf(const char* font_path);
     
     /// Unload a TrueType font (free font memory) but keep loaded glyphs.
-    void destroyTtf(TrueTypeHandle _handle);
+    void DestroyTtf(TrueTypeHandle handle);
 
     /// Return a font whose height is a fixed pixel size.
-    FontHandle createFontByPixelSize(TrueTypeHandle _handle, uint32_t _typefaceIndex, uint32_t _pixelSize,
-                                     FontType _fontType = FontType::Bitmap, uint16_t _glyphPadding = 6);
+    FontHandle CreateFontByPixelSize(TrueTypeHandle ttf_handle, uint32_t typeface_index, uint32_t pixel_size,
+                                     FontType font_type = FontType::Bitmap, uint16_t glyph_padding = 6);
 
-    FontFaceHandle createFace(CachedFile* font_file);
+    FontFaceHandle CreateFace(CachedFile* font_file);
 
     /// Return a scaled child font whose height is a fixed pixel size.
-    FontHandle createScaledFontToPixelSize(FontHandle _baseFontHandle, uint32_t _pixelSize);
+    FontHandle CreateScaledFontToPixelSize(FontHandle base_font_handle, uint32_t pixel_size);
 
     /// destroy a font (truetype or baked)
-    void destroyFont(FontHandle _handle);
+    void DestroyFont(FontHandle handle);
 
     /// Preload a set of glyphs from a TrueType file.
     ///
     /// @return True if every glyph could be preloaded, false otherwise if
     ///   the Font is a baked font, this only do validation on the characters.
-    bool preloadGlyph(FontHandle _handle, const wchar_t *_string);
+    bool PreloadGlyph(FontHandle handle, const wchar_t *string);
 
     /// Preload a single glyph, return true on success.
-    bool preloadGlyph(FontHandle _handle, CodePoint _character);
+    bool PreloadGlyph(FontHandle handle, CodePoint code_point);
 
-    void addGlyphBitmap(FontHandle _handle, CodePoint _character, uint16_t _width, uint16_t height, uint16_t _pitch,
-                        float extraScale, const uint8_t *_bitmapBuffer, float glyphOffsetX, float glyphOffsetY);
+    void AddGlyphBitmap(FontHandle handle, CodePoint code_point, uint16_t width, uint16_t height, uint16_t pitch,
+                        float extra_scale, const uint8_t *bitmap_buffer, float glyph_offset_x, float glyph_offset_y);
 
     /// Return the font descriptor of a font.
     ///
     /// @remark the handle is required to be valid
-    [[nodiscard]] const FontInfo &getFontInfo(FontHandle _handle) const;
+    [[nodiscard]] const FontInfo &GetFontInfo(FontHandle handle) const;
 
     /// Return the rendering information about the glyph region. Load the
     /// glyph from a TrueType font if possible
     ///
-    const GlyphInfo *getGlyphInfo(FontHandle _handle, CodePoint _codePoint);
+    const GlyphInfo *GetGlyphInfo(FontHandle handle, CodePoint code_point);
 
-    float getKerning(FontHandle _handle, CodePoint _prevCodePoint, CodePoint _codePoint);
+    float GetKerning(FontHandle handle, CodePoint prev_code_point, CodePoint code_point);
 
-    [[nodiscard]] const GlyphInfo &getBlackGlyph() const {
-        return m_blackGlyph;
+    [[nodiscard]] const GlyphInfo &GetBlackGlyph() const {
+        return black_glyph_;
     }
 
 private:
-    void init();
-    bool addBitmap(GlyphInfo &_glyphInfo, const uint8_t *_data);
+    void Init();
+    bool AddBitmap(GlyphInfo &glyph_info, const uint8_t *data);
     
-    FT_Library ft_library{};
-    MsdfGenerator msdf_generator;
+    FT_Library ft_library_{};
+    MsdfGenerator msdf_generator_;
 
-    bool m_ownAtlas;
-    Atlas *m_atlas;
+    bool own_atlas_;
+    Atlas *atlas_;
 
-    bx::HandleAllocT<MAX_OPENED_FONT> m_fontHandles;
-    CachedFont *m_cachedFonts{};
+    bx::HandleAllocT<MAX_OPENED_FONT> font_handles_;
+    CachedFont *cached_fonts_{};
 
-    bx::HandleAllocT<MAX_OPENED_FILES> m_filesHandles;
-    CachedFile *m_cachedFiles{};
+    bx::HandleAllocT<MAX_OPENED_FILES> files_handles_;
+    CachedFile *cached_files_{};
     
-    bx::HandleAllocT<MAX_OPENED_FACES> m_faceHandles;
-    FT_Face *m_cachedFaces{};
+    bx::HandleAllocT<MAX_OPENED_FACES> face_handles_;
+    FT_Face *cached_faces_{};
 
-    GlyphInfo m_blackGlyph{};
+    GlyphInfo black_glyph_{};
 
     //temporary buffer to raster glyph
-    uint8_t *m_buffer{};
+    uint8_t *buffer_{};
 };

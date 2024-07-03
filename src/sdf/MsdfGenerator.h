@@ -19,7 +19,7 @@ private:
     static int FtConicTo(const FT_Vector* control, const FT_Vector* to, void* user);
     static int FtCubicTo(const FT_Vector* control1, const FT_Vector* control2, const FT_Vector* to, void* user);
 public:
-    void BakeGlyphMSDF(CodePoint code_point, FT_Face face, uint8_t* output);
+    void BakeGlyphMsdf(CodePoint code_point, FT_Face face, uint8_t* output);
 };
 
 // used for decomposition of the glyph

@@ -6,25 +6,25 @@
 
 // logging
 
-void PrintError(const char* _error) {
-    std::cerr << "ERROR: " << _error << std::endl;
+void PrintError(const char* error) {
+    std::cerr << "ERROR: " << error << std::endl;
 }
 
-void PrintError(const std::string& _error) {
-    PrintError(_error.c_str());
+void PrintError(const std::string& error) {
+    PrintError(error.c_str());
 }
 
-void PrintInfo(const char* _info) {
-    std::cout << "INFO: " << _info << std::endl;
+void PrintInfo(const char* info) {
+    std::cout << "INFO: " << info << std::endl;
 }
 
-void PrintInfo(const std::string& _info) {
-    PrintInfo(_info.c_str());
+void PrintInfo(const std::string& info) {
+    PrintInfo(info.c_str());
 }
 
 // file reading 
 
-bx::AllocatorI* getDefaultAllocator() {
+bx::AllocatorI* GetDefaultAllocator() {
     BX_PRAGMA_DIAGNOSTIC_PUSH()
     BX_PRAGMA_DIAGNOSTIC_IGNORED_MSVC(4459) // warning C4459: declaration of "s_allocator" hides global declaration
     BX_PRAGMA_DIAGNOSTIC_IGNORED_CLANG_GCC("-Wshadow")
@@ -33,11 +33,11 @@ bx::AllocatorI* getDefaultAllocator() {
     BX_PRAGMA_DIAGNOSTIC_POP()
 }
 
-void* load(const bx::FilePath& filePath, uint32_t* size) {
-    const auto allocator = getDefaultAllocator();
+void* Load(const bx::FilePath& file_path, uint32_t* size) {
+    const auto allocator = GetDefaultAllocator();
     const auto reader = BX_NEW(allocator, bx::FileReader);
     
-    if (bx::open(reader, filePath) ) {
+    if (bx::open(reader, file_path) ) {
         auto actual_size = (uint32_t)bx::getSize(reader);
         void* data = bx::alloc(allocator, actual_size);
         bx::read(reader, data, actual_size, bx::ErrorAssert{});
@@ -49,7 +49,7 @@ void* load(const bx::FilePath& filePath, uint32_t* size) {
         return data;
     } else {
         std::string error_message = "Could not open file: ";
-        error_message += std::string(filePath.getCPtr()); 
+        error_message += std::string(file_path.getCPtr()); 
         PrintError(error_message.c_str());
     }
 

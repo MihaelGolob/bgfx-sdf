@@ -8,14 +8,14 @@
 // AtlasRegion struct represents a region in the atlas texture.
 struct AtlasRegion {
     enum Type {
-        TYPE_GRAY = 1, // 1 component
-        TYPE_BGRA8 = 4  // 4 components
+        TypeGray = 1, // 1 component
+        TypeBgra8 = 4  // 4 components
     };
 
-    [[nodiscard]] Type getType() const; 
-    [[nodiscard]] uint32_t getFaceIndex() const; 
-    [[nodiscard]] uint32_t getComponentIndex() const;
-    void setMask(Type _type, uint32_t _faceIndex, uint32_t _componentIndex); 
+    [[nodiscard]] Type GetType() const; 
+    [[nodiscard]] uint32_t GetFaceIndex() const; 
+    [[nodiscard]] uint32_t GetComponentIndex() const;
+    void SetMask(Type type, uint32_t face_index, uint32_t component_index); 
     
     uint16_t x, y;
     uint16_t width, height;

@@ -6,28 +6,28 @@
 
 enum class FontType {
     Bitmap, // normal
-    SDF, // signed distance field
-    MSDF, // multichannel signed distance field
+    Sdf, // signed distance field
+    Msdf, // multichannel signed distance field
 };
 
 struct FontInfo {
     /// The font height in pixel.
-    unsigned short pixelSize;
+    unsigned short pixel_size;
     /// Rendering type used for the font.
-    FontType fontType;
+    FontType font_type;
 
     /// The pixel extents above the baseline in pixels (typically positive).
     float ascender;
     /// The extents below the baseline in pixels (typically negative).
     float descender;
     /// The spacing in pixels between one row's descent and the next row's ascent.
-    float lineGap;
+    float line_gap;
     /// This field gives the maximum horizontal cursor advance for all glyphs in the font.
-    float maxAdvanceWidth;
+    float max_advance_width;
     /// The thickness of the under/hover/strike-trough line in pixels.
-    float underlineThickness;
+    float underline_thickness;
     /// The position of the underline relatively to the baseline.
-    float underlinePosition;
+    float underline_position;
 
     /// Scale to apply to glyph data.
     float scale;

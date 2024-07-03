@@ -11,99 +11,98 @@
 #include "../utilities.h"
 #include "../sdf/sdf.h"
 
-TrueTypeFont::TrueTypeFont() : m_font(), m_padding(6) { }
+TrueTypeFont::TrueTypeFont() : font_(), padding_(6) { }
 
-void TrueTypeFont::init(const uint8_t *_buffer, uint32_t _bufferSize, int32_t _fontIndex, uint32_t _pixelHeight, int16_t _padding) {
-    BX_WARN((_bufferSize > 256 && _bufferSize < 100000000), "(FontIndex %d) TrueType buffer size is suspicious (%d)", _fontIndex, _bufferSize)
-    BX_UNUSED(_bufferSize)
+void TrueTypeFont::Init(const uint8_t *buffer, uint32_t buffer_size, int32_t font_index, uint32_t pixel_height, int16_t padding) {
+    BX_WARN((buffer_size > 256 && buffer_size < 100000000), "(FontIndex %d) TrueType buffer size is suspicious (%d)", font_index, buffer_size)
+    BX_UNUSED(buffer_size)
 
-    int offset = stbtt_GetFontOffsetForIndex(_buffer, _fontIndex);
+    int offset = stbtt_GetFontOffsetForIndex(buffer, font_index);
 
-    stbtt_InitFont(&m_font, _buffer, offset);
+    stbtt_InitFont(&font_, buffer, offset);
 
-    m_scale = stbtt_ScaleForMappingEmToPixels(&m_font, (float) _pixelHeight);
+    scale_ = stbtt_ScaleForMappingEmToPixels(&font_, (float) pixel_height);
 
-    m_padding = _padding;
+    padding_ = padding;
 }
-#pragma clang diagnostic pop
 
-FontInfo TrueTypeFont::getFontInfo() {
+FontInfo TrueTypeFont::GetFontInfo() {
     int ascent;
     int descent;
-    int lineGap;
-    stbtt_GetFontVMetrics(&m_font, &ascent, &descent, &lineGap);
+    int line_gap;
+    stbtt_GetFontVMetrics(&font_, &ascent, &descent, &line_gap);
 
-    float scale = m_scale;
+    float scale = scale_;
 
     int x0, y0, x1, y1;
-    stbtt_GetFontBoundingBox(&m_font, &x0, &y0, &x1, &y1);
+    stbtt_GetFontBoundingBox(&font_, &x0, &y0, &x1, &y1);
 
-    FontInfo outFontInfo {};
-    outFontInfo.scale = 1.0f;
-    outFontInfo.ascender = bx::round(ascent * scale);
-    outFontInfo.descender = bx::round(descent * scale);
-    outFontInfo.lineGap = bx::round(lineGap * scale);
-    outFontInfo.maxAdvanceWidth = bx::round((y1 - y0) * scale);
+    FontInfo out_font_info {};
+    out_font_info.scale = 1.0f;
+    out_font_info.ascender = bx::round(ascent * scale);
+    out_font_info.descender = bx::round(descent * scale);
+    out_font_info.line_gap = bx::round(line_gap * scale);
+    out_font_info.max_advance_width = bx::round((y1 - y0) * scale);
 
-    outFontInfo.underlinePosition = (x1 - x0) * scale - ascent;
-    outFontInfo.underlineThickness = (x1 - x0) * scale / 24.f;
-    return outFontInfo;
+    out_font_info.underline_position = (x1 - x0) * scale - ascent;
+    out_font_info.underline_thickness = (x1 - x0) * scale / 24.f;
+    return out_font_info;
 }
 
-bool TrueTypeFont::bakeGlyphAlpha(CodePoint _codePoint, GlyphInfo &_glyphInfo, uint8_t *_outBuffer) {
-    int32_t ascent, descent, lineGap;
-    stbtt_GetFontVMetrics(&m_font, &ascent, &descent, &lineGap);
+bool TrueTypeFont::BakeGlyphAlpha(CodePoint code_point, GlyphInfo &glyph_info, uint8_t *out_buffer) {
+    int32_t ascent, descent, line_gap;
+    stbtt_GetFontVMetrics(&font_, &ascent, &descent, &line_gap);
 
     int32_t advance, lsb;
-    stbtt_GetCodepointHMetrics(&m_font, _codePoint, &advance, &lsb);
+    stbtt_GetCodepointHMetrics(&font_, code_point, &advance, &lsb);
 
-    const float scale = m_scale;
+    const float scale = scale_;
     int32_t x0, y0, x1, y1;
-    stbtt_GetCodepointBitmapBox(&m_font, _codePoint, scale, scale, &x0, &y0, &x1, &y1);
+    stbtt_GetCodepointBitmapBox(&font_, code_point, scale, scale, &x0, &y0, &x1, &y1);
 
     const int32_t ww = x1 - x0;
     const int32_t hh = y1 - y0;
 
-    _glyphInfo.offset_x = (float) x0;
-    _glyphInfo.offset_y = (float) y0;
-    _glyphInfo.width = (float) ww;
-    _glyphInfo.height = (float) hh;
-    _glyphInfo.advance_x = bx::round(((float) advance) * scale);
-    _glyphInfo.advance_y = bx::round(((float) (ascent + descent + lineGap)) * scale);
+    glyph_info.offset_x = (float) x0;
+    glyph_info.offset_y = (float) y0;
+    glyph_info.width = (float) ww;
+    glyph_info.height = (float) hh;
+    glyph_info.advance_x = bx::round(((float) advance) * scale);
+    glyph_info.advance_y = bx::round(((float) (ascent + descent + line_gap)) * scale);
 
     uint32_t bpp = 1;
-    uint32_t dstPitch = ww * bpp;
+    uint32_t dst_pitch = ww * bpp;
 
-    stbtt_MakeCodepointBitmap(&m_font, _outBuffer, ww, hh, dstPitch, scale, scale, _codePoint);
+    stbtt_MakeCodepointBitmap(&font_, out_buffer, ww, hh, dst_pitch, scale, scale, code_point);
 
     return true;
 }
 
-bool TrueTypeFont::BakeGlyphSDF(CodePoint _codePoint, GlyphInfo &_outGlyphInfo, uint8_t *_outBuffer) {
-    int32_t ascent, descent, lineGap;
-    stbtt_GetFontVMetrics(&m_font, &ascent, &descent, &lineGap);
+bool TrueTypeFont::BakeGlyphSdf(CodePoint code_point, GlyphInfo &out_glyph_info, uint8_t *out_buffer) {
+    int32_t ascent, descent, line_gap;
+    stbtt_GetFontVMetrics(&font_, &ascent, &descent, &line_gap);
 
     int32_t advance, lsb;
-    stbtt_GetCodepointHMetrics(&m_font, _codePoint, &advance, &lsb);
+    stbtt_GetCodepointHMetrics(&font_, code_point, &advance, &lsb);
 
-    const float scale = m_scale;
+    const float scale = scale_;
     int32_t x0, y0, x1, y1;
-    stbtt_GetCodepointBitmapBox(&m_font, _codePoint, scale, scale, &x0, &y0, &x1, &y1);
+    stbtt_GetCodepointBitmapBox(&font_, code_point, scale, scale, &x0, &y0, &x1, &y1);
 
-    const int32_t glyphWidth = x1 - x0;
-    const int32_t glyphHeight = y1 - y0;
+    const int32_t glyph_width = x1 - x0;
+    const int32_t glyph_height = y1 - y0;
 
-    _outGlyphInfo.offset_x = (float) x0;
-    _outGlyphInfo.offset_y = (float) y0;
-    _outGlyphInfo.width = (float) glyphWidth;
-    _outGlyphInfo.height = (float) glyphHeight;
-    _outGlyphInfo.advance_x = bx::round(((float) advance) * scale);
-    _outGlyphInfo.advance_y = bx::round(((float) (ascent + descent + lineGap)) * scale);
+    out_glyph_info.offset_x = (float) x0;
+    out_glyph_info.offset_y = (float) y0;
+    out_glyph_info.width = (float) glyph_width;
+    out_glyph_info.height = (float) glyph_height;
+    out_glyph_info.advance_x = bx::round(((float) advance) * scale);
+    out_glyph_info.advance_y = bx::round(((float) (ascent + descent + line_gap)) * scale);
 
     int bpp = 1;
-    int dstPitch = glyphWidth * bpp;
+    int dst_pitch = glyph_width * bpp;
 
-    stbtt_MakeCodepointBitmap(&m_font, _outBuffer, glyphWidth, glyphHeight, dstPitch, scale, scale, _codePoint);
+    stbtt_MakeCodepointBitmap(&font_, out_buffer, glyph_width, glyph_height, dst_pitch, scale, scale, code_point);
 
 #ifdef DEBUG_LOG_GLYPH_BUFFER
     std::cout << "Glyph " << (char)_codePoint << " buffer size is (" << glyphWidth << "," << glyphHeight << ")"  << std::endl;
@@ -121,23 +120,23 @@ bool TrueTypeFont::BakeGlyphSDF(CodePoint _codePoint, GlyphInfo &_outGlyphInfo, 
     }
 #endif
     
-    if (glyphWidth * glyphHeight <= 0) return false;
+    if (glyph_width * glyph_height <= 0) return false;
 
-    int newGlyphWidth = glyphWidth + 2 * m_padding;
-    int newGlyphHeight = glyphHeight + 2 * m_padding;
+    int new_glyph_width = glyph_width + 2 * padding_;
+    int new_glyph_height = glyph_height + 2 * padding_;
 
 //    BX_ASSERT(newGlyphHeight * newGlyphWidth < 128 * 128, "Glyph buffer overflow (size %d)", newGlyphHeight * newGlyphWidth)
 
-    auto buffer = (uint8_t*)malloc(newGlyphHeight * newGlyphWidth * sizeof(uint8_t));
-    bx::memSet(buffer, 0, newGlyphHeight * newGlyphWidth * sizeof(uint8_t));
+    auto buffer = (uint8_t*)malloc(new_glyph_height * new_glyph_width * sizeof(uint8_t));
+    bx::memSet(buffer, 0, new_glyph_height * new_glyph_width * sizeof(uint8_t));
 
     // copy the original glyph to the center of the new buffer
-    for (int i = m_padding; i < newGlyphHeight - m_padding; i++) {
-        bx::memCopy(buffer + i * newGlyphWidth + m_padding, _outBuffer + (i - m_padding) * glyphWidth, glyphWidth);
+    for (int i = padding_; i < new_glyph_height - padding_; i++) {
+        bx::memCopy(buffer + i * new_glyph_width + padding_, out_buffer + (i - padding_) * glyph_width, glyph_width);
     }
 
-    if (!BuildSignedDistanceField(_outBuffer, buffer, newGlyphWidth, newGlyphHeight, std::min(m_padding, m_padding))) {
-        BX_ASSERT(false, "Failed to build SDF for glyph %c", _codePoint)
+    if (!BuildSignedDistanceField(out_buffer, buffer, new_glyph_width, new_glyph_height, std::min(padding_, padding_))) {
+        BX_ASSERT(false, "Failed to build SDF for glyph %c", code_point)
     }
 
 #ifdef DEBUG_LOG_SDF_BUFFER
@@ -158,10 +157,10 @@ bool TrueTypeFont::BakeGlyphSDF(CodePoint _codePoint, GlyphInfo &_outGlyphInfo, 
 
     free(buffer);
 
-    _outGlyphInfo.offset_x -= (float)m_padding;
-    _outGlyphInfo.offset_y -= (float)m_padding;
-    _outGlyphInfo.width = (float)newGlyphWidth;
-    _outGlyphInfo.height = (float)newGlyphHeight;
+    out_glyph_info.offset_x -= (float)padding_;
+    out_glyph_info.offset_y -= (float)padding_;
+    out_glyph_info.width = (float)new_glyph_width;
+    out_glyph_info.height = (float)new_glyph_height;
     
     return true;
 }

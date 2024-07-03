@@ -43,15 +43,15 @@ static const uint8_t s_utf8d[364] =
 	12,36,12,12,12,12,12,12,12,12,12,12
 };
 
-uint32_t utf8_decode(uint32_t* _state, uint32_t* _codep, uint8_t _ch)
+uint32_t Utf8Decode(uint32_t* state, uint32_t* codep, uint8_t ch)
 {
-	uint32_t byte = _ch;
+	uint32_t byte = ch;
 	uint32_t type = s_utf8d[byte];
 
-	*_codep = (*_state != UTF8_ACCEPT) ?
-			  (byte & 0x3fu) | (*_codep << 6) :
+	*codep = (*state != UTF8_ACCEPT) ?
+			  (byte & 0x3fu) | (*codep << 6) :
 			  (0xff >> type) & (byte);
 
-	*_state = s_utf8d[256 + *_state + type];
-	return *_state;
+	*state = s_utf8d[256 + *state + type];
+	return *state;
 }

@@ -6,7 +6,7 @@
 /// A structure that describe a glyph.
 struct GlyphInfo {
     /// Index for faster retrieval.
-    int glyphIndex;
+    int glyph_index;
 
     /// Glyph's width in pixels.
     float width;
@@ -34,10 +34,10 @@ struct GlyphInfo {
     float advance_y;
 
     /// Amount to scale a bitmap image glyph.
-    float bitmapScale;
+    float bitmap_scale;
 
     /// Region index in the atlas storing textures.
-    unsigned short regionIndex;
+    unsigned short region_index;
 };
 
 // Glyph metrics:

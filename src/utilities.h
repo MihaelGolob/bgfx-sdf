@@ -9,19 +9,19 @@
 #include <iostream>
 #include <string>
 
-void PrintError(const char* _error);
-void PrintError(const std::string& _error);
-void PrintInfo(const char* _info);
-void PrintInfo(const std::string& _info);
+void PrintError(const char* error);
+void PrintError(const std::string& error);
+void PrintInfo(const char* info);
+void PrintInfo(const std::string& info);
 
 class FileReader : public bx::FileReader {
     typedef bx::FileReader super;
 
 public:
-    bool open(const bx::FilePath& filePath, bx::Error* _err) override {
-        return super::open(filePath, _err);
+    bool open(const bx::FilePath& file_path, bx::Error* err) override {
+        return super::open(file_path, err);
     }
 };
 
-bx::AllocatorI* getDefaultAllocator();
-void* load(const bx::FilePath& filePath, uint32_t* size);
+bx::AllocatorI* GetDefaultAllocator();
+void* Load(const bx::FilePath& file_path, uint32_t* size);

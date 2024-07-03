@@ -17,19 +17,19 @@ public:
 };
 
 class LinearSegment : public EdgeSegment {
-    Vector2 points[2];
+    Vector2 points_[2];
 public:
     LinearSegment(const Vector2 &p0, const Vector2 &p1);
 };
 
 class QuadraticSegment : public EdgeSegment {
-    Vector2 points[3];
+    Vector2 points_[3];
 public:
     QuadraticSegment(const Vector2 &p0, const Vector2 &p1, const Vector2 &p2);
 };
 
 class CubicSegment : public EdgeSegment {
-    Vector2 points[4];
+    Vector2 points_[4];
 public:
     CubicSegment(const Vector2 &p0, const Vector2 &p1, const Vector2 &p2, const Vector2 &p3);
 };
