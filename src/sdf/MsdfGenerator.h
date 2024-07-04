@@ -20,11 +20,14 @@ private:
     static int FtCubicTo(const FT_Vector* control1, const FT_Vector* control2, const FT_Vector* to, void* user);
     
 public:
-    void BakeGlyphMsdf(CodePoint code_point, GlyphInfo &out_glyph_info, FT_Face face, uint8_t* output) const;
+    void Init(FT_Face face, uint32_t pixel_height, int16_t padding);
+    
+    void BakeGlyphMsdf(CodePoint code_point, GlyphInfo &out_glyph_info, uint8_t* output) const;
     
 private:
-    float scale_ = 0;
+    float scale_ = 1;
     float padding_ = 0;
+    FT_Face face_;
 };
 
 // used for decomposition of the glyph

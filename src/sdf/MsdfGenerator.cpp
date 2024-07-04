@@ -6,16 +6,32 @@
 #include "MsdfGenerator.h"
 #include "../utilities.h"
 
-void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &out_glyph_info, FT_Face face, uint8_t *output) const {
-    out_glyph_info.offset_x = face->bbox.xMin;
-    out_glyph_info.offset_y = face->bbox.yMin;
-    out_glyph_info.width = face->bbox.xMax - face->bbox.xMin;
-    out_glyph_info.height = face->bbox.yMax - face->bbox.yMin;
-    out_glyph_info.advance_x = bx::round(face->glyph->advance.x * scale_);
-    out_glyph_info.advance_y = bx::round(face->glyph->advance.y * scale_);
-    
-    auto shape = ParseFtFace(code_point, face);
+void MsdfGenerator::Init(FT_Face face, uint32_t pixel_height, int16_t padding) {
+    face_ = face;
+    scale_ = pixel_height / (float)face->units_per_EM;
+    padding_ = padding;
+}
+
+void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &out_glyph_info, uint8_t *output) const {
+    auto shape = ParseFtFace(code_point, face_);
     shape.ApplyEdgeColoring(3.0);
+    
+    // todo: fix these metrics!
+    out_glyph_info.offset_x = 0;
+    out_glyph_info.offset_y = -10; 
+    out_glyph_info.width = face_->glyph->metrics.width * scale_;
+    out_glyph_info.height = face_->glyph->metrics.height * scale_;
+    out_glyph_info.advance_x = bx::round(face_->glyph->advance.x * scale_);
+    out_glyph_info.advance_y = bx::round(face_->glyph->advance.y * scale_);
+   
+    int width = out_glyph_info.width;
+    int height = out_glyph_info.height;
+    
+    for (int y = 0; y < width; y++) {
+        for (int x = 0; x < height; x++) {
+            output[y * width + x] = 255;
+        }
+    }
 }
 
 Shape MsdfGenerator::ParseFtFace(CodePoint code_point, FT_Face face) {

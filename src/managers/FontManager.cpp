@@ -96,6 +96,10 @@ FontHandle FontManager::CreateFontByPixelSize(TrueTypeHandle ttf_handle, uint32_
     font.cached_glyphs.clear();
     font.master_font_handle.idx = bx::kInvalidHandle;
     font.face_handle = font_type == FontType::Msdf ? CreateFace(&cached_files_[ttf_handle.idx]) : FontFaceHandle{bx::kInvalidHandle};
+    
+    if (font_type == FontType::Msdf) {
+        msdf_generator_.Init(cached_faces_[font.face_handle.idx], pixel_size, glyph_padding);
+    }
 
     FontHandle handle = {font_idx};
     return handle;
@@ -196,7 +200,7 @@ bool FontManager::PreloadGlyph(FontHandle handle, CodePoint code_point) {
                 font.true_type_font->BakeGlyphSdf(code_point, glyph_info, buffer_);
                 break;
             case FontType::Msdf:
-                msdf_generator_.BakeGlyphMsdf(code_point, glyph_info, cached_faces_[font.face_handle.idx], buffer_);
+                msdf_generator_.BakeGlyphMsdf(code_point, glyph_info, buffer_);
                 break;
             default:
                 BX_ASSERT(false, "TextureType not supported yet")
