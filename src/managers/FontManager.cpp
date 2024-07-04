@@ -191,6 +191,7 @@ bool FontManager::PreloadGlyph(FontHandle handle, CodePoint code_point) {
 
     if (font.true_type_font != nullptr) {
         GlyphInfo glyph_info {};
+        AtlasRegion::Type bitmap_type = AtlasRegion::TypeGray;
 
         switch (font.font_info.font_type) {
             case FontType::Bitmap:
@@ -201,12 +202,13 @@ bool FontManager::PreloadGlyph(FontHandle handle, CodePoint code_point) {
                 break;
             case FontType::Msdf:
                 msdf_generator_.BakeGlyphMsdf(code_point, glyph_info, buffer_);
+//                bitmap_type = AtlasRegion::TypeBgra8; todo: support 3 channel textures
                 break;
             default:
                 BX_ASSERT(false, "TextureType not supported yet")
         }
 
-        AddBitmap(glyph_info, buffer_);
+        AddBitmap(glyph_info, buffer_, bitmap_type);
 
         glyph_info.advance_x = (glyph_info.advance_x * font_info.scale);
         glyph_info.advance_y = (glyph_info.advance_y * font_info.scale);
@@ -314,7 +316,7 @@ const GlyphInfo *FontManager::GetGlyphInfo(FontHandle handle, CodePoint code_poi
     return &it->second;
 }
 
-bool FontManager::AddBitmap(GlyphInfo &glyph_info, const uint8_t *data) {
-    glyph_info.region_index = atlas_->AddRegion((uint16_t) bx::ceil(glyph_info.width), (uint16_t) bx::ceil(glyph_info.height), data, AtlasRegion::TypeGray);
+bool FontManager::AddBitmap(GlyphInfo &glyph_info, const uint8_t *data, const AtlasRegion::Type bitmap_type) {
+    glyph_info.region_index = atlas_->AddRegion((uint16_t) bx::ceil(glyph_info.width), (uint16_t) bx::ceil(glyph_info.height), data, bitmap_type);
     return true;
 }
