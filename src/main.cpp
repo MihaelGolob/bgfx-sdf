@@ -27,6 +27,7 @@ InputManager* input_manager_;
 
 // fonts
 TrueTypeHandle font_file_;
+FontHandle original_font_;
 FontHandle bitmap_font_;
 FontHandle bitmap_scaled_font_;
 FontHandle sdf_font_;
@@ -34,6 +35,7 @@ FontHandle sdf_scaled_font_;
 FontHandle msdf_font_;
 FontHandle msdf_scaled_font_;
 
+TextBufferHandle static_original_text_buffer_;
 TextBufferHandle static_bitmap_text_buffer_;
 TextBufferHandle static_sdf_text_buffer_;
 TextBufferHandle static_msdf_text_buffer_;
@@ -72,6 +74,8 @@ void InitFonts() {
     
     font_file_ = font_manager_->CreateTtf("../assets/fonts/droidsans.ttf");
     
+    original_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 64, FontType::Bitmap, 0);
+    
     bitmap_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::Bitmap, 0);
     bitmap_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(bitmap_font_, 64); // create scaled fonts to show the power of SDF
     
@@ -81,6 +85,7 @@ void InitFonts() {
     msdf_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::Msdf, 8);
     msdf_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(msdf_font_, 64);
     
+    static_original_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Bitmap, BufferType::Static);
     static_bitmap_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Bitmap, BufferType::Static);
     static_sdf_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Sdf, BufferType::Static);
     static_msdf_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Sdf, BufferType::Static);
@@ -155,15 +160,18 @@ void SetViewTransform() {
 void DrawStaticText() {
     text_buffer_manager_->ClearTextBuffer(static_bitmap_text_buffer_);
     text_buffer_manager_->ClearTextBuffer(static_sdf_text_buffer_);
-    
+
+    // draw original text
+    text_buffer_manager_->SetPenPosition(static_original_text_buffer_, 10.0f, 10.0f);
+    text_buffer_manager_->AppendText(static_original_text_buffer_, original_font_, "Original font rendered from 64px");
     // draw static bitmap text
-    text_buffer_manager_->SetPenPosition(static_bitmap_text_buffer_, 10.0f, 10.0f);
+    text_buffer_manager_->SetPenPosition(static_bitmap_text_buffer_, 10.0f, 80.0f);
     text_buffer_manager_->AppendText(static_bitmap_text_buffer_, bitmap_scaled_font_, "Bitmap font scaled from 16px to 64px");
     // draw static sdf text
-    text_buffer_manager_->SetPenPosition(static_sdf_text_buffer_, 10.0f, 80.0f);
+    text_buffer_manager_->SetPenPosition(static_sdf_text_buffer_, 10.0f, 150.0f);
     text_buffer_manager_->AppendText(static_sdf_text_buffer_, sdf_scaled_font_, "SDF font scaled from 16px to 64px");
     // draw static msdf text
-    text_buffer_manager_->SetPenPosition(static_msdf_text_buffer_, 10.0f, 150.0f);
+    text_buffer_manager_->SetPenPosition(static_msdf_text_buffer_, 10.0f, 220.0f);
     text_buffer_manager_->AppendText(static_msdf_text_buffer_, msdf_scaled_font_, "MSDF font scaled from 16px to 64px");
 }
 
@@ -175,13 +183,14 @@ void Update() {
         
         // draw dynamically typed text
         text_buffer_manager_->ClearTextBuffer(dynamic_text_buffer_);
-        text_buffer_manager_->SetPenPosition(dynamic_text_buffer_, 10.0f, 220.0f);
+        text_buffer_manager_->SetPenPosition(dynamic_text_buffer_, 10.0f, 290.0f);
         text_buffer_manager_->AppendText(dynamic_text_buffer_, sdf_scaled_font_, dynamic_text_.c_str());
         
         SetViewTransform();
 
         // draw text buffers
         text_buffer_manager_->SubmitTextBuffer(dynamic_text_buffer_, 0);
+        text_buffer_manager_->SubmitTextBuffer(static_original_text_buffer_, 0);
         text_buffer_manager_->SubmitTextBuffer(static_bitmap_text_buffer_, 0);
         text_buffer_manager_->SubmitTextBuffer(static_msdf_text_buffer_, 0);
         text_buffer_manager_->SubmitTextBuffer(static_sdf_text_buffer_, 0);
@@ -198,6 +207,7 @@ void Shutdown() {
     font_manager_->DestroyTtf(font_file_);
     
     // destroy font handles
+    font_manager_->DestroyFont(original_font_);
     font_manager_->DestroyFont(bitmap_font_);
     font_manager_->DestroyFont(bitmap_scaled_font_);
     font_manager_->DestroyFont(sdf_font_);
