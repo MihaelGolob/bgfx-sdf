@@ -17,8 +17,13 @@ public:
     
     virtual ~EdgeSegment() = default;
     
-    [[nodiscard]] virtual float SignedDistance(const Vector2& p, double parameter) const = 0;
-    [[nodiscard]] virtual float PseudoDistance(float distance, const Vector2&p, double parameter) const = 0;
+    [[nodiscard]] virtual float Distance(const Vector2& p, double& t) const = 0;
+    [[nodiscard]] virtual float PseudoDistance(float distance, const Vector2&p, double& t) const = 0;
+    
+    [[nodiscard]] virtual float SignedDistance(const Vector2& p, double& t) const;
+    
+    [[nodiscard]] virtual Vector2 GetPoint(double t) const = 0;
+    [[nodiscard]] virtual Vector2 GetDirection(double t) const = 0;
     
     EdgeColor color = EdgeColor::White;
 };
@@ -28,9 +33,11 @@ class LinearSegment : public EdgeSegment {
 public:
     LinearSegment(const Vector2 &p0, const Vector2 &p1);
     
-    // todo: implement
-    [[nodiscard]] float SignedDistance(const Vector2 &p, double parameter) const override {return 0;}
-    [[nodiscard]] float PseudoDistance(float distance, const Vector2&p, double parameter) const override {return 0;}
+    [[nodiscard]] float Distance(const Vector2 &p, double& t) const override;
+    [[nodiscard]] float PseudoDistance(float distance, const Vector2&p, double& t) const override;
+    
+    [[nodiscard]] Vector2 GetPoint(double t) const override;
+    [[nodiscard]] Vector2 GetDirection(double t) const override;
 };
 
 class QuadraticSegment : public EdgeSegment {
@@ -38,9 +45,11 @@ class QuadraticSegment : public EdgeSegment {
 public:
     QuadraticSegment(const Vector2 &p0, const Vector2 &p1, const Vector2 &p2);
     
-    // todo: implement
-    [[nodiscard]] float SignedDistance(const Vector2 &p, double parameter) const override {return 0;}
-    [[nodiscard]] float PseudoDistance(float distance, const Vector2&p, double parameter) const override {return 0;}
+    [[nodiscard]] float Distance(const Vector2 &p, double& t) const override;
+    [[nodiscard]] float PseudoDistance(float distance, const Vector2&p, double& t) const override;
+    
+    [[nodiscard]] Vector2 GetPoint(double t) const override;
+    [[nodiscard]] Vector2 GetDirection(double t) const override;
 };
 
 class CubicSegment : public EdgeSegment {
@@ -48,7 +57,9 @@ class CubicSegment : public EdgeSegment {
 public:
     CubicSegment(const Vector2 &p0, const Vector2 &p1, const Vector2 &p2, const Vector2 &p3);
     
-    // todo: implement
-    [[nodiscard]] float SignedDistance(const Vector2 &p, double parameter) const override {return 0;} 
-    [[nodiscard]] float PseudoDistance(float distance, const Vector2&p, double parameter) const override {return 0;}
+    [[nodiscard]] float Distance(const Vector2 &p, double& t) const override;
+    [[nodiscard]] float PseudoDistance(float distance, const Vector2&p, double& t) const override;
+    
+    [[nodiscard]] Vector2 GetPoint(double t) const override;
+    [[nodiscard]] Vector2 GetDirection(double t) const override;
 };

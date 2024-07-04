@@ -15,6 +15,9 @@ public:
     
     // math operators
     [[nodiscard]] float Cross(const Vector2& other) const;
+    [[nodiscard]] double Norm2() const;
+    [[nodiscard]] double Norm() const;
+    Vector2 Normalize();
     
     // operator definitions
     bool operator== (const Vector2& other) const;
@@ -22,6 +25,7 @@ public:
     Vector2 operator+ (const Vector2& other) const;
     Vector2 operator- (const Vector2& other) const;
     Vector2 operator* (float&& scalar) const;
+    double operator* (const Vector2& other) const;
 };
 
 // A vector can also represent just a point in 2D space

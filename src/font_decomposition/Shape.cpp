@@ -10,6 +10,7 @@ Contour& Shape::AddEmptyContour() {
 }
 
 void Shape::ApplyEdgeColoring(float max_angle) {
+    // todo: make this more sophisticated
     for (auto& c : contours) {
         auto current_color = EdgeColor::White;
         if (c.edges.size() > 1) current_color = EdgeColor::Magenta;
