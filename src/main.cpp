@@ -216,6 +216,7 @@ void Shutdown() {
     font_manager_->DestroyFont(msdf_scaled_font_);
     
     // destroy text buffer handles
+    text_buffer_manager_->DestroyTextBuffer(static_original_text_buffer_);
     text_buffer_manager_->DestroyTextBuffer(static_bitmap_text_buffer_);
     text_buffer_manager_->DestroyTextBuffer(static_sdf_text_buffer_);
     text_buffer_manager_->DestroyTextBuffer(static_msdf_text_buffer_);
