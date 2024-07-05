@@ -22,9 +22,9 @@ EdgeSegment *EdgeSegment::CreateEdgeSegment(const Vector2 &p0, const Vector2 &p1
     return new CubicSegment(p0, p1, p2, p3);
 }
 
-float EdgeSegment::SignedDistance(const Vector2 &p, double &t) const {
-    auto distance = Distance(p, t);
-    auto sign = (GetPoint(t) - p).Cross(GetDirection(t)) > 0 ? 1 : -1;
+double EdgeSegment::SignedDistance(const Vector2 &p, double &t) const {
+    const auto distance = Distance(p, t);
+    const auto sign = (GetPoint(t) - p).Cross(GetDirection(t)) > 0 ? 1 : -1;
     return distance * sign;
 }
 
@@ -32,14 +32,14 @@ float EdgeSegment::SignedDistance(const Vector2 &p, double &t) const {
 // linear segment -----------------------------------
 LinearSegment::LinearSegment(const Vector2 &p0, const Vector2 &p1) : points_{p0, p1} {}
 
-float LinearSegment::Distance(const Vector2 &p, double &t) const {
+double LinearSegment::Distance(const Vector2 &p, double &t) const {
     t = (p - points_[0]) * (points_[1] - points_[0]) / (points_[1] - points_[0]).Norm2();
     t = std::clamp(t, 0.0, 1.0);
 
     return (GetPoint(t) - p).Norm();
 }
 
-float LinearSegment::PseudoDistance(float distance, const Vector2 &p, double& t) const {
+double LinearSegment::PseudoDistance(float distance, const Vector2 &p, double& t) const {
     t = (p - points_[0]) * (points_[1] - points_[0]) / (points_[1] - points_[0]).Norm2();
     
     return (GetPoint(t) - p).Norm();
@@ -56,7 +56,7 @@ Vector2 LinearSegment::GetDirection(double t) const {
 // quadratic segment --------------------------------
 QuadraticSegment::QuadraticSegment(const Vector2 &p0, const Vector2 &p1, const Vector2 &p2) : points_{p0, p1, p2} {}
 
-float QuadraticSegment::PseudoDistance(float distance, const Vector2 &p, double& t) const {
+double QuadraticSegment::PseudoDistance(float distance, const Vector2 &p, double& t) const {
     // todo: implement
     return 0;
 }
@@ -67,7 +67,7 @@ Vector2 QuadraticSegment::GetPoint(double t) const {
            + (points_[2] - points_[1] * 2 + points_[0]) * t * t;
 }
 
-float QuadraticSegment::Distance(const Vector2 &p, double &t) const {
+double QuadraticSegment::Distance(const Vector2 &p, double &t) const {
     // todo: implement
     return 0;
 }
@@ -81,7 +81,7 @@ Vector2 QuadraticSegment::GetDirection(double t) const {
 // cubic segment ------------------------------------
 CubicSegment::CubicSegment(const Vector2 &p0, const Vector2 &p1, const Vector2 &p2, const Vector2 &p3) : points_{p0, p1, p2, p3} {}
 
-float CubicSegment::PseudoDistance(float distance, const Vector2 &p, double& t) const {
+double CubicSegment::PseudoDistance(float distance, const Vector2 &p, double& t) const {
     // todo: implement
     return 0;
 }
@@ -93,7 +93,7 @@ Vector2 CubicSegment::GetPoint(double t) const {
            + (points_[3] - points_[2] * 3 + points_[1] * 3 - points_[0]) * t * t * t;
 }
 
-float CubicSegment::Distance(const Vector2 &p, double &t) const {
+double CubicSegment::Distance(const Vector2 &p, double &t) const {
     // todo: implement
     return 0;
 }
