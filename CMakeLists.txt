@@ -58,6 +58,7 @@ target_compile_options(bgfx-sdf PUBLIC
 add_subdirectory(libs/bgfx.cmake)
 add_subdirectory(libs/glfw)
 add_subdirectory(libs/freetype)
+add_subdirectory(tests)
 
 #add_definitions(STB_TRUE_TYPE_IMPLEMENTATION)
 

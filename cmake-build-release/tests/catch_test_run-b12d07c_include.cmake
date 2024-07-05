@@ -1,0 +1,5 @@
+if(EXISTS "C:/Users/Mihael/Documents/bgfx-sdf/cmake-build-release/tests/catch_test_run-b12d07c_tests.cmake")
+  include("C:/Users/Mihael/Documents/bgfx-sdf/cmake-build-release/tests/catch_test_run-b12d07c_tests.cmake")
+else()
+  add_test(catch_test_run_NOT_BUILT-b12d07c catch_test_run_NOT_BUILT-b12d07c)
+endif()
