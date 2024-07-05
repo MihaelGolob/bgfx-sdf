@@ -5,8 +5,8 @@ project(bgfx-sdf)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
 # find src/* -name "*.cpp" -printf "%p\n"
-add_executable(bgfx-sdf 
-		src/main.cpp
+add_library(bgfx-sdf STATIC
+#		src/main.cpp
 		src/managers/FontManager.cpp
 		src/managers/FontManager.h
 		src/font_processing/CubeAtlas.cpp
@@ -59,6 +59,7 @@ add_subdirectory(libs/bgfx.cmake)
 add_subdirectory(libs/glfw)
 add_subdirectory(libs/freetype)
 add_subdirectory(tests)
+add_subdirectory(application)
 
 #add_definitions(STB_TRUE_TYPE_IMPLEMENTATION)
 
