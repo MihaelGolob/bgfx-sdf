@@ -4,6 +4,7 @@
 
 #include <cmath>
 #include "Vector2.h"
+#include "../utilities.h"
 
 Vector2::Vector2(const FT_Vector v, float scale) {
     x = v.x * scale;
@@ -51,6 +52,11 @@ double Vector2::Length() const {
 
 Vector2 Vector2::Normalize() {
     double norm = Length();
+    if (norm == 0) {
+        PrintError("Trying to normalize a zero vector!");
+        return *this;
+    }
+    
     x /= norm;
     y /= norm;
     
