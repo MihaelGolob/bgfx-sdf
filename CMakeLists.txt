@@ -46,6 +46,7 @@ add_executable(bgfx-sdf
 		src/font_decomposition/EdgeSegment.cpp
 		src/font_decomposition/EdgeHolder.cpp
 		src/font_decomposition/EdgeHolder.h
+		src/helper/EquationSolver.h
 )
 
 target_compile_features(bgfx-sdf PUBLIC cxx_std_17)

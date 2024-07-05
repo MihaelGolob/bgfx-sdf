@@ -15,8 +15,8 @@ public:
     
     // math operators
     [[nodiscard]] float Cross(const Vector2& other) const;
-    [[nodiscard]] double Norm2() const;
-    [[nodiscard]] double Norm() const;
+    [[nodiscard]] double Length2() const;
+    [[nodiscard]] double Length() const;
     Vector2 Normalize();
     
     // operator definitions

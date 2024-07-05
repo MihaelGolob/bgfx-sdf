@@ -4,7 +4,9 @@
 
 #include <algorithm>
 #include <cmath>
+#include <vector>
 #include "EdgeSegment.h"
+#include "../helper/EquationSolver.h"
 
 // edge segment -------------------------------------
 EdgeSegment *EdgeSegment::CreateEdgeSegment(const Vector2 &p0, const Vector2 &p1) {
@@ -16,8 +18,7 @@ EdgeSegment *EdgeSegment::CreateEdgeSegment(const Vector2 &p0, const Vector2 &p1
     return new QuadraticSegment(p0, p1, p2);
 }
 
-EdgeSegment *
-EdgeSegment::CreateEdgeSegment(const Vector2 &p0, const Vector2 &p1, const Vector2 &p2, const Vector2 &p3) {
+EdgeSegment *EdgeSegment::CreateEdgeSegment(const Vector2 &p0, const Vector2 &p1, const Vector2 &p2, const Vector2 &p3) {
     if ((p1 - p0).Cross(p2 - p1) == 0 && (p2 - p1).Cross(p3 - p2) == 0) return new LinearSegment(p0, p3);
     if (p1 * 1.5 - p0 * 0.5 == p2 * 1.5 - p3 * 0.5) return new QuadraticSegment(p0, p2 - p1, p3);
     return new CubicSegment(p0, p1, p2, p3);
@@ -34,16 +35,10 @@ double EdgeSegment::SignedDistance(const Vector2 &p, double &t) const {
 LinearSegment::LinearSegment(const Vector2 &p0, const Vector2 &p1) : points_{p0, p1} {}
 
 double LinearSegment::Distance(const Vector2 &p, double &t) const {
-    t = (p - points_[0]) * (points_[1] - points_[0]) / (points_[1] - points_[0]).Norm2();
+    t = (p - points_[0]) * (points_[1] - points_[0]) / (points_[1] - points_[0]).Length2();
     t = std::clamp(t, 0.0, 1.0);
 
-    return (GetPoint(t) - p).Norm();
-}
-
-double LinearSegment::PseudoDistance(float distance, const Vector2 &p, double &t) const {
-    t = (p - points_[0]) * (points_[1] - points_[0]) / (points_[1] - points_[0]).Norm2();
-
-    return (GetPoint(t) - p).Norm();
+    return (GetPoint(t) - p).Length();
 }
 
 Vector2 LinearSegment::GetPoint(double t) const {
@@ -57,14 +52,31 @@ Vector2 LinearSegment::GetDirection(double t) const {
 // quadratic segment --------------------------------
 QuadraticSegment::QuadraticSegment(const Vector2 &p0, const Vector2 &p1, const Vector2 &p2) : points_{p0, p1, p2} {}
 
-double QuadraticSegment::PseudoDistance(float distance, const Vector2 &p, double &t) const {
-    // todo: implement
-    return 0;
-}
-
 double QuadraticSegment::Distance(const Vector2 &p, double &t) const {
-    // todo: implement
-    return 0;
+    // helper variables
+    const auto p0 = p - points_[0];
+    const auto p1 = points_[1] - points_[0];
+    const auto p2 = points_[2] - points_[1] * 2 + points_[0];
+    
+    // equation coefficients
+    const auto a = p2.Length2();
+    const auto b = 3 * (p1 *(p2));
+    const auto c = 2 * p1.Length2() - p2*p0;
+    const auto d = -(p1 * p0);
+    
+    std::vector<double> roots = SolveCubicEquation(a, b, c, d);
+    
+    // find the closest root
+    double min_distance = INFINITY;
+    for (const auto root : roots) {
+        const auto dist = (GetPoint(root) - p).Length();
+        if (dist < min_distance) {
+            min_distance = dist;
+            t = root;
+        }
+    }
+    
+    return min_distance;
 }
 
 Vector2 QuadraticSegment::GetPoint(double t) const {
@@ -83,9 +95,34 @@ Vector2 QuadraticSegment::GetDirection(double t) const {
 // cubic segment ------------------------------------
 CubicSegment::CubicSegment(const Vector2 &p0, const Vector2 &p1, const Vector2 &p2, const Vector2 &p3) : points_{p0, p1, p2, p3} {}
 
-double CubicSegment::PseudoDistance(float distance, const Vector2 &p, double &t) const {
-    // todo: implement
-    return 0;
+double CubicSegment::Distance(const Vector2 &p, double &t) const {
+    // helper variables
+    const auto p0 = p - points_[0];
+    const auto p1 = points_[1] - points_[0];
+    const auto p2 = points_[2] - points_[1] * 2 + points_[0];
+    const auto p3 = points_[3] - points_[2] * 3 + points_[1] * 3 - points_[0];
+
+    // equation coefficients
+    const auto a = p3.Length2();
+    const auto b = 5 * (p2 * p3);
+    const auto c = 4 * (p1 * p3) + 6 * (p2.Length2());
+    const auto d = 9 * (p1 * p2) - p2 * p0;
+    const auto e = 3 * p1.Length2() - p2 * p0;
+    const auto f = -(p1 * p0);
+
+    std::vector<double> roots = SolveQuinticEquation(a, b, c, d, e, f);
+
+    // find the closest root
+    double min_distance = INFINITY;
+    for (const auto root : roots) {
+        const auto dist = (GetPoint(root) - p).Length();
+        if (dist < min_distance) {
+            min_distance = dist;
+            t = root;
+        }
+    }
+
+    return min_distance;
 }
 
 Vector2 CubicSegment::GetPoint(double t) const {
@@ -93,11 +130,6 @@ Vector2 CubicSegment::GetPoint(double t) const {
            + (points_[1] - points_[0]) * 3 * t
            + (points_[2] - points_[1] * 2 + points_[0]) * 3 * t * t
            + (points_[3] - points_[2] * 3 + points_[1] * 3 - points_[0]) * t * t * t;
-}
-
-double CubicSegment::Distance(const Vector2 &p, double &t) const {
-    // todo: implement
-    return 0;
 }
 
 Vector2 CubicSegment::GetDirection(double t) const {

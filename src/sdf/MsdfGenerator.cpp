@@ -36,7 +36,7 @@ void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &out_glyph_inf
     }
 }
 
-std::array<float, 3> MsdfGenerator::GeneratePixel(const Shape &shape, const Vector2 &p) {
+std::array<double, 3> MsdfGenerator::GeneratePixel(const Shape &shape, const Vector2 &p) {
     // struct to hold the closest edge for each color
     struct {
         float min_distance = INFINITY;

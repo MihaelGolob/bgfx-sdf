@@ -41,16 +41,16 @@ double Vector2::operator*(const Vector2 &other) const {
     return x * other.x + y * other.y;
 }
 
-double Vector2::Norm2() const {
+double Vector2::Length2() const {
     return x * x + y * y;
 }
 
-double Vector2::Norm() const {
-    return sqrt(Norm2());
+double Vector2::Length() const {
+    return sqrt(Length2());
 }
 
 Vector2 Vector2::Normalize() {
-    double norm = Norm();
+    double norm = Length();
     x /= norm;
     y /= norm;
     
