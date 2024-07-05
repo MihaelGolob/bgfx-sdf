@@ -1,6 +1,7 @@
 ﻿//
 // Created by MihaelGolob on 13. 05. 2024.
 //
+// based on https://github.com/generic-library/edtaa3/blob/master/edtaa3func.c
 
 #pragma once
 
@@ -88,7 +89,7 @@ bool CheckNeighborDistances(SdfPoint* points, int neighbor_index, SdfPoint &curr
     return false;
 }
 
-// use the sweep & update algorithm to build anti-aliased signed distance field
+// use the sweep & update algorithm to build anti-aliased signed distance d
 bool BuildSignedDistanceField(uint8_t* out_buffer, uint8_t* glyph_bitmap, int width, int height, int spread = 6) {
     auto points = (SdfPoint*)malloc(width * height * sizeof(SdfPoint));
     if (!points) return false;
