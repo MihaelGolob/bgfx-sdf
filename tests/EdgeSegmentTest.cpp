@@ -58,21 +58,21 @@ TEST_CASE("EdgeSegment", "[EdgeSegment]") {
                 REQUIRE(distance == Approx(1.523154));
             }
         }
-        
+
         SECTION("SignedDistanceToPoint") {
-            auto bezier = EdgeHolder({1,4}, {6,6});
+            auto bezier = EdgeHolder({1, 4}, {6, 6});
             auto positive_point = Vector2(4, 3);
             auto negative_point = Vector2(3, 5);
-            
+
             double t;
             auto inside_distance = bezier->SignedDistance(positive_point, t);
             auto outside_distance = bezier->SignedDistance(negative_point, t);
-            
+
             REQUIRE(inside_distance == Approx(bezier->Distance(positive_point, t)));
             REQUIRE(outside_distance == Approx(-bezier->Distance(negative_point, t)));
         }
     }
-    
+
     SECTION("Quadratic") {
         SECTION("PointOn") {
             auto bezier = EdgeHolder({2, 1}, {5, 5}, {15, 0});
@@ -124,21 +124,21 @@ TEST_CASE("EdgeSegment", "[EdgeSegment]") {
                 REQUIRE(distance == Approx(1.414213));
             }
         }
-        
+
         SECTION("SignedDistanceToPoint") {
-            auto bezier = EdgeHolder({1,4}, {6,6}, {3,1});
+            auto bezier = EdgeHolder({1, 4}, {6, 6}, {3, 1});
             auto positive_point = Vector2(3, 3);
             auto negative_point = Vector2(5, 5);
-            
+
             double t;
             auto inside_distance = bezier->SignedDistance(positive_point, t);
             auto outside_distance = bezier->SignedDistance(negative_point, t);
-            
+
             REQUIRE(inside_distance == Approx(bezier->Distance(positive_point, t)));
             REQUIRE(outside_distance == Approx(-bezier->Distance(negative_point, t)));
         }
     }
-    
+
     SECTION("Cubic") {
         SECTION("PointOn") {
 
@@ -188,19 +188,33 @@ TEST_CASE("EdgeSegment", "[EdgeSegment]") {
                 REQUIRE(distance == Approx(2.236067977));
             }
         }
-        
+
         SECTION("SignedDistanceToPoint") {
-            auto bezier = EdgeHolder({1,4}, {6,6}, {3,1}, {5, 5});
+            auto bezier = EdgeHolder({1, 4}, {6, 6}, {3, 1}, {5, 5});
             auto positive_point = Vector2(4, 3);
             auto negative_point = Vector2(3, 5);
-            
+
             double t;
             auto inside_distance = bezier->SignedDistance(positive_point, t);
             auto outside_distance = bezier->SignedDistance(negative_point, t);
-            
+
             REQUIRE(inside_distance == Approx(bezier->Distance(positive_point, t)));
             REQUIRE(outside_distance == Approx(-bezier->Distance(negative_point, t)));
         }
+    }
+
+    SECTION("Orthogonality") {
+        auto b1 = EdgeHolder({0, 1}, {2, 0});
+        auto b2 = EdgeHolder({0, 0}, {2, 0});
+
+        auto point = Vector2(3, 1);
+
+        double t1, t2;
+        auto distance1 = b1->SignedDistance(point, t1);
+        auto distance2 = b2->SignedDistance(point, t2);
+
+        REQUIRE(distance1 == Approx(distance2));
+        REQUIRE(b1->GetOrthogonality(point, t1) > b2->GetOrthogonality(point, t2));
     }
 }
 
