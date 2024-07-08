@@ -41,4 +41,31 @@ TEST_CASE("EquationSolver", "[EquationSolver]") {
             REQUIRE(roots[0] == Approx(-1.820578));
         }
     }
+    
+    SECTION("QuinticEquation", "[EquationSolver]") {
+        SECTION("UniqueRoots") {
+            double a = 1, b = 27.4, c = -910.75, d = 6905.3, e = -16116.45, f = 1543.5;
+            auto roots = SolveQuinticEquation(a, b, c, d, e, f);
+            REQUIRE(roots.size() == 5);
+            REQUIRE(roots[0] == Approx(-49));
+            REQUIRE(roots[1] == Approx(0.1));
+            REQUIRE(roots[2] == Approx(5));
+            REQUIRE(roots[3] == Approx(6));
+            REQUIRE(roots[4] == Approx(10.5));
+        }
+        SECTION("Only1RealRoot") {
+            double a = 1, b = 1, c = 0, d = 1, e = 0, f = 1;
+            auto roots = SolveQuinticEquation(a, b, c, d, e, f);
+            REQUIRE(roots.size() == 1);
+            REQUIRE(roots[0] == Approx(-1.57015));
+        }
+        SECTION("Roots3RealAnd2Imaginary") {
+            double a = 1, b = 4, c = -1, d = -1, e = 0, f = -5;
+            auto roots = SolveQuinticEquation(a, b, c, d, e, f);
+            REQUIRE(roots.size() == 3);
+            REQUIRE(roots[0] == Approx(-4.16582));
+            REQUIRE(roots[1] == Approx(-1.139267));
+            REQUIRE(roots[2] == Approx(1.10323));
+        }
+    }
 }

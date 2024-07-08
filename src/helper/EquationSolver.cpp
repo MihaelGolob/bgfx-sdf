@@ -21,7 +21,14 @@ std::vector<double> SolveCubicEquation(double a, double b, double c, double d) {
 }
 
 std::vector<double> SolveQuinticEquation(double a, double b, double c, double d, double e, double f) {
-    std::vector<double> roots;
+    double r[5];
+    int n = SolveP5(r, b/a, c/a, d/a, e/a, f/a);
+
+    auto roots = std::vector<double>(n);
+    for (int i = 0; i < n; i++) {
+        roots[i] = r[i];
+    }
+    std::sort(roots.begin(), roots.end());
 
     return roots;
 }
