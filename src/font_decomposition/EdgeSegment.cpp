@@ -26,7 +26,7 @@ EdgeSegment *EdgeSegment::CreateEdgeSegment(const Vector2 &p0, const Vector2 &p1
 
 double EdgeSegment::SignedDistance(const Vector2 &p, double &t) const {
     const auto distance = Distance(p, t);
-    const auto sign = (GetPoint(t) - p).Cross(GetDirection(t)) > 0 ? 1 : -1;
+    const auto sign = (GetPoint(t) - p).Cross(GetDirection(t)) > 0 ? -1 : 1;
     return distance * sign;
 }
 

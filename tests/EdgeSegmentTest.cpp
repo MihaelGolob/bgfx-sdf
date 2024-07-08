@@ -10,7 +10,7 @@ using namespace Catch;
 
 TEST_CASE("EdgeSegment", "[EdgeSegment]") {
     SECTION("Linear") {
-        SECTION("PointOnLinear") {
+        SECTION("PointOn") {
             auto bezier = EdgeHolder({2, 2}, {7, 4});
             SECTION("tBetween0and1") {
                 auto point = bezier->GetPoint(0.6);
@@ -34,7 +34,7 @@ TEST_CASE("EdgeSegment", "[EdgeSegment]") {
             }
         }
 
-        SECTION("DistanceToLinear") {
+        SECTION("DistanceToPoint") {
             auto bezier = EdgeHolder({2, 2}, {7, 4});
             SECTION("tBetween0and1") {
                 auto point = Vector2(3, 5);
@@ -58,10 +58,23 @@ TEST_CASE("EdgeSegment", "[EdgeSegment]") {
                 REQUIRE(distance == Approx(1.523154));
             }
         }
+        
+        SECTION("SignedDistanceToPoint") {
+            auto bezier = EdgeHolder({1,4}, {6,6});
+            auto positive_point = Vector2(4, 3);
+            auto negative_point = Vector2(3, 5);
+            
+            double t;
+            auto inside_distance = bezier->SignedDistance(positive_point, t);
+            auto outside_distance = bezier->SignedDistance(negative_point, t);
+            
+            REQUIRE(inside_distance == Approx(bezier->Distance(positive_point, t)));
+            REQUIRE(outside_distance == Approx(-bezier->Distance(negative_point, t)));
+        }
     }
     
     SECTION("Quadratic") {
-        SECTION("PointOnQuadratic") {
+        SECTION("PointOn") {
             auto bezier = EdgeHolder({2, 1}, {5, 5}, {15, 0});
             SECTION("tBetween0and1") {
                 auto point = bezier->GetPoint(0.13);
@@ -85,7 +98,7 @@ TEST_CASE("EdgeSegment", "[EdgeSegment]") {
             }
         }
 
-        SECTION("DistanceToQuadratic") {
+        SECTION("DistanceToPoint") {
             auto bezier = EdgeHolder({2, 2}, {4, 6}, {7, 4});
             SECTION("tBetween0and1") {
                 // setup
@@ -111,10 +124,23 @@ TEST_CASE("EdgeSegment", "[EdgeSegment]") {
                 REQUIRE(distance == Approx(1.414213));
             }
         }
+        
+        SECTION("SignedDistanceToPoint") {
+            auto bezier = EdgeHolder({1,4}, {6,6}, {3,1});
+            auto positive_point = Vector2(3, 3);
+            auto negative_point = Vector2(5, 5);
+            
+            double t;
+            auto inside_distance = bezier->SignedDistance(positive_point, t);
+            auto outside_distance = bezier->SignedDistance(negative_point, t);
+            
+            REQUIRE(inside_distance == Approx(bezier->Distance(positive_point, t)));
+            REQUIRE(outside_distance == Approx(-bezier->Distance(negative_point, t)));
+        }
     }
     
     SECTION("Cubic") {
-        SECTION("PointOnCubic") {
+        SECTION("PointOn") {
 
             auto bezier = EdgeHolder({2, 2}, {3, 5}, {5, 6}, {7, 4});
             SECTION("tBetween0and1") {
@@ -139,7 +165,7 @@ TEST_CASE("EdgeSegment", "[EdgeSegment]") {
             }
         }
 
-        SECTION("DistanceToCubic") {
+        SECTION("DistanceToPoint") {
             auto bezier = EdgeHolder({2, 2}, {3, 5}, {5, 6}, {7, 4});
             SECTION("tBetween0and1") {
                 // setup
@@ -161,6 +187,19 @@ TEST_CASE("EdgeSegment", "[EdgeSegment]") {
                 REQUIRE(t == Approx(0));
                 REQUIRE(distance == Approx(2.236067977));
             }
+        }
+        
+        SECTION("SignedDistanceToPoint") {
+            auto bezier = EdgeHolder({1,4}, {6,6}, {3,1}, {5, 5});
+            auto positive_point = Vector2(4, 3);
+            auto negative_point = Vector2(3, 5);
+            
+            double t;
+            auto inside_distance = bezier->SignedDistance(positive_point, t);
+            auto outside_distance = bezier->SignedDistance(negative_point, t);
+            
+            REQUIRE(inside_distance == Approx(bezier->Distance(positive_point, t)));
+            REQUIRE(outside_distance == Approx(-bezier->Distance(negative_point, t)));
         }
     }
 }
