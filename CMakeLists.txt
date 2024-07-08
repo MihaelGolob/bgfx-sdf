@@ -15,6 +15,9 @@ add_library(bgfx-sdf STATIC
 		src/font_processing/utf8.h
 		
 		libs/stb/stb_truetype.h
+		libs/poly34/poly34.h
+		libs/poly34/poly34.cpp
+		
 		src/utilities.cpp
 		src/managers/TextBufferManager.cpp
 		src/managers/TextBufferManager.h
@@ -85,6 +88,7 @@ include_directories(bgfx-sdf
 		libs/freetype/include
 		
 		libs/stb
+		libs/poly34
 )
 
 target_link_libraries(bgfx-sdf
