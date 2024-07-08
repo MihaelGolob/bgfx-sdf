@@ -1,6 +1,7 @@
 add_subdirectory(lib)
 
-add_executable(catch_test_run Vector2Test.cpp)
+add_executable(catch_test_run Vector2Test.cpp
+        EdgeSegmentTest.cpp)
 target_link_libraries(catch_test_run PRIVATE Catch2::Catch2WithMain)
 target_link_libraries(catch_test_run PRIVATE bgfx-sdf)
 
