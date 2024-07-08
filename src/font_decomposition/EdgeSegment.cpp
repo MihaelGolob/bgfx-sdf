@@ -116,10 +116,15 @@ double CubicSegment::Distance(const Vector2 &p, double &t) const {
     const auto f = -(p1 * p0);
 
     std::vector<double> roots = SolveQuinticEquation(a, b, c, d, e, f);
+    // also check the endpoints
+    roots.emplace_back(0);
+    roots.emplace_back(1);
 
     // find the closest root
     double min_distance = INFINITY;
     for (const auto root: roots) {
+        if (root < 0 || root > 1) continue; // skip invalid roots (outside the segment range)
+        
         const auto dist = (GetPoint(root) - p).Length();
         if (dist < min_distance) {
             min_distance = dist;
