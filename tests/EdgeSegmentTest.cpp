@@ -47,9 +47,8 @@ TEST_CASE("EdgeSegment", "[EdgeSegment]") {
             auto distance = bezier->Distance(point, t);
 
             // verification
-//            REQUIRE(t == Approx());
-            printf("warning: not testing for correct t value\n");
-            REQUIRE(distance == Approx(0.569801));
+            REQUIRE(t == Approx(0.37306));
+            REQUIRE(distance == Approx(1.059306));
         }
         SECTION("tMoreThan1") {
             // setup
@@ -60,9 +59,8 @@ TEST_CASE("EdgeSegment", "[EdgeSegment]") {
             auto distance = bezier->Distance(point, t);
 
             // verification
-//            REQUIRE(t == Approx(0));
-            printf("warning: not testing for correct t value\n");
-            REQUIRE(distance == Approx(1.414113));
+            REQUIRE(t == Approx(1));
+            REQUIRE(distance == Approx(1.414213));
         }
     }
 
