@@ -57,25 +57,30 @@ double QuadraticSegment::Distance(const Vector2 &p, double &t) const {
     const auto p0 = p - points_[0];
     const auto p1 = points_[1] - points_[0];
     const auto p2 = points_[2] - points_[1] * 2 + points_[0];
-    
+
     // equation coefficients
-    const auto a = p2.Length2();
-    const auto b = 3 * (p1 *(p2));
-    const auto c = 2 * p1.Length2() - p2*p0;
+    const auto a = p2 * p2;
+    const auto b = 3 * (p1 * p2);
+    const auto c = 2 * (p1 * p1) - p2 * p0;
     const auto d = -(p1 * p0);
-    
+
     std::vector<double> roots = SolveCubicEquation(a, b, c, d);
-    
+    // also check the endpoints
+    roots.emplace_back(0);
+    roots.emplace_back(1);
+
     // find the closest root
     double min_distance = INFINITY;
-    for (const auto root : roots) {
+    for (const auto root: roots) {
+        if (root < 0 || root > 1) continue; // skip invalid roots (outside the segment range)
+
         const auto dist = (GetPoint(root) - p).Length();
         if (dist < min_distance) {
             min_distance = dist;
             t = root;
         }
     }
-    
+
     return min_distance;
 }
 
@@ -114,7 +119,7 @@ double CubicSegment::Distance(const Vector2 &p, double &t) const {
 
     // find the closest root
     double min_distance = INFINITY;
-    for (const auto root : roots) {
+    for (const auto root: roots) {
         const auto dist = (GetPoint(root) - p).Length();
         if (dist < min_distance) {
             min_distance = dist;
