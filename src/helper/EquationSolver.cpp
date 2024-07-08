@@ -13,7 +13,7 @@ std::vector<double> SolveCubicEquation(double a, double b, double c, double d) {
     
     auto roots = std::vector<double>(n);
     for (int i = 0; i < n; i++) {
-        roots.emplace_back(r[i]);
+        roots[i] = r[i];
     }
     std::sort(roots.begin(), roots.end());
 
