@@ -108,11 +108,11 @@ double CubicSegment::Distance(const Vector2 &p, double &t) const {
     const auto p3 = points_[3] - points_[2] * 3 + points_[1] * 3 - points_[0];
 
     // equation coefficients
-    const auto a = p3.Length2();
+    const auto a = p3 * p3;
     const auto b = 5 * (p2 * p3);
-    const auto c = 4 * (p1 * p3) + 6 * (p2.Length2());
-    const auto d = 9 * (p1 * p2) - p2 * p0;
-    const auto e = 3 * p1.Length2() - p2 * p0;
+    const auto c = 4 * (p1 * p3) + 6 * (p2 * p2);
+    const auto d = 9 * (p1 * p2) - p3 * p0;
+    const auto e = 3 * (p1 * p1) - 2 * (p2 * p0);
     const auto f = -(p1 * p0);
 
     std::vector<double> roots = SolveQuinticEquation(a, b, c, d, e, f);
