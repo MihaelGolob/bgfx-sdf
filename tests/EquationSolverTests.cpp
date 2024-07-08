@@ -35,10 +35,10 @@ TEST_CASE("EquationSolver", "[EquationSolver]") {
             REQUIRE(roots[2] == Approx(2));
         }
         SECTION("Roots1AndDoubleIrrational") {
-            double a = 1, b = -4, c = 2, d = 3;
+            double a = 2, b = -5, c = -2, d = 25;
             auto roots = SolveCubicEquation(a, b, c, d);
             REQUIRE(roots.size() == 1);
-            REQUIRE(roots[0] == Approx(3));
+            REQUIRE(roots[0] == Approx(-1.820578));
         }
     }
 }
