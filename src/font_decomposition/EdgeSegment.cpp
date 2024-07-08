@@ -30,6 +30,12 @@ double EdgeSegment::SignedDistance(const Vector2 &p, double &t) const {
     return distance * sign;
 }
 
+double EdgeSegment::GetOrthogonality(const Vector2 &p, double t) const {
+    const auto direction = GetDirection(t);
+    const auto x = (p - GetPoint(t)).Normalize();
+    return direction.Cross(x);
+}
+
 
 // linear segment -----------------------------------
 LinearSegment::LinearSegment(const Vector2 &p0, const Vector2 &p1) : points_{p0, p1} {}

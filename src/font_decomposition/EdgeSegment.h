@@ -23,6 +23,7 @@ public:
     
     [[nodiscard]] virtual Vector2 GetPoint(double t) const = 0;
     [[nodiscard]] virtual Vector2 GetDirection(double t) const = 0;
+    [[nodiscard]] virtual double GetOrthogonality(const Vector2 &p, double t) const;
     
     [[nodiscard]] virtual double SignedDistance(const Vector2 &p, double &t) const;
     [[nodiscard]] virtual double PseudoDistance(float distance, const Vector2 &p, double &t) const {return 0;};
