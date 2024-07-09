@@ -65,3 +65,32 @@ double Shape::SignedDistance(const Vector2 &p) const {
     
     return min_distance;
 }
+
+double Shape::SignedPseudoDistance(const Vector2 &p) const {
+    double min_distance = INFINITY;
+    double max_orthogonality = 0;
+    EdgeHolder closest_edge;
+
+    for (const auto& c : contours) {
+        for (const auto& e : c.edges) {
+            double t;
+            auto distance = e->SignedDistance(p, t);
+
+            if (fabs(distance) < fabs(min_distance)) {
+                min_distance = distance;
+                max_orthogonality = e->GetOrthogonality(p, t);
+                closest_edge = e;
+            } else if (distance == min_distance) {
+                const auto orthogonality = e->GetOrthogonality(p, t);
+                if (orthogonality > max_orthogonality) {
+                    // this is needed for correct sign if the distance is the same
+                    max_orthogonality = orthogonality;
+                    min_distance = distance;
+                    closest_edge = e;
+                }
+            }
+        }
+    }
+    
+    return closest_edge->PseudoDistance(p, min_distance);
+}
