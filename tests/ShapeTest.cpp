@@ -83,6 +83,12 @@ TEST_CASE("Shape", "[Shape]") {
                 auto distance = shape.SignedPseudoDistance(point);
                 REQUIRE(distance == Approx(-0.277350));
             }
+
+            SECTION("inside on corner") {
+                auto point = Vector2(2.5, 6.5);
+                auto signed_distance = shape.SignedPseudoDistance(point);
+                REQUIRE(signed_distance == Approx(0.5));
+            }
         }
     }
 }
