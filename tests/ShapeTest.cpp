@@ -29,40 +29,60 @@ TEST_CASE("Shape", "[Shape]") {
         inner.AddEdge(EdgeHolder({3, 6}, {3, 3}));
         shape.contours.emplace_back(inner);
 
-        SECTION("Signed distance inside shape") {
-            auto point = Vector2(4, 2.3);
-            auto signed_distance = shape.SignedDistance(point);
-            REQUIRE(signed_distance == Approx(0.3));
+        SECTION("Signed Distance") {
+            SECTION("Signed distance inside shape") {
+                auto point = Vector2(4, 2.3);
+                auto signed_distance = shape.SignedDistance(point);
+                REQUIRE(signed_distance == Approx(0.3));
+            }
+
+            SECTION("Signed distance inside on corner") {
+                auto point = Vector2(2.5, 6.5);
+                auto signed_distance = shape.SignedDistance(point);
+                REQUIRE(signed_distance == Approx(0.5));
+            }
+
+            SECTION("Signed distance outside shape") {
+                auto point = Vector2(4, 1.3);
+                auto signed_distance = shape.SignedDistance(point);
+                REQUIRE(signed_distance == Approx(-0.7));
+            }
+
+            SECTION("Signed distance outside but on corner") {
+                auto point = Vector2(9, 8);
+                auto signed_distance = shape.SignedDistance(point);
+                REQUIRE(signed_distance == Approx(-2.236067));
+            }
+
+            SECTION("Signed distance outside but inner contour") {
+                auto point = Vector2(5.5, 4);
+                auto signed_distance = shape.SignedDistance(point);
+                REQUIRE(signed_distance == Approx(-0.5));
+            }
+
+            SECTION("Signed distance on edge") {
+                auto point = Vector2(3, 3);
+                auto signed_distance = shape.SignedDistance(point);
+                REQUIRE(signed_distance == Approx(0));
+            }
         }
 
-        SECTION("Signed distance inside on corner") {
-            auto point = Vector2(2.5, 6.5);
-            auto signed_distance = shape.SignedDistance(point);
-            REQUIRE(signed_distance == Approx(0.5));
-        }
+        auto custom = Contour();
+        custom.AddEdge(EdgeHolder({2, 7}, {5, 9}));
+        shape.contours.emplace_back(custom);
 
-        SECTION("Signed distance outside shape") {
-            auto point = Vector2(4, 1.3);
-            auto signed_distance = shape.SignedDistance(point);
-            REQUIRE(signed_distance == Approx(-0.7));
-        }
+        SECTION("Signed Pseudo Distance") {
+            SECTION("It calculates pseudo distance to nearest edge") {
+                auto point = Vector2(10, 2.1);
+                auto distance = shape.SignedPseudoDistance(point);
+                REQUIRE(distance == Approx(-3));
+            }
 
-        SECTION("Signed distance outside but on corner") {
-            auto point = Vector2(9, 8);
-            auto signed_distance = shape.SignedDistance(point);
-            REQUIRE(signed_distance == Approx(-2.236067));
-        }
-
-        SECTION("Signed distance outside but inner contour") {
-            auto point = Vector2(5.5, 4);
-            auto signed_distance = shape.SignedDistance(point);
-            REQUIRE(signed_distance == Approx(-0.5));
-        }
-        
-        SECTION("Signed distance on edge") {
-            auto point = Vector2(3, 3);
-            auto signed_distance = shape.SignedDistance(point);
-            REQUIRE(signed_distance == Approx(0));
+            SECTION("Check pseudo distance") {
+                auto point = Vector2(6, 10);
+                auto distance = shape.SignedPseudoDistance(point);
+                REQUIRE(distance == Approx(-0.277350));
+            }
         }
     }
 }
