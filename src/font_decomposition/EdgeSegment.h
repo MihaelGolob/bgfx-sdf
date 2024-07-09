@@ -23,6 +23,7 @@ public:
     [[nodiscard]] virtual double Distance(const Vector2 &p, double &t) const = 0;
     [[nodiscard]] virtual double SignedDistance(const Vector2 &p, double &t) const;
     [[nodiscard]] virtual double SignedPseudoDistance(const Vector2& p, double &t) const = 0;
+    [[nodiscard]] virtual int GetSign(const Vector2 &p, double &t) const;
     
     [[nodiscard]] virtual Vector2 GetPoint(double t) const = 0;
     [[nodiscard]] virtual Vector2 GetDirection(double t) const = 0;

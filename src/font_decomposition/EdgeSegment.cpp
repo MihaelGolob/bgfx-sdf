@@ -25,14 +25,17 @@ EdgeSegment *EdgeSegment::CreateEdgeSegment(const Vector2 &p0, const Vector2 &p1
 
 double EdgeSegment::SignedDistance(const Vector2 &p, double &t) const {
     const auto distance = Distance(p, t);
-    const auto sign = (GetPoint(t) - p).Cross(GetDirection(t)) > 0 ? -1 : 1;
-    return distance * sign;
+    return distance * GetSign(p, t);
 }
 
 double EdgeSegment::GetOrthogonality(const Vector2 &p, double t) const {
     const auto direction = GetDirection(t);
     const auto x = (p - GetPoint(t)).Normalize();
     return direction.Cross(x);
+}
+
+int EdgeSegment::GetSign(const Vector2 &p, double &t) const {
+    return (GetPoint(t) - p).Cross(GetDirection(t)) > 0 ? -1 : 1;
 }
 
 
@@ -57,7 +60,7 @@ Vector2 LinearSegment::GetDirection(double t) const {
 double LinearSegment::SignedPseudoDistance(const Vector2 &p, double &t) const {
     t = (p - points_[0]) * (points_[1] - points_[0]) / (points_[1] - points_[0]).Length2();
 
-    return (GetPoint(t) - p).Length();
+    return (GetPoint(t) - p).Length() * GetSign(p, t);
 }
 
 // quadratic segment --------------------------------
@@ -96,7 +99,7 @@ double QuadraticSegment::SignedPseudoDistance(const Vector2 &p, double &t) const
         }
     }
 
-    return min_distance;
+    return min_distance * GetSign(p, t);
 }
 
 Vector2 QuadraticSegment::GetPoint(double t) const {
@@ -163,7 +166,7 @@ double CubicSegment::SignedPseudoDistance(const Vector2 &p, double &t) const {
         }
     }
 
-    return min_distance;
+    return min_distance * GetSign(p, t);
 }
 
 Vector2 CubicSegment::GetPoint(double t) const {
