@@ -55,35 +55,45 @@ Vector2 LinearSegment::GetDirection(double t) const {
     return (points_[1] - points_[0]).Normalize();
 }
 
+double LinearSegment::PseudoDistance(const Vector2 &p, double &t) const {
+    t = (p - points_[0]) * (points_[1] - points_[0]) / (points_[1] - points_[0]).Length2();
+
+    return (GetPoint(t) - p).Length();
+}
+
 // quadratic segment --------------------------------
 QuadraticSegment::QuadraticSegment(const Vector2 &p0, const Vector2 &p1, const Vector2 &p2) : points_{p0, p1, p2} {}
 
 double QuadraticSegment::Distance(const Vector2 &p, double &t) const {
-    // helper variables
-    const auto p0 = p - points_[0];
-    const auto p1 = points_[1] - points_[0];
-    const auto p2 = points_[2] - points_[1] * 2 + points_[0];
-
-    // equation coefficients
-    const auto a = p2 * p2;
-    const auto b = 3 * (p1 * p2);
-    const auto c = 2 * (p1 * p1) - p2 * p0;
-    const auto d = -(p1 * p0);
-
-    std::vector<double> roots = SolveCubicEquation(a, b, c, d);
+    auto candidates = CandidateTValues(p);
     // also check the endpoints
-    roots.emplace_back(0);
-    roots.emplace_back(1);
+    candidates.emplace_back(0);
+    candidates.emplace_back(1);
 
     // find the closest root
     double min_distance = INFINITY;
-    for (const auto root: roots) {
-        if (root < 0 || root > 1) continue; // skip invalid roots (outside the segment range)
+    for (const auto can: candidates) {
+        if (can < 0 || can > 1) continue; // skip invalid roots (outside the segment range)
 
-        const auto dist = (GetPoint(root) - p).Length();
+        const auto dist = (GetPoint(can) - p).Length();
         if (dist < min_distance) {
             min_distance = dist;
-            t = root;
+            t = can;
+        }
+    }
+
+    return min_distance;
+}
+
+double QuadraticSegment::PseudoDistance(const Vector2 &p, double &t) const {
+    auto candidates = CandidateTValues(p);
+
+    double min_distance = INFINITY;
+    for (const auto can: candidates) {
+        const auto dist = (GetPoint(can) - p).Length();
+        if (dist < min_distance) {
+            min_distance = dist;
+            t = can;
         }
     }
 
@@ -102,39 +112,55 @@ Vector2 QuadraticSegment::GetDirection(double t) const {
     return direction.Normalize();
 }
 
+std::vector<double> QuadraticSegment::CandidateTValues(const Vector2 &p) const {
+    // helper variables
+    const auto p0 = p - points_[0];
+    const auto p1 = points_[1] - points_[0];
+    const auto p2 = points_[2] - points_[1] * 2 + points_[0];
+
+    // equation coefficients
+    const auto a = p2 * p2;
+    const auto b = 3 * (p1 * p2);
+    const auto c = 2 * (p1 * p1) - p2 * p0;
+    const auto d = -(p1 * p0);
+
+    return SolveCubicEquation(a, b, c, d);
+}
 
 // cubic segment ------------------------------------
 CubicSegment::CubicSegment(const Vector2 &p0, const Vector2 &p1, const Vector2 &p2, const Vector2 &p3) : points_{p0, p1, p2, p3} {}
 
 double CubicSegment::Distance(const Vector2 &p, double &t) const {
-    // helper variables
-    const auto p0 = p - points_[0];
-    const auto p1 = points_[1] - points_[0];
-    const auto p2 = points_[2] - points_[1] * 2 + points_[0];
-    const auto p3 = points_[3] - points_[2] * 3 + points_[1] * 3 - points_[0];
-
-    // equation coefficients
-    const auto a = p3 * p3;
-    const auto b = 5 * (p2 * p3);
-    const auto c = 4 * (p1 * p3) + 6 * (p2 * p2);
-    const auto d = 9 * (p1 * p2) - p3 * p0;
-    const auto e = 3 * (p1 * p1) - 2 * (p2 * p0);
-    const auto f = -(p1 * p0);
-
-    std::vector<double> roots = SolveQuinticEquation(a, b, c, d, e, f);
+    auto candidates = CandidateTValues(p);
     // also check the endpoints
-    roots.emplace_back(0);
-    roots.emplace_back(1);
+    candidates.emplace_back(0);
+    candidates.emplace_back(1);
 
     // find the closest root
     double min_distance = INFINITY;
-    for (const auto root: roots) {
-        if (root < 0 || root > 1) continue; // skip invalid roots (outside the segment range)
-        
-        const auto dist = (GetPoint(root) - p).Length();
+    for (const auto can: candidates) {
+        if (can < 0 || can > 1) continue; // skip invalid roots (outside the segment range)
+
+        const auto dist = (GetPoint(can) - p).Length();
         if (dist < min_distance) {
             min_distance = dist;
-            t = root;
+            t = can;
+        }
+    }
+
+    return min_distance;
+}
+
+double CubicSegment::PseudoDistance(const Vector2 &p, double &t) const {
+    auto candidates = CandidateTValues(p);
+
+    // find the closest root
+    double min_distance = INFINITY;
+    for (const auto can: candidates) {
+        const auto dist = (GetPoint(can) - p).Length();
+        if (dist < min_distance) {
+            min_distance = dist;
+            t = can;
         }
     }
 
@@ -153,4 +179,22 @@ Vector2 CubicSegment::GetDirection(double t) const {
                      + (points_[2] - points_[1] * 2 + points_[0]) * 6 * t
                      + (points_[1] - points_[0]) * 3;
     return direction.Normalize();
+}
+
+std::vector<double> CubicSegment::CandidateTValues(const Vector2 &p) const {
+    // helper variables
+    const auto p0 = p - points_[0];
+    const auto p1 = points_[1] - points_[0];
+    const auto p2 = points_[2] - points_[1] * 2 + points_[0];
+    const auto p3 = points_[3] - points_[2] * 3 + points_[1] * 3 - points_[0];
+
+    // equation coefficients
+    const auto a = p3 * p3;
+    const auto b = 5 * (p2 * p3);
+    const auto c = 4 * (p1 * p3) + 6 * (p2 * p2);
+    const auto d = 9 * (p1 * p2) - p3 * p0;
+    const auto e = 3 * (p1 * p1) - 2 * (p2 * p0);
+    const auto f = -(p1 * p0);
+
+    return SolveQuinticEquation(a, b, c, d, e, f);
 }
