@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Vector2.h"
+#include <vector>
 
 enum class EdgeColor {
     Black, Red, Green, Yellow, Blue, Magenta, Cyan, White

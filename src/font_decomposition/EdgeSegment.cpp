@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <vector>
 #include "EdgeSegment.h"
 #include "../helper/EquationSolver.h"
 
