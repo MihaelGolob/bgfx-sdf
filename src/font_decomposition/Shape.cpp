@@ -92,5 +92,5 @@ double Shape::SignedPseudoDistance(const Vector2 &p) const {
         }
     }
     
-    return closest_edge->PseudoDistance(p, min_distance);
+    return closest_edge->SignedPseudoDistance(p, min_distance);
 }

@@ -21,7 +21,7 @@ public:
 
     [[nodiscard]] virtual double Distance(const Vector2 &p, double &t) const = 0;
     [[nodiscard]] virtual double SignedDistance(const Vector2 &p, double &t) const;
-    [[nodiscard]] virtual double PseudoDistance(const Vector2& p, double &t) const = 0;
+    [[nodiscard]] virtual double SignedPseudoDistance(const Vector2& p, double &t) const = 0;
     
     [[nodiscard]] virtual Vector2 GetPoint(double t) const = 0;
     [[nodiscard]] virtual Vector2 GetDirection(double t) const = 0;
@@ -36,7 +36,7 @@ public:
     LinearSegment(const Vector2 &p0, const Vector2 &p1);
 
     [[nodiscard]] double Distance(const Vector2 &p, double &t) const override;
-    [[nodiscard]] double PseudoDistance(const Vector2& p, double &t) const override;
+    [[nodiscard]] double SignedPseudoDistance(const Vector2& p, double &t) const override;
 
     [[nodiscard]] Vector2 GetPoint(double t) const override;
     [[nodiscard]] Vector2 GetDirection(double t) const override;
@@ -48,7 +48,7 @@ public:
     QuadraticSegment(const Vector2 &p0, const Vector2 &p1, const Vector2 &p2);
 
     [[nodiscard]] double Distance(const Vector2 &p, double &t) const override;
-    [[nodiscard]] double PseudoDistance(const Vector2& p, double &t) const override;
+    [[nodiscard]] double SignedPseudoDistance(const Vector2& p, double &t) const override;
 
     [[nodiscard]] Vector2 GetPoint(double t) const override;
     [[nodiscard]] Vector2 GetDirection(double t) const override;
@@ -63,7 +63,7 @@ public:
     CubicSegment(const Vector2 &p0, const Vector2 &p1, const Vector2 &p2, const Vector2 &p3);
 
     [[nodiscard]] double Distance(const Vector2 &p, double &t) const override;
-    [[nodiscard]] double PseudoDistance(const Vector2& p, double &t) const override;
+    [[nodiscard]] double SignedPseudoDistance(const Vector2& p, double &t) const override;
 
     [[nodiscard]] Vector2 GetPoint(double t) const override;
     [[nodiscard]] Vector2 GetDirection(double t) const override;

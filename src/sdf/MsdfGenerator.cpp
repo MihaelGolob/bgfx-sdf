@@ -70,9 +70,9 @@ std::array<double, 3> MsdfGenerator::GeneratePixel(const Shape &shape, const Vec
     }
 
     return {
-        red.edge ? (*red.edge)->PseudoDistance(red.min_distance, p, red.near_parameter) : INFINITY,
-        green.edge ? (*green.edge)->PseudoDistance(green.min_distance, p, green.near_parameter) : INFINITY,
-        blue.edge ? (*blue.edge)->PseudoDistance(blue.min_distance, p, blue.near_parameter) : INFINITY
+            red.edge ? (*red.edge)->SignedPseudoDistance(red.min_distance, p, red.near_parameter) : INFINITY,
+        green.edge ? (*green.edge)->SignedPseudoDistance(green.min_distance, p, green.near_parameter) : INFINITY,
+        blue.edge ? (*blue.edge)->SignedPseudoDistance(blue.min_distance, p, blue.near_parameter) : INFINITY
     };
 }
 

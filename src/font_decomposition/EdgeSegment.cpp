@@ -55,7 +55,7 @@ Vector2 LinearSegment::GetDirection(double t) const {
     return (points_[1] - points_[0]).Normalize();
 }
 
-double LinearSegment::PseudoDistance(const Vector2 &p, double &t) const {
+double LinearSegment::SignedPseudoDistance(const Vector2 &p, double &t) const {
     t = (p - points_[0]) * (points_[1] - points_[0]) / (points_[1] - points_[0]).Length2();
 
     return (GetPoint(t) - p).Length();
@@ -85,7 +85,7 @@ double QuadraticSegment::Distance(const Vector2 &p, double &t) const {
     return min_distance;
 }
 
-double QuadraticSegment::PseudoDistance(const Vector2 &p, double &t) const {
+double QuadraticSegment::SignedPseudoDistance(const Vector2 &p, double &t) const {
     auto candidates = CandidateTValues(p);
 
     double min_distance = INFINITY;
@@ -151,7 +151,7 @@ double CubicSegment::Distance(const Vector2 &p, double &t) const {
     return min_distance;
 }
 
-double CubicSegment::PseudoDistance(const Vector2 &p, double &t) const {
+double CubicSegment::SignedPseudoDistance(const Vector2 &p, double &t) const {
     auto candidates = CandidateTValues(p);
 
     // find the closest root
