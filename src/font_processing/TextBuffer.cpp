@@ -50,7 +50,7 @@ void TextBuffer::AppendText(FontHandle font_handle, const char *string, const ch
 
     for (; *string && string < end; ++string) {
         if (Utf8Decode(&state, (uint32_t *) &codepoint, *string) == UTF8_ACCEPT) {
-            AppendGlyph(font_handle, codepoint, false);
+            AppendGlyph(font_handle, codepoint);
         }
     }
 
@@ -74,7 +74,7 @@ void TextBuffer::AppendText(FontHandle font_handle, const wchar_t *string, const
 
     for (const wchar_t *current = string; current < end; ++current) {
         uint32_t code_point = *current;
-        AppendGlyph(font_handle, code_point, false);
+        AppendGlyph(font_handle, code_point);
     }
 }
 
@@ -88,10 +88,7 @@ void TextBuffer::AppendAtlasFace(uint16_t face_index) {
     float x1 = x0 + (float) font_manager_->GetAtlas()->GetTextureSize();
     float y1 = y0 + (float) font_manager_->GetAtlas()->GetTextureSize();
 
-    font_manager_->GetAtlas()->PackFaceLayerUv(face_index, (uint8_t *) vertex_buffer_,
-                                               sizeof(TextVertex) * vertex_count_ + offsetof(TextVertex, u),
-                                               sizeof(TextVertex)
-    );
+    font_manager_->GetAtlas()->PackFaceLayerUv(face_index, (uint8_t *) vertex_buffer_, sizeof(TextVertex) * vertex_count_ + offsetof(TextVertex, u), sizeof(TextVertex));
 
     SetVertex(vertex_count_ + 0, x0, y0, background_color_);
     SetVertex(vertex_count_ + 1, x0, y1, background_color_);
@@ -125,10 +122,10 @@ void TextBuffer::ClearTextBuffer() {
     rectangle_.height = 0;
 }
 
-void TextBuffer::AppendGlyph(FontHandle handle, CodePoint code_point, bool shadow) {
+void TextBuffer::AppendGlyph(FontHandle handle, CodePoint code_point) {
     if (code_point == L'\t') {
         for (uint32_t ii = 0; ii < 4; ++ii) {
-            AppendGlyph(handle, L' ', shadow);
+            AppendGlyph(handle, L' ');
         }
         return;
     }

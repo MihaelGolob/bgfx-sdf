@@ -92,7 +92,7 @@ public:
     }
 
 private:
-    void AppendGlyph(FontHandle handle, CodePoint code_point, bool shadow);
+    void AppendGlyph(FontHandle handle, CodePoint code_point);
 
     void VerticalCenterLastLine(float txt_decal_y, float top, float bottom);
 
