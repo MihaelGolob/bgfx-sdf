@@ -20,8 +20,10 @@ void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &out_glyph_inf
     shape.ApplyEdgeColoring(3.0);
 
     CalculateGlyphMetrics(face_, out_glyph_info);
+    
     const int width = out_glyph_info.width;
     const int height = out_glyph_info.height;
+    
 
     // general msdf generation loop
     for (int y = 0; y < width; y++) {
@@ -29,9 +31,13 @@ void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &out_glyph_inf
             Vector2 p = Vector2((x + 0.5) / width, (y + 0.5) / height); // todo: apply some sort of transformation
             auto res = GeneratePixel(shape, p);
 
-            output[y * width + x] = MapDistanceToColorValue(res[0]);
-            output[width * height + y * width + x] = MapDistanceToColorValue(res[1]);
-            output[2 * width * height + y * width + x] = MapDistanceToColorValue(res[2]);
+//            output[y * width + x] = MapDistanceToColorValue(res[0]);
+//            output[width * height + y * width + x] = MapDistanceToColorValue(res[1]);
+//            output[2 * width * height + y * width + x] = MapDistanceToColorValue(res[2]);
+
+            output[y * width + x] = 255;
+//            output[width * height + y * width + x] = 0; 
+//            output[2 * width * height + y * width + x] = 255;
         }
     }
 }
@@ -150,12 +156,19 @@ int MsdfGenerator::FtCubicTo(const FT_Vector *control1, const FT_Vector *control
 
 void MsdfGenerator::CalculateGlyphMetrics(FT_Face const &face, GlyphInfo &out_glyph_info) {
     // todo: fix these metrics!
+//    out_glyph_info.offset_x = 0;
+//    out_glyph_info.offset_y = -10;
+//    out_glyph_info.width = face_->glyph->metrics.width * scale_;
+//    out_glyph_info.height = face_->glyph->metrics.height * scale_;
+//    out_glyph_info.advance_x = bx::round(face_->glyph->advance.x * scale_);
+//    out_glyph_info.advance_y = bx::round(face_->glyph->advance.y * scale_);
+
     out_glyph_info.offset_x = 0;
-    out_glyph_info.offset_y = -10;
-    out_glyph_info.width = face_->glyph->metrics.width * scale_;
-    out_glyph_info.height = face_->glyph->metrics.height * scale_;
-    out_glyph_info.advance_x = bx::round(face_->glyph->advance.x * scale_);
-    out_glyph_info.advance_y = bx::round(face_->glyph->advance.y * scale_);
+    out_glyph_info.offset_y = 0;
+    out_glyph_info.width = 8;
+    out_glyph_info.height = 11;
+    out_glyph_info.advance_x = 10;
+    out_glyph_info.advance_y = 0;
 }
 
 int MsdfGenerator::MapDistanceToColorValue(float distance) const {
