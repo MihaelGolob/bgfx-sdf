@@ -16,12 +16,14 @@
 #include "../shaders/vertex/vs_font_basic.bin.h"
 #include "../shaders/fragment/fs_font_basic.bin.h"
 #include "../shaders/fragment/fs_font_sdf.bin.h"
+#include "../shaders/fragment/fs_font_msdf.bin.h"
 
 static const bgfx::EmbeddedShader s_embedded_shaders_[] =
         {
                 BGFX_EMBEDDED_SHADER(vs_font_basic),
                 BGFX_EMBEDDED_SHADER(fs_font_basic),
                 BGFX_EMBEDDED_SHADER(fs_font_sdf),
+                BGFX_EMBEDDED_SHADER(fs_font_msdf),
                 BGFX_EMBEDDED_SHADER_END()
         };
 
@@ -39,6 +41,11 @@ TextBufferManager::TextBufferManager(FontManager *font_manager) : font_manager_(
     sdf_program_ = bgfx::createProgram(
             bgfx::createEmbeddedShader(s_embedded_shaders_, type, "vs_font_basic"),
             bgfx::createEmbeddedShader(s_embedded_shaders_, type, "fs_font_sdf"), true
+    );
+
+    msdf_program_ = bgfx::createProgram(
+            bgfx::createEmbeddedShader(s_embedded_shaders_, type, "vs_font_basic"),
+            bgfx::createEmbeddedShader(s_embedded_shaders_, type, "fs_font_msdf"), true
     );
 
     vertex_layout_
@@ -63,6 +70,7 @@ TextBufferManager::~TextBufferManager() {
     // destroy shader programs
     bgfx::destroy(basic_program_);
     bgfx::destroy(sdf_program_);
+    bgfx::destroy(msdf_program_);
 }
 
 TextBufferHandle TextBufferManager::CreateTextBuffer(FontType type, BufferType::Enum buffer_type) {
@@ -141,6 +149,11 @@ void TextBufferManager::SubmitTextBuffer(TextBufferHandle handle, bgfx::ViewId i
             break;
         case FontType::Sdf: {
             program = sdf_program_;
+            bgfx::setState(0 | BGFX_STATE_WRITE_RGB | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA));
+            break;
+        }
+        case FontType::Msdf: {
+            program = msdf_program_;
             bgfx::setState(0 | BGFX_STATE_WRITE_RGB | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA));
             break;
         }
