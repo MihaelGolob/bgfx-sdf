@@ -1,4 +1,4 @@
-# Upodabljanje pisave z uporabo predznačenega polja razdalje
+# Upodabljanje besedila z večkanalnimi predznačenimi funkcijami razdalje
 
 Pomemben vidik video iger je vizualno privlačno prikazovanje besedila, ki se pogosto prilagaja različnim skaliranjem in ločljivostim zaslona. Da bi zagotovili jasno in nezamegljeno pisavo, moramo uporabiti velike slikovne atlase. [SDF](https://steamcdn-a.akamaihd.net/apps/valve/2007/SIGGRAPH2007_AlphaTestedMagnification.pdf) (Signed Distance Field) tehnika se izkaže kot rešitev, saj omogoča oster prikaz pisave tudi pri velikem povečanju, ob minimalni uporabi teksturnega prostora. Nadgradnja te metode, imenovana [MSDF](https://github.com/Chlumsky/msdfgen?tab=MIT-1-ov-file) (Multi-Channel Signed Distance Field), še dodatno izboljša natančnost, zlasti pri upodabljanju ostrejših kotov v črkah. Poleg tega tehnika SDF in MSDF zmanjšuje tudi overdraw, ki se pojavi pri generiranju različnih učinkov na pisavi, kot so sence, obrobe in mehki robovi, kar pripomore k izboljšanju splošne performance igre.
 
