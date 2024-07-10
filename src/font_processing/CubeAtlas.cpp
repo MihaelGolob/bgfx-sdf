@@ -68,8 +68,7 @@ uint16_t Atlas::AddRegion(uint16_t width, uint16_t height, const uint8_t *bitmap
     uint16_t yy = 0;
     uint32_t idx = 0;
     while (idx < used_layers_) {
-        if (layers_[idx].face_region.GetType() == type
-            && layers_[idx].packer.AddRectangle(width + 1, height + 1, xx, yy)) {
+        if (layers_[idx].face_region.GetType() == type && layers_[idx].packer.AddRectangle(width + 1, height + 1, xx, yy)) {
             break;
         }
 
@@ -77,8 +76,7 @@ uint16_t Atlas::AddRegion(uint16_t width, uint16_t height, const uint8_t *bitmap
     }
 
     if (idx >= used_layers_) {
-        if ((idx + type) > 24
-            || used_faces_ >= 6) {
+        if ((idx + type) > 24 || used_faces_ >= 6) {
             return UINT16_MAX;
         }
 
@@ -118,10 +116,10 @@ void Atlas::UpdateRegion(const AtlasRegion &region, const uint8_t *bitmap_buffer
     uint32_t size = region.width * region.height * 4;
     if (0 < size) {
         const bgfx::Memory *mem = bgfx::alloc(size);
-        bx::memSet(mem->data, 0, mem->size);
+        bx::memSet(mem->data, 0, mem->size); // set to 0 to avoid uninitialized data
         if (region.GetType() == AtlasRegion::TypeBgra8) {
             const uint8_t *in_line_buffer = bitmap_buffer;
-            uint8_t *out_line_buffer = &texture_buffer_[region.GetFaceIndex() * (texture_size_ * texture_size_ * 4) + (((region.y * texture_size_) + region.x) * 4)];
+            uint8_t *out_line_buffer = texture_buffer_ + region.GetFaceIndex() * (texture_size_ * texture_size_ * 4) + (((region.y * texture_size_) + region.x) * 4);
 
             // copy the region to the texture buffer
             for (int yy = 0; yy < region.height; ++yy) {
@@ -134,7 +132,7 @@ void Atlas::UpdateRegion(const AtlasRegion &region, const uint8_t *bitmap_buffer
         } else {
             uint32_t layer = region.GetComponentIndex();
             const uint8_t *in_line_buffer = bitmap_buffer;
-            uint8_t *out_line_buffer = (texture_buffer_ + region.GetFaceIndex() * (texture_size_ * texture_size_ * 4) + (((region.y * texture_size_) + region.x) * 4));
+            uint8_t *out_line_buffer = texture_buffer_ + region.GetFaceIndex() * (texture_size_ * texture_size_ * 4) + (((region.y * texture_size_) + region.x) * 4);
 
             for (int yy = 0; yy < region.height; ++yy) {
                 for (int xx = 0; xx < region.width; ++xx) {
