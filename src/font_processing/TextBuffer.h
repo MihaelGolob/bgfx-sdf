@@ -20,15 +20,6 @@ struct BufferType {
     };
 };
 
-/// special style effect (can be combined)
-enum TextStyleFlags {
-    StyleNormal = 0,
-    StyleOverline = 1,
-    StyleUnderline = 1 << 1,
-    StyleStrikeThrough = 1 << 2,
-    StyleBackground = 1 << 3,
-};
-
 struct TextRectangle {
     float width, height;
 };
@@ -112,15 +103,10 @@ private:
                | (((rgba >> 24) & 0xff) << 0);
     }
 
-    void SetVertex(uint32_t i, float x, float y, uint32_t rgba, uint8_t style = StyleNormal) {
+    void SetVertex(uint32_t i, float x, float y, uint32_t rgba) {
         vertex_buffer_[i].x = x;
         vertex_buffer_[i].y = y;
         vertex_buffer_[i].rgba = rgba;
-        style_buffer_[i] = style;
-    }
-
-    void SetOutlineColor(uint32_t i, uint32_t rgba_outline) {
-        vertex_buffer_[i].rgba_outline = rgba_outline;
     }
 
     struct TextVertex {
@@ -132,25 +118,10 @@ private:
         uint32_t rgba_outline;
     };
 
-    uint32_t style_flags_;
-
     // color states
     uint32_t text_color_;
-
     uint32_t background_color_;
-    uint32_t overline_color_;
-    uint32_t underline_color_;
-    uint32_t strike_through_color_;
-
-    // outline state
-    float outline_width_;
-    uint32_t outline_color_;
-
-    // drop shadow state
-    float drop_shadow_offset_[2]{};
-    uint32_t drop_shadow_color_;
-    float drop_shadow_softener_;
-
+    
     //position states
     float pen_x_;
     float pen_y_;
