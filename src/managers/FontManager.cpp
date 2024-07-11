@@ -240,48 +240,6 @@ bool FontManager::PreloadGlyph(FontHandle handle, CodePoint code_point) {
     return false;
 }
 
-void FontManager::AddGlyphBitmap(FontHandle handle, CodePoint code_point, uint16_t width, uint16_t height,
-                                 uint16_t pitch, float extra_scale, const uint8_t *bitmap_buffer, float glyph_offset_x, float glyph_offset_y) {
-    BX_ASSERT(isValid(handle), "Invalid handle used")
-    CachedFont &font = cached_fonts_[handle.idx];
-
-    GlyphHashMap::iterator iter = font.cached_glyphs.find(code_point);
-    if (iter != font.cached_glyphs.end()) {
-        return;
-    }
-
-    GlyphInfo glyph_info {};
-
-    float glyph_scale = extra_scale;
-    glyph_info.offset_x = glyph_offset_x * glyph_scale;
-    glyph_info.offset_y = glyph_offset_y * glyph_scale;
-    glyph_info.width = (float) width;
-    glyph_info.height = (float) height;
-    glyph_info.advance_x = (float) width * glyph_scale;
-    glyph_info.advance_y = (float) height * glyph_scale;
-    glyph_info.bitmap_scale = glyph_scale;
-
-    uint32_t dst_pitch = width * 4;
-
-    uint8_t *dst = buffer_;
-    const uint8_t *src = bitmap_buffer;
-    uint32_t src_pitch = pitch;
-
-    for (int32_t ii = 0; ii < height; ++ii) {
-        bx::memCopy(dst, src, dst_pitch);
-
-        dst += dst_pitch;
-        src += src_pitch;
-    }
-
-    glyph_info.region_index = atlas_->AddRegion(
-            (uint16_t) bx::ceil(glyph_info.width), (uint16_t) bx::ceil(glyph_info.height), buffer_,
-            AtlasRegion::TypeBgra8
-    );
-
-    font.cached_glyphs[code_point] = glyph_info;
-}
-
 const FontInfo &FontManager::GetFontInfo(FontHandle handle) const {
     BX_ASSERT(isValid(handle), "Invalid handle used")
     return cached_fonts_[handle.idx].font_info;

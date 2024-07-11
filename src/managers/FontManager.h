@@ -100,9 +100,6 @@ public:
     /// Preload a single glyph, return true on success.
     bool PreloadGlyph(FontHandle handle, CodePoint code_point);
 
-    void AddGlyphBitmap(FontHandle handle, CodePoint code_point, uint16_t width, uint16_t height, uint16_t pitch,
-                        float extra_scale, const uint8_t *bitmap_buffer, float glyph_offset_x, float glyph_offset_y);
-
     /// Return the font descriptor of a font.
     ///
     /// @remark the handle is required to be valid
