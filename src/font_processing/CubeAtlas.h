@@ -41,7 +41,7 @@ public:
                        AtlasRegion::Type type = AtlasRegion::TypeBgra8, uint16_t outline = 0);
 
     /// update a pre allocated region
-    void UpdateRegion(const AtlasRegion &region, const uint8_t *bitmap_buffer);
+    void UpdateRegion(const AtlasRegion &region, const uint8_t *bitmap_buffer, AtlasRegion::Type type);
 
     /// Pack the UV coordinates of the four corners of a region to a vertex buffer using the supplied vertex format.
     /// v0 -- v3

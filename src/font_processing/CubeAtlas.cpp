@@ -68,7 +68,7 @@ uint16_t Atlas::AddRegion(uint16_t width, uint16_t height, const uint8_t *bitmap
     uint16_t yy = 0;
     uint32_t idx = 0;
     while (idx < used_layers_) {
-        if (layers_[idx].face_region.GetType() == type && layers_[idx].packer.AddRectangle(width + 1, height + 1, xx, yy)) {
+        if (layers_[idx].packer.AddRectangle(width + 1, height + 1, xx, yy)) {
             break;
         }
 
@@ -102,7 +102,7 @@ uint16_t Atlas::AddRegion(uint16_t width, uint16_t height, const uint8_t *bitmap
     region.height = height;
     region.mask = layers_[idx].face_region.mask;
 
-    UpdateRegion(region, bitmap_buffer);
+    UpdateRegion(region, bitmap_buffer, type);
 
     region.x += outline;
     region.y += outline;
@@ -112,12 +112,12 @@ uint16_t Atlas::AddRegion(uint16_t width, uint16_t height, const uint8_t *bitmap
     return region_count_++;
 }
 
-void Atlas::UpdateRegion(const AtlasRegion &region, const uint8_t *bitmap_buffer) {
+void Atlas::UpdateRegion(const AtlasRegion &region, const uint8_t *bitmap_buffer, AtlasRegion::Type type) {
     uint32_t size = region.width * region.height * 4;
     if (0 < size) {
         const bgfx::Memory *mem = bgfx::alloc(size);
         bx::memSet(mem->data, 0, mem->size); // set to 0 to avoid uninitialized data
-        if (region.GetType() == AtlasRegion::TypeBgra8) {
+        if (type == AtlasRegion::TypeBgra8) {
             const uint8_t *in_line_buffer = bitmap_buffer;
             uint8_t *out_line_buffer = texture_buffer_ + region.GetFaceIndex() * (texture_size_ * texture_size_ * 4) + (((region.y * texture_size_) + region.x) * 4);
 
@@ -134,6 +134,8 @@ void Atlas::UpdateRegion(const AtlasRegion &region, const uint8_t *bitmap_buffer
             const uint8_t *in_line_buffer = bitmap_buffer;
             uint8_t *out_line_buffer = texture_buffer_ + region.GetFaceIndex() * (texture_size_ * texture_size_ * 4) + (((region.y * texture_size_) + region.x) * 4);
 
+            // only copies to a single channel of the output buffer and leaves
+            // the other ones zero (effectively using only the first/blue channel in BGRA8 format)
             for (int yy = 0; yy < region.height; ++yy) {
                 for (int xx = 0; xx < region.width; ++xx) {
                     out_line_buffer[(xx * 4) + layer] = in_line_buffer[xx];
@@ -144,7 +146,6 @@ void Atlas::UpdateRegion(const AtlasRegion &region, const uint8_t *bitmap_buffer
                 out_line_buffer += texture_size_ * 4;
             }
         }
-
         bgfx::updateTextureCube(texture_handle_, 0, (uint8_t) region.GetFaceIndex(), 0, region.x, region.y, region.width, region.height, mem);
     }
 }

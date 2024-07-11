@@ -24,18 +24,17 @@ void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &out_glyph_inf
     const int width = out_glyph_info.width;
     const int height = out_glyph_info.height;
     
-
     // general msdf generation loop
-    for (int y = 0; y < width; y++) {
-        for (int x = 0; x < height; x++) {
-            Vector2 p = Vector2((x + 0.5) / width, (y + 0.5) / height); // todo: apply some sort of transformation
-            auto res = GeneratePixel(shape, p);
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+//            Vector2 p = Vector2((x + 0.5) / width, (y + 0.5) / height); // todo: apply some sort of transformation
+//            auto res = GeneratePixel(shape, p);
             auto index = (y * width + x) * 4;
 
-            output[index] = 255;
-            output[index + 1] = 255;
-            output[index + 2] = 0;
-            output[index + 3] = 255;
+            output[index] = 200;        // B
+            output[index + 1] = 150;    // G
+            output[index + 2] = 200;      // R
+            output[index + 3] = 255;    // A
         }
     }
 }
@@ -163,10 +162,11 @@ void MsdfGenerator::CalculateGlyphMetrics(FT_Face const &face, GlyphInfo &out_gl
 
     out_glyph_info.offset_x = 0;
     out_glyph_info.offset_y = 0;
-    out_glyph_info.width = 8;
-    out_glyph_info.height = 11;
-    out_glyph_info.advance_x = 10;
+    out_glyph_info.width = 50;
+    out_glyph_info.height = 100;
+    out_glyph_info.advance_x = 60;
     out_glyph_info.advance_y = 0;
+    out_glyph_info.bitmap_scale = 1;
 }
 
 int MsdfGenerator::MapDistanceToColorValue(float distance) const {

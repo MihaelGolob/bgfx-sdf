@@ -5,12 +5,6 @@ $input v_color0, v_texcoord0
 SAMPLERCUBE(s_texColor, 0);
 
 void main() {
-    //vec4 out_color = vec4(1,1,1,1);
-	vec4 color = textureCube(s_texColor, v_texcoord0.xyz);
-	//float d = color.b;
-    
-    //float aaf = fwidth(d);
-    //float alpha = smoothstep(0.5 - aaf, 0.5 + aaf, d);
-    
-    gl_FragColor = color;
+    vec4 color = textureCube(s_texColor, v_texcoord0.xyz);
+    gl_FragColor = vec4(color);
 }

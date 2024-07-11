@@ -202,7 +202,7 @@ bool FontManager::PreloadGlyph(FontHandle handle, CodePoint code_point) {
                 break;
             case FontType::Msdf:
                 msdf_generator_.BakeGlyphMsdf(code_point, glyph_info, buffer_);
-//                bitmap_type = AtlasRegion::TypeBgra8; todo: support 3 channel textures
+                bitmap_type = AtlasRegion::TypeBgra8;
                 break;
             default:
                 BX_ASSERT(false, "TextureType not supported yet")
@@ -291,12 +291,9 @@ float FontManager::GetKerning(FontHandle handle, CodePoint prev_code_point, Code
     const CachedFont &cached_font = cached_fonts_[handle.idx];
     if (isValid(cached_font.master_font_handle)) {
         CachedFont &base_font = cached_fonts_[cached_font.master_font_handle.idx];
-        return base_font.true_type_font->scale_
-               * stbtt_GetCodepointKernAdvance(&base_font.true_type_font->font_, prev_code_point, code_point)
-               * cached_font.font_info.scale;
+        return base_font.true_type_font->scale_ * stbtt_GetCodepointKernAdvance(&base_font.true_type_font->font_, prev_code_point, code_point) * cached_font.font_info.scale;
     } else {
-        return cached_font.true_type_font->scale_ *
-               stbtt_GetCodepointKernAdvance(&cached_font.true_type_font->font_, prev_code_point, code_point);
+        return cached_font.true_type_font->scale_ * stbtt_GetCodepointKernAdvance(&cached_font.true_type_font->font_, prev_code_point, code_point);
     }
 }
 

@@ -140,7 +140,6 @@ void TextBufferManager::SubmitTextBuffer(TextBufferHandle handle, bgfx::ViewId i
     bgfx::setTexture(0, tex_color_, font_manager_->GetAtlas()->GetTextureHandle());
 
     bgfx::ProgramHandle program = BGFX_INVALID_HANDLE;
-    // todo mihael: add support for other font types (sdf, msdf, ...)
     // Load the correct shader program based on the font type
     switch (bc.font_type) {
         case FontType::Bitmap:

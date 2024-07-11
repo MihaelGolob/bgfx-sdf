@@ -207,12 +207,15 @@ void TextBuffer::AppendGlyph(FontHandle handle, CodePoint code_point) {
         SetVertex(vertex_count_ + 3, x1, y0, text_color_);
     }
 
+    // first triangle of a quad
     index_buffer_[index_count_ + 0] = vertex_count_ + 0;
     index_buffer_[index_count_ + 1] = vertex_count_ + 1;
     index_buffer_[index_count_ + 2] = vertex_count_ + 2;
+    // second triangle of a quad
     index_buffer_[index_count_ + 3] = vertex_count_ + 0;
     index_buffer_[index_count_ + 4] = vertex_count_ + 2;
     index_buffer_[index_count_ + 5] = vertex_count_ + 3;
+    
     vertex_count_ += 4;
     index_count_ += 6;
 
