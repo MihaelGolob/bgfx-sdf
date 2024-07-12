@@ -8,8 +8,9 @@
 #include "MsdfGenerator.h"
 #include "../utilities.h"
 
-void MsdfGenerator::Init(FT_Face face, uint32_t pixel_height, int16_t padding) {
+void MsdfGenerator::Init(FT_Face face, TrueTypeFont* font, uint32_t pixel_height, int16_t padding) {
     face_ = face;
+    font_ = font;
     scale_ = pixel_height / (float) face->units_per_EM;
     padding_ = padding;
     distance_range_ = 30.0f;
@@ -19,7 +20,7 @@ void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &out_glyph_inf
     auto shape = ParseFtFace(code_point, face_);
     shape.ApplyEdgeColoring(3.0);
 
-    CalculateGlyphMetrics(face_, out_glyph_info);
+    out_glyph_info = font_->GetGlyphInfo(code_point); // todo: could we do this by using freetype instead? this is kinda ugly
     
     const int width = out_glyph_info.width;
     const int height = out_glyph_info.height;
@@ -149,24 +150,6 @@ int MsdfGenerator::FtCubicTo(const FT_Vector *control1, const FT_Vector *control
     }
 
     return 0;
-}
-
-void MsdfGenerator::CalculateGlyphMetrics(FT_Face const &face, GlyphInfo &out_glyph_info) {
-    // todo: fix these metrics!
-//    out_glyph_info.offset_x = 0;
-//    out_glyph_info.offset_y = -10;
-//    out_glyph_info.width = face_->glyph->metrics.width * scale_;
-//    out_glyph_info.height = face_->glyph->metrics.height * scale_;
-//    out_glyph_info.advance_x = bx::round(face_->glyph->advance.x * scale_);
-//    out_glyph_info.advance_y = bx::round(face_->glyph->advance.y * scale_);
-
-    out_glyph_info.offset_x = 0;
-    out_glyph_info.offset_y = 0;
-    out_glyph_info.width = 50;
-    out_glyph_info.height = 100;
-    out_glyph_info.advance_x = 60;
-    out_glyph_info.advance_y = 0;
-    out_glyph_info.bitmap_scale = 1;
 }
 
 int MsdfGenerator::MapDistanceToColorValue(float distance) const {

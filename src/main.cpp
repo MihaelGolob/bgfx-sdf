@@ -82,7 +82,7 @@ void InitFonts() {
     sdf_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::Sdf, 8);
     sdf_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(sdf_font_, 64);
     
-    msdf_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::Msdf, 8);
+    msdf_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 64, FontType::Msdf, 8); // todo change back to 16px
     msdf_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(msdf_font_, 64);
     
     static_original_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Bitmap, BufferType::Static);
@@ -172,7 +172,7 @@ void DrawStaticText() {
     text_buffer_manager_->AppendText(static_sdf_text_buffer_, sdf_scaled_font_, "SDF font scaled from 16px to 64px");
     // draw static msdf text
     text_buffer_manager_->SetPenPosition(static_msdf_text_buffer_, 10.0f, 220.0f);
-    text_buffer_manager_->AppendText(static_msdf_text_buffer_, msdf_font_, "MSDF font scaled from 16px to 64px");
+    text_buffer_manager_->AppendText(static_msdf_text_buffer_, msdf_font_, "SDF font scaled from 16px to 64px");
 }
 
 void Update() {

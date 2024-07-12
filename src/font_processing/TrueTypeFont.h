@@ -25,6 +25,8 @@ public:
 
     /// return the font descriptor of the current font
     FontInfo GetFontInfo();
+    
+    GlyphInfo GetGlyphInfo(CodePoint code_point);
 
     /// raster a glyph as 8bit alpha to a memory buffer
     /// update the GlyphInfo according to the raster strategy

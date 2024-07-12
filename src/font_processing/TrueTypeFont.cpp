@@ -49,6 +49,32 @@ FontInfo TrueTypeFont::GetFontInfo() {
     return out_font_info;
 }
 
+GlyphInfo TrueTypeFont::GetGlyphInfo(CodePoint code_point) {
+    auto glyph_info = GlyphInfo();
+
+    int32_t ascent, descent, line_gap;
+    stbtt_GetFontVMetrics(&font_, &ascent, &descent, &line_gap);
+
+    int32_t advance, lsb;
+    stbtt_GetCodepointHMetrics(&font_, code_point, &advance, &lsb);
+
+    const float scale = scale_;
+    int32_t x0, y0, x1, y1;
+    stbtt_GetCodepointBitmapBox(&font_, code_point, scale, scale, &x0, &y0, &x1, &y1);
+
+    const int32_t glyph_width = x1 - x0;
+    const int32_t glyph_height = y1 - y0;
+
+    glyph_info.offset_x = (float) x0;
+    glyph_info.offset_y = (float) y0;
+    glyph_info.width = (float) glyph_width;
+    glyph_info.height = (float) glyph_height;
+    glyph_info.advance_x = bx::round(((float) advance) * scale);
+    glyph_info.advance_y = bx::round(((float) (ascent + descent + line_gap)) * scale);
+    
+    return glyph_info;
+}
+
 bool TrueTypeFont::BakeGlyphAlpha(CodePoint code_point, GlyphInfo &glyph_info, uint8_t *out_buffer) {
     int32_t ascent, descent, line_gap;
     stbtt_GetFontVMetrics(&font_, &ascent, &descent, &line_gap);

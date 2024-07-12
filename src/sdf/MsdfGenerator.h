@@ -16,13 +16,12 @@ class MsdfGenerator {
 private:
     
 public:
-    void Init(FT_Face face, uint32_t pixel_height, int16_t padding);
+    void Init(FT_Face face, TrueTypeFont* font, uint32_t pixel_height, int16_t padding);
     
     void BakeGlyphMsdf(CodePoint code_point, GlyphInfo &out_glyph_info, uint8_t* output);
     std::array<double, 3> GeneratePixel(const Shape& shape, const Vector2& p);
     
 private:
-    void CalculateGlyphMetrics(const FT_Face& face, GlyphInfo& glyph_info);
     [[nodiscard]] int MapDistanceToColorValue(float distance) const;
     
     // glyph decomposition
@@ -37,6 +36,7 @@ private:
     float distance_range_ = 1.0;
     
     FT_Face face_;
+    TrueTypeFont* font_;
 };
 
 // used for decomposition of the glyph
