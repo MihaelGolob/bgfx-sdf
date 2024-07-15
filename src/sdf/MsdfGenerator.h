@@ -16,9 +16,9 @@ class MsdfGenerator {
 private:
     
 public:
-    void Init(FT_Face face, TrueTypeFont* font, uint32_t pixel_height, int16_t padding);
+    void Init(FT_Face face, uint32_t font_size);
     
-    void BakeGlyphMsdf(CodePoint code_point, GlyphInfo &out_glyph_info, uint8_t* output);
+    void BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t* output);
     std::array<double, 3> GeneratePixel(const Shape& shape, const Vector2& p);
     
 private:
@@ -32,14 +32,12 @@ private:
     static int FtLineTo(const FT_Vector* to, void* user);
     static int FtConicTo(const FT_Vector* control, const FT_Vector* to, void* user);
     static int FtCubicTo(const FT_Vector* control1, const FT_Vector* control2, const FT_Vector* to, void* user);
-    void CalculateGlyphMetrics(FT_Face const &face, GlyphInfo &out_glyph_info); // todo: temporary
+    static void CalculateGlyphMetrics(FT_Face const &face, GlyphInfo &out_glyph_info);
     
-    float scale_ = 1;
-    float padding_ = 0;
+    float font_size_ = 0;
     float distance_range_ = 1.0;
     
     FT_Face face_;
-    TrueTypeFont* font_;
 };
 
 // used for decomposition of the glyph

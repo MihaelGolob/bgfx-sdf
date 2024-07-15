@@ -5,9 +5,12 @@
 #pragma once
 
 #include "../font_decomposition/Shape.h"
+#include "../font_processing/GlyphInfo.h"
 
 class DebugShapeGenerator {
 public:
     static Shape GetGlyphI();
     static Shape GetGlyphA();
+    
+    static GlyphInfo GetDebugGlyphInfo();
 };

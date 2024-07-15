@@ -44,3 +44,20 @@ Shape DebugShapeGenerator::GetGlyphA() {
 
     return shape;
 }
+
+GlyphInfo DebugShapeGenerator::GetDebugGlyphInfo() {
+    auto out_glyph_info = GlyphInfo();
+    out_glyph_info.width = 50;
+    out_glyph_info.height = 100;
+
+    out_glyph_info.advance_x = 60;
+    out_glyph_info.advance_y = 0;
+
+    out_glyph_info.offset_x = 0;
+    out_glyph_info.offset_y = 0;
+
+    out_glyph_info.bitmap_scale = 1;
+    
+    return out_glyph_info;
+}
+

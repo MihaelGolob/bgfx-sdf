@@ -9,36 +9,38 @@
 #include "../utilities.h"
 #include "../helper/DebugShapeGenerator.h"
 
-void MsdfGenerator::Init(FT_Face face, TrueTypeFont *font, uint32_t pixel_height, int16_t padding) {
+void MsdfGenerator::Init(FT_Face face, uint32_t font_size) {
     face_ = face;
-    font_ = font;
-    scale_ = pixel_height / (float) face->units_per_EM;
-    padding_ = padding;
+    font_size_ = font_size;
     distance_range_ = 50.0;
+
+    FT_Set_Pixel_Sizes(face, 0, font_size_);
 }
 
-void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &out_glyph_info, uint8_t *output) {
+void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t *output) {
     auto shape = ParseFtFace(code_point, face_);
-    shape = DebugShapeGenerator::GetGlyphA(); // todo: debugging purposes
     shape.ApplyEdgeColoring(3.0);
 
-    out_glyph_info = font_->GetGlyphInfo(code_point); // todo: could we do this by using freetype instead? this is kinda ugly
-    CalculateGlyphMetrics(face_, out_glyph_info); // todo: only temporary!!
-
-    const int width = out_glyph_info.width;
-    const int height = out_glyph_info.height;
-
+    CalculateGlyphMetrics(face_, glyph_info);
+    
+    int width = glyph_info.width;
+    int height = glyph_info.height;
     // general msdf generation loop
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
-            Vector2 p = Vector2((x + 0.5), (y + 0.5)); // todo: apply some sort of transformation
-            auto res = GeneratePixel(shape, p);
+//            Vector2 p = Vector2((x + 0.5), (y + 0.5)); // todo: apply some sort of transformation
+//            auto res = GeneratePixel(shape, p);
             auto index = (y * width + x) * 4;
 
-            output[index] = MapDistanceToColorValue(res[0]);        // B
-            output[index + 1] = MapDistanceToColorValue(res[1]);    // G
-            output[index + 2] = MapDistanceToColorValue(res[2]);    // R
-            output[index + 3] = 255;    // A
+//            output[index] = MapDistanceToColorValue(res[0]);        // B
+//            output[index + 1] = MapDistanceToColorValue(res[1]);    // G
+//            output[index + 2] = MapDistanceToColorValue(res[2]);    // R
+//            output[index + 3] = 255;    // A
+
+            output[index] = 255;
+            output[index + 1] = 255;
+            output[index + 2] = 0;
+            output[index + 3] = 255;
         }
     }
 }
@@ -86,7 +88,8 @@ std::array<double, 3> MsdfGenerator::GeneratePixel(const Shape &shape, const Vec
 }
 
 Shape MsdfGenerator::ParseFtFace(CodePoint code_point, FT_Face face) {
-    if (FT_Load_Glyph(face, code_point, FT_LOAD_NO_SCALE)) {
+    auto glyph_index = FT_Get_Char_Index(face, code_point);
+    if (FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT)) {
         PrintError("Failed to load glyph");
         return {};
     }
@@ -107,7 +110,7 @@ Shape MsdfGenerator::ParseFtFace(CodePoint code_point, FT_Face face) {
     ft_functions.delta = 0;
 
     FT_Outline_Decompose(&face->glyph->outline, &ft_functions, &context);
-
+    
     return output;
 }
 
@@ -173,12 +176,14 @@ void MsdfGenerator::ClampArrayToRange(std::array<double, 3> &array) {
 }
 
 void MsdfGenerator::CalculateGlyphMetrics(FT_Face const &face, GlyphInfo &out_glyph_info) {
-    // todo: only temporary!!!
-    out_glyph_info.offset_x = 0;
-    out_glyph_info.offset_y = 0;
-    out_glyph_info.width = 50;
-    out_glyph_info.height = 100;
-    out_glyph_info.advance_x = 60;
-    out_glyph_info.advance_y = 0;
+    out_glyph_info.width = face->glyph->metrics.width >> 6;
+    out_glyph_info.height = face->glyph->metrics.height >> 6;
+    
+    out_glyph_info.advance_x = face->glyph->advance.x >> 6;
+    out_glyph_info.advance_y = face->glyph->advance.y >> 6;
+    
+    out_glyph_info.offset_x = face->glyph->metrics.horiBearingX >> 6;
+    out_glyph_info.offset_y = -face->glyph->metrics.horiBearingY >> 6;
+    
     out_glyph_info.bitmap_scale = 1;
 }
