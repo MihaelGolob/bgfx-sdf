@@ -7,8 +7,8 @@
 #include "../utilities.h"
 
 Vector2::Vector2(const FT_Vector v, float scale) {
-    x = v.x * scale;
-    y = v.y * scale;
+    x = (long) (v.x * scale) >> 6;
+    y = (long) (v.y * scale) >> 6;
 }
 
 Vector2::Vector2(float x, float y) : x{x}, y{y} {}

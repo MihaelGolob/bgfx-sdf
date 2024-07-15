@@ -28,19 +28,15 @@ void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, u
     // general msdf generation loop
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
-//            Vector2 p = Vector2((x + 0.5), (y + 0.5)); // todo: apply some sort of transformation
-//            auto res = GeneratePixel(shape, p);
+            Vector2 p = Vector2((x + 0.5), (y + 0.5)); // todo: apply some sort of transformation
+            auto res = GeneratePixel(shape, p);
             auto index = (y * width + x) * 4;
+            index = ((height - y - 1) * width + x) * 4; // flip over y axis
 
-//            output[index] = MapDistanceToColorValue(res[0]);        // B
-//            output[index + 1] = MapDistanceToColorValue(res[1]);    // G
-//            output[index + 2] = MapDistanceToColorValue(res[2]);    // R
-//            output[index + 3] = 255;    // A
-
-            output[index] = 255;
-            output[index + 1] = 255;
-            output[index + 2] = 0;
-            output[index + 3] = 255;
+            output[index] = MapDistanceToColorValue(res[0]);        // B
+            output[index + 1] = MapDistanceToColorValue(res[1]);    // G
+            output[index + 2] = MapDistanceToColorValue(res[2]);    // R
+            output[index + 3] = 255;                                         // A
         }
     }
 }
