@@ -13,8 +13,8 @@ void main() {
     float d = median(color.r, color.g, color.b) - 0.5;
     float w = clamp(d / fwidth(d) + 0.5, 0.0, 1.0);
     
-    vec4 outside_color = vec4(0.0, 0.0, 0.0, 1.0);
+    vec4 outside_color = vec4(0.0, 0.0, 0.0, 0.0);
     vec4 inside_color = vec4(1.0, 1.0, 1.0, 1.0);
     
-    gl_FragColor = mix(outside_color, inside_color, w);
+    gl_FragColor = mix(inside_color, outside_color, w);
 }
