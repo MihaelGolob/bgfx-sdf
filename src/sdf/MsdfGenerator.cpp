@@ -7,6 +7,7 @@
 
 #include "MsdfGenerator.h"
 #include "../utilities.h"
+#include "../helper/DebugShapeGenerator.h"
 
 void MsdfGenerator::Init(FT_Face face, TrueTypeFont *font, uint32_t pixel_height, int16_t padding) {
     face_ = face;
@@ -16,26 +17,9 @@ void MsdfGenerator::Init(FT_Face face, TrueTypeFont *font, uint32_t pixel_height
     distance_range_ = 50.0;
 }
 
-// todo: only for debugging purposes
-Shape GetGlyphI() {
-    // returns a glyph "I" shape in the 4th quadrant
-    // bbox of shape is [0, 50] in x and [0, 100] in y
-    auto shape = Shape();
-
-    // outer contour
-    auto outer = Contour();
-    outer.AddEdge(EdgeHolder({20, 10}, {30, 10}));
-    outer.AddEdge(EdgeHolder({30, 10}, {30, 90}));
-    outer.AddEdge(EdgeHolder({30, 90}, {20, 90}));
-    outer.AddEdge(EdgeHolder({20, 90}, {20, 10}));
-    shape.contours.emplace_back(outer);
-
-    return shape;
-}
-
 void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &out_glyph_info, uint8_t *output) {
     auto shape = ParseFtFace(code_point, face_);
-    shape = GetGlyphI(); // todo: debugging purposes
+    shape = DebugShapeGenerator::GetGlyphA(); // todo: debugging purposes
     shape.ApplyEdgeColoring(3.0);
 
     out_glyph_info = font_->GetGlyphInfo(code_point); // todo: could we do this by using freetype instead? this is kinda ugly
@@ -55,8 +39,6 @@ void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &out_glyph_inf
             output[index + 1] = MapDistanceToColorValue(res[1]);    // G
             output[index + 2] = MapDistanceToColorValue(res[2]);    // R
             output[index + 3] = 255;    // A
-
-//            printf("Pixel at (%d, %d) is %d %d %d\n", x, y, output[index], output[index + 1], output[index + 2]);
         }
     }
 }
@@ -176,7 +158,6 @@ int MsdfGenerator::FtCubicTo(const FT_Vector *control1, const FT_Vector *control
 }
 
 int MsdfGenerator::MapDistanceToColorValue(float distance) const {
-//    return distance;
     return (int) std::lround((distance / distance_range_ + 0.5f) * 255);
 }
 

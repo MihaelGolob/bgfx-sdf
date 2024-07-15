@@ -51,6 +51,8 @@ add_library(bgfx-sdf STATIC
 		src/font_decomposition/EdgeHolder.h
 		src/helper/EquationSolver.h
 		src/helper/EquationSolver.cpp
+		src/helper/DebugShapeGenerator.cpp
+		src/helper/DebugShapeGenerator.h
 )
 
 target_compile_features(bgfx-sdf PUBLIC cxx_std_17)
