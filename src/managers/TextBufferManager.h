@@ -65,4 +65,5 @@ private:
     bgfx::ProgramHandle basic_program_{};
     bgfx::ProgramHandle sdf_program_{};
     bgfx::ProgramHandle msdf_program_{};
+    bgfx::ProgramHandle color_program_{};
 };
