@@ -23,6 +23,8 @@ public:
     
 private:
     [[nodiscard]] int MapDistanceToColorValue(float distance) const;
+    [[nodiscard]] float ClampDistanceToRange(float distance) const;
+    void ClampArrayToRange(std::array<double, 3>& array);
     
     // glyph decomposition
     static Shape ParseFtFace(CodePoint code_point, FT_Face face);
@@ -30,6 +32,7 @@ private:
     static int FtLineTo(const FT_Vector* to, void* user);
     static int FtConicTo(const FT_Vector* control, const FT_Vector* to, void* user);
     static int FtCubicTo(const FT_Vector* control1, const FT_Vector* control2, const FT_Vector* to, void* user);
+    void CalculateGlyphMetrics(FT_Face const &face, GlyphInfo &out_glyph_info); // todo: temporary
     
     float scale_ = 1;
     float padding_ = 0;
