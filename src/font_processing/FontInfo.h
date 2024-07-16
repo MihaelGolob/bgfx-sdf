@@ -6,7 +6,8 @@
 
 enum class FontType {
     Bitmap, // normal
-    Sdf, // signed distance field
+    SdfFromBitmap, // signed distance field
+    SdfFromVector,
     Msdf, // multichannel signed distance field
     Color, // multichannel color bitmap
 };

@@ -16,6 +16,23 @@ void MsdfGenerator::Init(FT_Face face, uint32_t font_size) {
     FT_Set_Pixel_Sizes(face, 0, font_size_);
 }
 
+void MsdfGenerator::BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t *output) {
+    auto shape = ParseFtFace(code_point, face_);
+    shape.ApplyEdgeColoring(3.0);
+
+    CalculateGlyphMetrics(face_, glyph_info);
+
+    int width = glyph_info.width;
+    int height = glyph_info.height;
+    
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            auto index = ((height - y - 1) * width + x) * 4; // flip over y axis
+            output[index] = 255;
+        }
+    }
+}
+
 void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t *output) {
     auto shape = ParseFtFace(code_point, face_);
     shape.ApplyEdgeColoring(3.0);

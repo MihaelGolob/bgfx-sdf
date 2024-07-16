@@ -197,8 +197,11 @@ bool FontManager::PreloadGlyph(FontHandle handle, CodePoint code_point) {
             case FontType::Bitmap:
                 font.true_type_font->BakeGlyphAlpha(code_point, glyph_info, buffer_);
                 break;
-            case FontType::Sdf:
+            case FontType::SdfFromBitmap:
                 font.true_type_font->BakeGlyphSdf(code_point, glyph_info, buffer_);
+                break;
+            case FontType::SdfFromVector:
+                msdf_generator_.BakeGlyphSdf(code_point, glyph_info, buffer_);
                 break;
             case FontType::Msdf:
                 msdf_generator_.BakeGlyphMsdf(code_point, glyph_info, buffer_);

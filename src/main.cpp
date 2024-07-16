@@ -28,16 +28,23 @@ InputManager* input_manager_;
 // fonts
 TrueTypeHandle font_file_;
 FontHandle original_font_;
+
 FontHandle bitmap_font_;
 FontHandle bitmap_scaled_font_;
-FontHandle sdf_font_;
-FontHandle sdf_scaled_font_;
+
+FontHandle sdf_bitmap_font_;
+FontHandle sdf_bitmap_scaled_font_;
+
+FontHandle sdf_vector_font_;
+FontHandle sdf_vector_scaled_font_;
+
 FontHandle msdf_font_;
 FontHandle msdf_scaled_font_;
 
 TextBufferHandle original_text_buffer_;
 TextBufferHandle bitmap_text_buffer_;
-TextBufferHandle sdf_text_buffer_;
+TextBufferHandle sdf_bitmap_text_buffer_;
+TextBufferHandle sdf_vector_text_buffer_;
 TextBufferHandle msdf_text_buffer_;
 
 // function handlers
@@ -78,15 +85,19 @@ void InitFonts() {
     bitmap_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::Bitmap, 0);
     bitmap_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(bitmap_font_, 64); // create scaled fonts to show the power of SDF
     
-    sdf_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::Sdf, 8);
-    sdf_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(sdf_font_, 64);
+    sdf_bitmap_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::SdfFromBitmap, 8);
+    sdf_bitmap_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(sdf_bitmap_font_, 64);
+
+    sdf_vector_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::SdfFromVector, 8);
+    sdf_vector_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(sdf_vector_font_, 64);
     
     msdf_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::Msdf, 8);
     msdf_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(msdf_font_, 64);
 
     original_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Bitmap, BufferType::Transient);
     bitmap_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Bitmap, BufferType::Transient);
-    sdf_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Sdf, BufferType::Transient);
+    sdf_bitmap_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::SdfFromBitmap, BufferType::Transient);
+    sdf_vector_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Color, BufferType::Transient);
     msdf_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Msdf, BufferType::Transient);
 }
 
@@ -156,7 +167,8 @@ void SetViewTransform() {
 void ClearTextBuffers() {
     text_buffer_manager_->ClearTextBuffer(original_text_buffer_);
     text_buffer_manager_->ClearTextBuffer(bitmap_text_buffer_);
-    text_buffer_manager_->ClearTextBuffer(sdf_text_buffer_);
+    text_buffer_manager_->ClearTextBuffer(sdf_bitmap_text_buffer_);
+    text_buffer_manager_->ClearTextBuffer(sdf_vector_text_buffer_);
     text_buffer_manager_->ClearTextBuffer(msdf_text_buffer_);
 }
 
@@ -174,10 +186,13 @@ void Update() {
         text_buffer_manager_->SetPenPosition(bitmap_text_buffer_, 10.0f, 80.0f);
         text_buffer_manager_->AppendText(bitmap_text_buffer_, bitmap_scaled_font_, dynamic_text_.c_str());
         
-        text_buffer_manager_->SetPenPosition(sdf_text_buffer_, 10.0f, 150.0f);
-        text_buffer_manager_->AppendText(sdf_text_buffer_, sdf_scaled_font_, dynamic_text_.c_str());
+        text_buffer_manager_->SetPenPosition(sdf_bitmap_text_buffer_, 10.0f, 150.0f);
+        text_buffer_manager_->AppendText(sdf_bitmap_text_buffer_, sdf_bitmap_scaled_font_, dynamic_text_.c_str());
+
+        text_buffer_manager_->SetPenPosition(sdf_vector_text_buffer_, 10.0f, 220.0f);
+        text_buffer_manager_->AppendText(sdf_vector_text_buffer_, sdf_vector_scaled_font_, dynamic_text_.c_str()); 
         
-        text_buffer_manager_->SetPenPosition(msdf_text_buffer_, 10.0f, 220.0f);
+        text_buffer_manager_->SetPenPosition(msdf_text_buffer_, 10.0f, 290.0f);
         text_buffer_manager_->AppendText(msdf_text_buffer_, msdf_scaled_font_, dynamic_text_.c_str());
         
         SetViewTransform();
@@ -186,7 +201,8 @@ void Update() {
         text_buffer_manager_->SubmitTextBuffer(original_text_buffer_, 0);
         text_buffer_manager_->SubmitTextBuffer(bitmap_text_buffer_, 0);
         text_buffer_manager_->SubmitTextBuffer(msdf_text_buffer_, 0);
-        text_buffer_manager_->SubmitTextBuffer(sdf_text_buffer_, 0);
+        text_buffer_manager_->SubmitTextBuffer(sdf_vector_text_buffer_, 0);
+        text_buffer_manager_->SubmitTextBuffer(sdf_bitmap_text_buffer_, 0);
 
         bgfx::frame();
     }
@@ -201,17 +217,24 @@ void Shutdown() {
     
     // destroy font handles
     font_manager_->DestroyFont(original_font_);
+    
     font_manager_->DestroyFont(bitmap_font_);
     font_manager_->DestroyFont(bitmap_scaled_font_);
-    font_manager_->DestroyFont(sdf_font_);
-    font_manager_->DestroyFont(sdf_scaled_font_);
+    
+    font_manager_->DestroyFont(sdf_bitmap_font_);
+    font_manager_->DestroyFont(sdf_bitmap_scaled_font_);
+    
+    font_manager_->DestroyFont(sdf_vector_font_);
+    font_manager_->DestroyFont(sdf_vector_scaled_font_);
+    
     font_manager_->DestroyFont(msdf_font_);
     font_manager_->DestroyFont(msdf_scaled_font_);
     
     // destroy text buffer handles
     text_buffer_manager_->DestroyTextBuffer(original_text_buffer_);
     text_buffer_manager_->DestroyTextBuffer(bitmap_text_buffer_);
-    text_buffer_manager_->DestroyTextBuffer(sdf_text_buffer_);
+    text_buffer_manager_->DestroyTextBuffer(sdf_bitmap_text_buffer_);
+    text_buffer_manager_->DestroyTextBuffer(sdf_vector_text_buffer_);
     text_buffer_manager_->DestroyTextBuffer(msdf_text_buffer_);
     
     // unsubscribe from input manager

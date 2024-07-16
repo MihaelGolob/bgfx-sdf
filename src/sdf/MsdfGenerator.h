@@ -19,6 +19,8 @@ public:
     void Init(FT_Face face, uint32_t font_size);
     
     void BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t* output);
+    void BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t* output);
+    
     std::array<double, 3> GeneratePixel(const Shape& shape, const Vector2& p);
     
 private:
