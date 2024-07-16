@@ -22,13 +22,13 @@ void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, u
     shape.ApplyEdgeColoring(3.0);
 
     CalculateGlyphMetrics(face_, glyph_info);
-    
+
     int width = glyph_info.width;
     int height = glyph_info.height;
     // general msdf generation loop
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
-            Vector2 p = Vector2((x + 0.5), (y + 0.5)); // todo: apply some sort of transformation
+            Vector2 p = Vector2((x + 0.5), (y + 0.5)) + Vector2(0, -((face_->glyph->metrics.height >> 6) - (face_->glyph->metrics.horiBearingY >> 6))); // todo: apply some sort of transformation
             auto res = GeneratePixel(shape, p);
             auto index = (y * width + x) * 4;
             index = ((height - y - 1) * width + x) * 4; // flip over y axis
@@ -93,8 +93,7 @@ Shape MsdfGenerator::ParseFtFace(CodePoint code_point, FT_Face face) {
     Shape output{};
 
     FtContext context{};
-    double scale = 1.0; // todo: support different scale types
-    context.scale = scale;
+    context.scale = 1.0 / 64.0; // default for freetype
     context.shape = &output;
 
     FT_Outline_Funcs_ ft_functions{};
@@ -106,7 +105,7 @@ Shape MsdfGenerator::ParseFtFace(CodePoint code_point, FT_Face face) {
     ft_functions.delta = 0;
 
     FT_Outline_Decompose(&face->glyph->outline, &ft_functions, &context);
-    
+
     return output;
 }
 
@@ -174,12 +173,12 @@ void MsdfGenerator::ClampArrayToRange(std::array<double, 3> &array) {
 void MsdfGenerator::CalculateGlyphMetrics(FT_Face const &face, GlyphInfo &out_glyph_info) {
     out_glyph_info.width = face->glyph->metrics.width >> 6;
     out_glyph_info.height = face->glyph->metrics.height >> 6;
-    
+
     out_glyph_info.advance_x = face->glyph->advance.x >> 6;
     out_glyph_info.advance_y = face->glyph->advance.y >> 6;
-    
+
     out_glyph_info.offset_x = face->glyph->metrics.horiBearingX >> 6;
     out_glyph_info.offset_y = -face->glyph->metrics.horiBearingY >> 6;
-    
+
     out_glyph_info.bitmap_scale = 1;
 }
