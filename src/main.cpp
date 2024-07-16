@@ -35,17 +35,16 @@ FontHandle sdf_scaled_font_;
 FontHandle msdf_font_;
 FontHandle msdf_scaled_font_;
 
-TextBufferHandle static_original_text_buffer_;
-TextBufferHandle static_bitmap_text_buffer_;
-TextBufferHandle static_sdf_text_buffer_;
-TextBufferHandle static_msdf_text_buffer_;
-TextBufferHandle dynamic_text_buffer_;
+TextBufferHandle original_text_buffer_;
+TextBufferHandle bitmap_text_buffer_;
+TextBufferHandle sdf_text_buffer_;
+TextBufferHandle msdf_text_buffer_;
 
 // function handlers
 FunctionId key_pressed_id_;
 FunctionId key_released_id_;
 
-std::string dynamic_text_;
+std::string dynamic_text_ = "Lorem ipsum dolor sit amet, consectetur adipiscing elit";
 
 bool shift_pressed_ = false;
 
@@ -84,12 +83,11 @@ void InitFonts() {
     
     msdf_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::Msdf, 8);
     msdf_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(msdf_font_, 64);
-    
-    static_original_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Bitmap, BufferType::Static);
-    static_bitmap_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Bitmap, BufferType::Static);
-    static_sdf_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Sdf, BufferType::Static);
-    static_msdf_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Msdf, BufferType::Static);
-    dynamic_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Sdf, BufferType::Transient);
+
+    original_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Bitmap, BufferType::Transient);
+    bitmap_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Bitmap, BufferType::Transient);
+    sdf_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Sdf, BufferType::Transient);
+    msdf_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Msdf, BufferType::Transient);
 }
 
 void HandleKeyPressed(int key) {
@@ -103,8 +101,6 @@ void HandleKeyPressed(int key) {
         int offset = shift_pressed_ ? 'A' - 'a' : 0; // if shift is pressed, convert to uppercase
         dynamic_text_ += (char) (InputManager::GetKeyChar(key) + offset);
     }
-    
-    PrintInfo(dynamic_text_);
 }
 
 void HandleKeyReleased(int key) {
@@ -157,22 +153,11 @@ void SetViewTransform() {
     bgfx::setViewRect(0, 0, 0, uint16_t(k_window_width_), uint16_t(k_window_height_) );
 }
 
-void DrawStaticText() {
-    text_buffer_manager_->ClearTextBuffer(static_bitmap_text_buffer_);
-    text_buffer_manager_->ClearTextBuffer(static_sdf_text_buffer_);
-
-    // draw original text
-    text_buffer_manager_->SetPenPosition(static_original_text_buffer_, 10.0f, 10.0f);
-    text_buffer_manager_->AppendText(static_original_text_buffer_, original_font_, "Lorem ipsum dolor sit amet, consectetur adipiscing elit");
-    // draw static bitmap text
-    text_buffer_manager_->SetPenPosition(static_bitmap_text_buffer_, 10.0f, 80.0f);
-    text_buffer_manager_->AppendText(static_bitmap_text_buffer_, bitmap_scaled_font_, "Lorem ipsum dolor sit amet, consectetur adipiscing elit");
-    // draw static sdf text
-    text_buffer_manager_->SetPenPosition(static_sdf_text_buffer_, 10.0f, 150.0f);
-    text_buffer_manager_->AppendText(static_sdf_text_buffer_, sdf_scaled_font_, "Lorem ipsum dolor sit amet, consectetur adipiscing elit");
-    // draw static msdf text
-    text_buffer_manager_->SetPenPosition(static_msdf_text_buffer_, 10.0f, 220.0f);
-    text_buffer_manager_->AppendText(static_msdf_text_buffer_, msdf_scaled_font_, "Lorem ipsum dolor sit amet, consectetur adipiscing elit");
+void ClearTextBuffers() {
+    text_buffer_manager_->ClearTextBuffer(original_text_buffer_);
+    text_buffer_manager_->ClearTextBuffer(bitmap_text_buffer_);
+    text_buffer_manager_->ClearTextBuffer(sdf_text_buffer_);
+    text_buffer_manager_->ClearTextBuffer(msdf_text_buffer_);
 }
 
 void Update() {
@@ -181,19 +166,27 @@ void Update() {
         glfwPollEvents();
         bgfx::touch(0);
         
-        // draw dynamically typed text
-        text_buffer_manager_->ClearTextBuffer(dynamic_text_buffer_);
-        text_buffer_manager_->SetPenPosition(dynamic_text_buffer_, 10.0f, 290.0f);
-        text_buffer_manager_->AppendText(dynamic_text_buffer_, sdf_scaled_font_, dynamic_text_.c_str());
+        ClearTextBuffers();
+
+        text_buffer_manager_->SetPenPosition(original_text_buffer_, 10.0f, 10.0f);
+        text_buffer_manager_->AppendText(original_text_buffer_, original_font_, dynamic_text_.c_str());
+        
+        text_buffer_manager_->SetPenPosition(bitmap_text_buffer_, 10.0f, 80.0f);
+        text_buffer_manager_->AppendText(bitmap_text_buffer_, bitmap_scaled_font_, dynamic_text_.c_str());
+        
+        text_buffer_manager_->SetPenPosition(sdf_text_buffer_, 10.0f, 150.0f);
+        text_buffer_manager_->AppendText(sdf_text_buffer_, sdf_scaled_font_, dynamic_text_.c_str());
+        
+        text_buffer_manager_->SetPenPosition(msdf_text_buffer_, 10.0f, 220.0f);
+        text_buffer_manager_->AppendText(msdf_text_buffer_, msdf_scaled_font_, dynamic_text_.c_str());
         
         SetViewTransform();
 
         // draw text buffers
-        text_buffer_manager_->SubmitTextBuffer(dynamic_text_buffer_, 0);
-        text_buffer_manager_->SubmitTextBuffer(static_original_text_buffer_, 0);
-        text_buffer_manager_->SubmitTextBuffer(static_bitmap_text_buffer_, 0);
-        text_buffer_manager_->SubmitTextBuffer(static_msdf_text_buffer_, 0);
-        text_buffer_manager_->SubmitTextBuffer(static_sdf_text_buffer_, 0);
+        text_buffer_manager_->SubmitTextBuffer(original_text_buffer_, 0);
+        text_buffer_manager_->SubmitTextBuffer(bitmap_text_buffer_, 0);
+        text_buffer_manager_->SubmitTextBuffer(msdf_text_buffer_, 0);
+        text_buffer_manager_->SubmitTextBuffer(sdf_text_buffer_, 0);
 
         bgfx::frame();
     }
@@ -216,11 +209,10 @@ void Shutdown() {
     font_manager_->DestroyFont(msdf_scaled_font_);
     
     // destroy text buffer handles
-    text_buffer_manager_->DestroyTextBuffer(static_original_text_buffer_);
-    text_buffer_manager_->DestroyTextBuffer(static_bitmap_text_buffer_);
-    text_buffer_manager_->DestroyTextBuffer(static_sdf_text_buffer_);
-    text_buffer_manager_->DestroyTextBuffer(static_msdf_text_buffer_);
-    text_buffer_manager_->DestroyTextBuffer(dynamic_text_buffer_);
+    text_buffer_manager_->DestroyTextBuffer(original_text_buffer_);
+    text_buffer_manager_->DestroyTextBuffer(bitmap_text_buffer_);
+    text_buffer_manager_->DestroyTextBuffer(sdf_text_buffer_);
+    text_buffer_manager_->DestroyTextBuffer(msdf_text_buffer_);
     
     // unsubscribe from input manager
     InputManager::UnsubscribeKeyPressed(key_pressed_id_);
@@ -240,7 +232,6 @@ int main() {
     InitFonts();
     InitInputManager();
     
-    DrawStaticText();
     // update loop
     Update();
     
