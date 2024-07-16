@@ -72,7 +72,7 @@ void InitFonts() {
     font_manager_ = new FontManager(1024);
     text_buffer_manager_ = new TextBufferManager(font_manager_);
     
-    font_file_ = font_manager_->CreateTtf("../assets/fonts/OpenSans-Regular.ttf");
+    font_file_ = font_manager_->CreateTtf("../assets/fonts/OpenSans-Bold.ttf");
     
     original_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 64, FontType::Bitmap, 0);
     
