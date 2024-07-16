@@ -216,5 +216,31 @@ TEST_CASE("EdgeSegment", "[EdgeSegment]") {
         REQUIRE(distance1 == Approx(distance2));
         REQUIRE(b1->GetOrthogonality(point, t1) > b2->GetOrthogonality(point, t2));
     }
+
+    SECTION("Angle") {
+        SECTION("Parallel line segments") {
+            auto edge1 = EdgeHolder({0, 0}, {1, 1});
+            auto edge2 = EdgeHolder({1, 1}, {2, 2});
+            
+            auto angle = EdgeSegment::GetAngleDeg(edge1, edge2, 1, 0);
+            REQUIRE(angle == Approx(0));
+        }
+        
+        SECTION("Orthogonal line segments") {
+            auto edge1 = EdgeHolder({0, 0}, {1, 0});
+            auto edge2 = EdgeHolder({1, 0}, {1, 1});
+            
+            auto angle = EdgeSegment::GetAngleDeg(edge1, edge2, 1, 0);
+            REQUIRE(angle == Approx(90));
+        }
+        
+        SECTION("45 degree line segments") {
+            auto edge1 = EdgeHolder({0, 0}, {1, 1});
+            auto edge2 = EdgeHolder({1, 1}, {1, 2});
+            
+            auto angle = EdgeSegment::GetAngleDeg(edge1, edge2, 1, 0);
+            REQUIRE(angle == Approx(45));
+        }
+    }
 }
 
