@@ -11,15 +11,24 @@ Contour& Shape::AddEmptyContour() {
 }
 
 void Shape::ApplyEdgeColoring(float max_angle) {
-    // todo: make this more sophisticated
     for (auto& c : contours) {
         auto current_color = EdgeColor::White;
         if (c.edges.size() > 1) current_color = EdgeColor::Magenta;
         
-        for (auto& e : c.edges) {
-            e->color = current_color;
+        auto next_color = [&current_color]() {
             if (current_color == EdgeColor::Yellow) current_color = EdgeColor::Cyan;
-            else current_color = EdgeColor::Yellow;
+            else current_color = EdgeColor::Yellow; 
+        };
+        
+        auto previous_edge = EdgeHolder();
+        for (auto& e : c.edges) {
+            if (previous_edge.IsValid()) {
+                const auto angle = EdgeSegment::GetAngleDeg(previous_edge, e, 1, 0);
+                if (angle > max_angle) next_color();
+            }
+            
+            e->color = current_color;
+            previous_edge = e;
         }
     }
 }
