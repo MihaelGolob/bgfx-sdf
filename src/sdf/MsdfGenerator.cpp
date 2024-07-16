@@ -7,12 +7,11 @@
 
 #include "MsdfGenerator.h"
 #include "../utilities.h"
-#include "../helper/DebugShapeGenerator.h"
 
 void MsdfGenerator::Init(FT_Face face, uint32_t font_size) {
     face_ = face;
     font_size_ = font_size;
-    distance_range_ = 7.0;
+    distance_range_ = font_size_ / 2.0; // todo: is this good enough? 
 
     FT_Set_Pixel_Sizes(face, 0, font_size_);
 }
@@ -28,7 +27,9 @@ void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, u
     // general msdf generation loop
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
-            Vector2 p = Vector2((x + 0.5), (y + 0.5)) + Vector2(0, -((face_->glyph->metrics.height >> 6) - (face_->glyph->metrics.horiBearingY >> 6))); // todo: apply some sort of transformation
+            auto translation = Vector2(face_->glyph->metrics.horiBearingX >> 6, -((face_->glyph->metrics.height >> 6) - (face_->glyph->metrics.horiBearingY >> 6)));
+            Vector2 p = Vector2((x + 0.5), (y + 0.5)) + translation;
+            
             auto res = GeneratePixel(shape, p);
             auto index = ((height - y - 1) * width + x) * 4; // flip over y axis
 
