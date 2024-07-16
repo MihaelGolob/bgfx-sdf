@@ -7,3 +7,7 @@
 EdgeHolder::~EdgeHolder() {
 //    delete edge; todo: deleting edge causes SEG FAULT ???
 }
+
+bool EdgeHolder::IsValid() {
+    return edge_ != nullptr;
+}

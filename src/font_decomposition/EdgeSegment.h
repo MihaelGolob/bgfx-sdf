@@ -28,6 +28,7 @@ public:
     [[nodiscard]] virtual Vector2 GetPoint(double t) const = 0;
     [[nodiscard]] virtual Vector2 GetDirection(double t) const = 0;
     [[nodiscard]] virtual double GetOrthogonality(const Vector2 &p, double t) const;
+    [[nodiscard]] static double GetAngleDeg(const EdgeSegment* edge1, const EdgeSegment* edge2, double t1, double t2);
 
     EdgeColor color = EdgeColor::White;
 };

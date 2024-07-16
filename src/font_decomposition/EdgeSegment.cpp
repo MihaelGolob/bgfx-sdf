@@ -38,6 +38,9 @@ int EdgeSegment::GetSign(const Vector2 &p, double &t) const {
     return (GetPoint(t) - p).Cross(GetDirection(t)) > 0 ? -1 : 1;
 }
 
+double EdgeSegment::GetAngleDeg(const EdgeSegment *edge1, const EdgeSegment *edge2, double t1, double t2) {
+    return std::asin(edge1->GetDirection(t1).Cross(edge2->GetDirection(t2))) * 180 / M_PI;
+}
 
 // linear segment -----------------------------------
 LinearSegment::LinearSegment(const Vector2 &p0, const Vector2 &p1) : points_{p0, p1} {}
