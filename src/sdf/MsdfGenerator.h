@@ -21,7 +21,8 @@ public:
     void BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t* output);
     void BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t* output);
     
-    std::array<double, 3> GeneratePixel(const Shape& shape, const Vector2& p);
+    std::array<double, 3> GenerateMsdfPixel(const Shape& shape, const Vector2& p);
+    double GenerateSdfPixel(const Shape& shape, const Vector2& p);
     
 private:
     [[nodiscard]] int MapDistanceToColorValue(float distance) const;

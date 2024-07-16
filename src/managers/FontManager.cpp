@@ -202,6 +202,7 @@ bool FontManager::PreloadGlyph(FontHandle handle, CodePoint code_point) {
                 break;
             case FontType::SdfFromVector:
                 msdf_generator_.BakeGlyphSdf(code_point, glyph_info, buffer_);
+                bitmap_type = AtlasRegion::TypeBgra8; // todo check how to do this with single channel texture
                 break;
             case FontType::Msdf:
                 msdf_generator_.BakeGlyphMsdf(code_point, glyph_info, buffer_);

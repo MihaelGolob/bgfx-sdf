@@ -27,8 +27,17 @@ void MsdfGenerator::BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, ui
     
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
+            auto translation = Vector2(face_->glyph->metrics.horiBearingX >> 6, -((face_->glyph->metrics.height >> 6) - (face_->glyph->metrics.horiBearingY >> 6)));
+            Vector2 p = Vector2((x + 0.5), (y + 0.5)) + translation;
+            auto distance = GenerateSdfPixel(shape, p);
+            auto mapped_distance = MapDistanceToColorValue(distance);
+            
             auto index = ((height - y - 1) * width + x) * 4; // flip over y axis
-            output[index] = 255;
+            
+            output[index] = mapped_distance;
+            output[index + 1] = mapped_distance;
+            output[index + 2] = mapped_distance;
+            output[index + 3] = 255;
         }
     }
 }
@@ -47,7 +56,7 @@ void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, u
             auto translation = Vector2(face_->glyph->metrics.horiBearingX >> 6, -((face_->glyph->metrics.height >> 6) - (face_->glyph->metrics.horiBearingY >> 6)));
             Vector2 p = Vector2((x + 0.5), (y + 0.5)) + translation;
             
-            auto res = GeneratePixel(shape, p);
+            auto res = GenerateMsdfPixel(shape, p);
             auto index = ((height - y - 1) * width + x) * 4; // flip over y axis
 
             output[index] = MapDistanceToColorValue(res[0]);        // B
@@ -58,7 +67,7 @@ void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, u
     }
 }
 
-std::array<double, 3> MsdfGenerator::GeneratePixel(const Shape &shape, const Vector2 &p) {
+std::array<double, 3> MsdfGenerator::GenerateMsdfPixel(const Shape &shape, const Vector2 &p) {
     // struct to hold the closest edge for each color
     struct {
         float min_distance = INFINITY;
@@ -99,6 +108,11 @@ std::array<double, 3> MsdfGenerator::GeneratePixel(const Shape &shape, const Vec
     ClampArrayToRange(res);
     return res;
 }
+
+double MsdfGenerator::GenerateSdfPixel(const Shape &shape, const Vector2 &p) {
+    return shape.SignedDistance(p);
+}
+
 
 Shape MsdfGenerator::ParseFtFace(CodePoint code_point, FT_Face face) {
     auto glyph_index = FT_Get_Char_Index(face, code_point);

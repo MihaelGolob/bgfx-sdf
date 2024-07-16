@@ -97,7 +97,7 @@ void InitFonts() {
     original_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Bitmap, BufferType::Transient);
     bitmap_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Bitmap, BufferType::Transient);
     sdf_bitmap_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::SdfFromBitmap, BufferType::Transient);
-    sdf_vector_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Color, BufferType::Transient);
+    sdf_vector_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::SdfFromVector, BufferType::Transient);
     msdf_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Msdf, BufferType::Transient);
 }
 
