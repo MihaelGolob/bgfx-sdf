@@ -72,7 +72,7 @@ void InitFonts() {
     font_manager_ = new FontManager(1024);
     text_buffer_manager_ = new TextBufferManager(font_manager_);
     
-    font_file_ = font_manager_->CreateTtf("../assets/fonts/droidsans.ttf");
+    font_file_ = font_manager_->CreateTtf("../assets/fonts/OpenSans-Regular.ttf");
     
     original_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 64, FontType::Bitmap, 0);
     
@@ -82,7 +82,7 @@ void InitFonts() {
     sdf_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::Sdf, 8);
     sdf_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(sdf_font_, 64);
     
-    msdf_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::Msdf, 8); // todo change back to 16px
+    msdf_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::Msdf, 8);
     msdf_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(msdf_font_, 64);
     
     static_original_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Bitmap, BufferType::Static);
