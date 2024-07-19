@@ -53,7 +53,7 @@ double Vector2::Length() const {
 Vector2 Vector2::Normalize() {
     double norm = Length();
     if (norm == 0) {
-        PrintError("Trying to normalize a zero vector!");
+//        PrintError("Trying to normalize a zero vector!");
         return *this;
     }
     
