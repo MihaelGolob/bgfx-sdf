@@ -28,6 +28,7 @@ private:
     [[nodiscard]] int MapDistanceToColorValue(float distance) const;
     [[nodiscard]] float ClampDistanceToRange(float distance) const;
     void ClampArrayToRange(std::array<double, 3>& array);
+    void MapArrayToColorValue(std::array<double, 3>& array);
     
     // glyph decomposition
     static Shape ParseFtFace(CodePoint code_point, FT_Face face);

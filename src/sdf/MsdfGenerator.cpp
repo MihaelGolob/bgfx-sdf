@@ -11,7 +11,7 @@
 void MsdfGenerator::Init(FT_Face face, uint32_t font_size) {
     face_ = face;
     font_size_ = font_size;
-    distance_range_ = font_size_ / 2.0; // todo: is this good enough? 
+    distance_range_ = font_size_; // todo: is this good enough? 
 
     FT_Set_Pixel_Sizes(face, 0, font_size_);
 }
@@ -24,16 +24,17 @@ void MsdfGenerator::BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, ui
 
     int width = glyph_info.width;
     int height = glyph_info.height;
-    
+
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             auto translation = Vector2(face_->glyph->metrics.horiBearingX >> 6, -((face_->glyph->metrics.height >> 6) - (face_->glyph->metrics.horiBearingY >> 6)));
             Vector2 p = Vector2((x + 0.5), (y + 0.5)) + translation;
             auto distance = GenerateSdfPixel(shape, p);
-            auto mapped_distance = MapDistanceToColorValue(distance);
-            
+            auto clamped = ClampDistanceToRange(distance);
+            auto mapped_distance = MapDistanceToColorValue(clamped);
+
             auto index = ((height - y - 1) * width + x) * 4; // flip over y axis
-            
+
             output[index] = mapped_distance;
             output[index + 1] = mapped_distance;
             output[index + 2] = mapped_distance;
@@ -55,10 +56,11 @@ void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, u
         for (int x = 0; x < width; x++) {
             auto translation = Vector2(face_->glyph->metrics.horiBearingX >> 6, -((face_->glyph->metrics.height >> 6) - (face_->glyph->metrics.horiBearingY >> 6)));
             Vector2 p = Vector2((x + 0.5), (y + 0.5)) + translation;
-            
+
             auto res = GenerateMsdfPixel(shape, p);
             auto index = ((height - y - 1) * width + x) * 4; // flip over y axis
 
+            ClampArrayToRange(res);
             output[index] = MapDistanceToColorValue(res[0]);        // B
             output[index + 1] = MapDistanceToColorValue(res[1]);    // G
             output[index + 2] = MapDistanceToColorValue(res[2]);    // R
@@ -105,7 +107,6 @@ std::array<double, 3> MsdfGenerator::GenerateMsdfPixel(const Shape &shape, const
             green.edge ? (*green.edge)->SignedPseudoDistance(p, green.near_parameter) : INFINITY,
             blue.edge ? (*blue.edge)->SignedPseudoDistance(p, blue.near_parameter) : INFINITY
     };
-    ClampArrayToRange(res);
     return res;
 }
 
@@ -191,13 +192,19 @@ int MsdfGenerator::MapDistanceToColorValue(float distance) const {
 }
 
 float MsdfGenerator::ClampDistanceToRange(float distance) const {
-    float clamped = bx::clamp(distance, -distance_range_, distance_range_);
+    float clamped = bx::clamp(distance, -distance_range_ / 2.0, distance_range_ / 2.0);
     return clamped;
 }
 
 void MsdfGenerator::ClampArrayToRange(std::array<double, 3> &array) {
     for (int i = 0; i < 3; i++) {
         array[i] = ClampDistanceToRange(array[i]);
+    }
+}
+
+void MsdfGenerator::MapArrayToColorValue(std::array<double, 3> &array) {
+    for (int i = 0; i < 3; i++) {
+        array[i] = MapDistanceToColorValue(array[i]);
     }
 }
 
@@ -213,3 +220,4 @@ void MsdfGenerator::CalculateGlyphMetrics(FT_Face const &face, GlyphInfo &out_gl
 
     out_glyph_info.bitmap_scale = 1;
 }
+
