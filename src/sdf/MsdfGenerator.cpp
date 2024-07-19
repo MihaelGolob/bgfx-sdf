@@ -11,7 +11,7 @@
 void MsdfGenerator::Init(FT_Face face, uint32_t font_size) {
     face_ = face;
     font_size_ = font_size;
-    distance_range_ = font_size_; // todo: is this good enough? 
+    distance_range_ = 0.5*font_size_; // todo: is this good enough? 
 
     FT_Set_Pixel_Sizes(face, 0, font_size_);
 }
@@ -103,10 +103,11 @@ std::array<double, 3> MsdfGenerator::GenerateMsdfPixel(const Shape &shape, const
     }
 
     std::array<double, 3> res = {
-            red.edge ? (*red.edge)->SignedPseudoDistance(p, red.near_parameter) : INFINITY,
-            green.edge ? (*green.edge)->SignedPseudoDistance(p, green.near_parameter) : INFINITY,
-            blue.edge ? (*blue.edge)->SignedPseudoDistance(p, blue.near_parameter) : INFINITY
+            red.edge ? (*red.edge)->DistanceToPseudoDistance(p, red.near_parameter, red.min_distance) : INFINITY,
+            green.edge ? (*green.edge)->DistanceToPseudoDistance(p, green.near_parameter, green.min_distance) : INFINITY,
+            blue.edge ? (*blue.edge)->DistanceToPseudoDistance(p, blue.near_parameter, blue.min_distance) : INFINITY
     };
+
     return res;
 }
 
@@ -117,7 +118,7 @@ double MsdfGenerator::GenerateSdfPixel(const Shape &shape, const Vector2 &p) {
 
 Shape MsdfGenerator::ParseFtFace(CodePoint code_point, FT_Face face) {
     auto glyph_index = FT_Get_Char_Index(face, code_point);
-    if (FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT)) {
+    if (FT_Load_Glyph(face, glyph_index, FT_LOAD_NO_SCALE)) {
         PrintError("Failed to load glyph");
         return {};
     }

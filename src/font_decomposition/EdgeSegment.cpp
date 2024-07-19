@@ -42,6 +42,30 @@ double EdgeSegment::GetAngleDeg(const EdgeSegment *edge1, const EdgeSegment *edg
     return std::asin(edge1->GetDirection(t1).Cross(edge2->GetDirection(t2))) * 180 / M_PI;
 }
 
+double EdgeSegment::DistanceToPseudoDistance(const Vector2 &p, double t, double distance) const {
+    if (t < 0) {
+        auto dir = GetDirection(0);
+        auto aq = p - GetPoint(0);
+        if (aq * dir < 0) {
+            double pseudo_dist = aq.Cross(dir);
+            if (abs(pseudo_dist) <= abs(distance)) {
+                return pseudo_dist;
+            }
+        }
+    } else if (t > 1) {
+        auto dir = GetDirection(1);
+        auto bq = p - GetPoint(1);
+        if (bq * dir > 0) {
+            double pseudo_dist = bq.Cross(dir);
+            if (abs(pseudo_dist) <= abs(distance)) {
+                return pseudo_dist;
+            }
+        }
+    }
+
+    return distance;
+}
+
 // linear segment -----------------------------------
 LinearSegment::LinearSegment(const Vector2 &p0, const Vector2 &p1) : points_{p0, p1} {}
 
