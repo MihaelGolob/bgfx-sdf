@@ -8,10 +8,11 @@
 #include "MsdfGenerator.h"
 #include "../utilities.h"
 
-void MsdfGenerator::Init(FT_Face face, uint32_t font_size) {
+void MsdfGenerator::Init(FT_Face face, uint32_t font_size, uint32_t padding) {
     face_ = face;
     font_size_ = font_size;
-    distance_range_ = 0.5*font_size_; // todo: is this good enough? 
+    distance_range_ = 0.5 * font_size_; // todo: is this good enough?
+    padding_ = padding;
 
     FT_Set_Pixel_Sizes(face, 0, font_size_);
 }
@@ -27,8 +28,11 @@ void MsdfGenerator::BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, ui
 
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
-            auto translation = Vector2(face_->glyph->metrics.horiBearingX >> 6, -((face_->glyph->metrics.height >> 6) - (face_->glyph->metrics.horiBearingY >> 6)));
+            auto glyph_translation = Vector2(face_->glyph->metrics.horiBearingX >> 6, -((face_->glyph->metrics.height >> 6) - (face_->glyph->metrics.horiBearingY >> 6)));
+            auto padding_translation = Vector2(padding_, padding_);
+            auto translation = glyph_translation - padding_translation;
             Vector2 p = Vector2((x + 0.5), (y + 0.5)) + translation;
+            
             auto distance = GenerateSdfPixel(shape, p);
             auto clamped = ClampDistanceToRange(distance);
             auto mapped_distance = MapDistanceToColorValue(clamped);
@@ -54,7 +58,9 @@ void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, u
     // general msdf generation loop
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
-            auto translation = Vector2(face_->glyph->metrics.horiBearingX >> 6, -((face_->glyph->metrics.height >> 6) - (face_->glyph->metrics.horiBearingY >> 6)));
+            auto glyph_translation = Vector2(face_->glyph->metrics.horiBearingX >> 6, -((face_->glyph->metrics.height >> 6) - (face_->glyph->metrics.horiBearingY >> 6)));
+            auto padding_translation = Vector2(padding_, padding_);
+            auto translation = glyph_translation - padding_translation;
             Vector2 p = Vector2((x + 0.5), (y + 0.5)) + translation;
 
             auto res = GenerateMsdfPixel(shape, p);
@@ -115,10 +121,9 @@ double MsdfGenerator::GenerateSdfPixel(const Shape &shape, const Vector2 &p) {
     return shape.SignedDistance(p);
 }
 
-
 Shape MsdfGenerator::ParseFtFace(CodePoint code_point, FT_Face face) {
     auto glyph_index = FT_Get_Char_Index(face, code_point);
-    if (FT_Load_Glyph(face, glyph_index, FT_LOAD_NO_SCALE)) {
+    if (FT_Load_Glyph(face, glyph_index, 0)) {
         PrintError("Failed to load glyph");
         return {};
     }
@@ -209,9 +214,9 @@ void MsdfGenerator::MapArrayToColorValue(std::array<double, 3> &array) {
     }
 }
 
-void MsdfGenerator::CalculateGlyphMetrics(FT_Face const &face, GlyphInfo &out_glyph_info) {
-    out_glyph_info.width = face->glyph->metrics.width >> 6;
-    out_glyph_info.height = face->glyph->metrics.height >> 6;
+void MsdfGenerator::CalculateGlyphMetrics(FT_Face const &face, GlyphInfo &out_glyph_info) const {
+    out_glyph_info.width = (face->glyph->metrics.width >> 6);
+    out_glyph_info.height = (face->glyph->metrics.height >> 6);
 
     out_glyph_info.advance_x = face->glyph->advance.x >> 6;
     out_glyph_info.advance_y = face->glyph->advance.y >> 6;
@@ -220,5 +225,13 @@ void MsdfGenerator::CalculateGlyphMetrics(FT_Face const &face, GlyphInfo &out_gl
     out_glyph_info.offset_y = -face->glyph->metrics.horiBearingY >> 6;
 
     out_glyph_info.bitmap_scale = 1;
+    
+    if (out_glyph_info.width > 0 && out_glyph_info.height > 0) {
+        out_glyph_info.width += padding_ * 2;
+        out_glyph_info.height += padding_ * 2;
+        
+        out_glyph_info.offset_x -= padding_;
+        out_glyph_info.offset_y -= padding_;
+    }
 }
 

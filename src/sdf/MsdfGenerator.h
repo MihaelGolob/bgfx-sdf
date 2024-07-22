@@ -16,7 +16,7 @@ class MsdfGenerator {
 private:
     
 public:
-    void Init(FT_Face face, uint32_t font_size);
+    void Init(FT_Face face, uint32_t font_size, uint32_t padding);
     
     void BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t* output);
     void BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t* output);
@@ -29,6 +29,7 @@ private:
     [[nodiscard]] float ClampDistanceToRange(float distance) const;
     void ClampArrayToRange(std::array<double, 3>& array);
     void MapArrayToColorValue(std::array<double, 3>& array);
+    void CalculateGlyphMetrics(FT_Face const &face, GlyphInfo &out_glyph_info) const;
     
     // glyph decomposition
     static Shape ParseFtFace(CodePoint code_point, FT_Face face);
@@ -36,10 +37,10 @@ private:
     static int FtLineTo(const FT_Vector* to, void* user);
     static int FtConicTo(const FT_Vector* control, const FT_Vector* to, void* user);
     static int FtCubicTo(const FT_Vector* control1, const FT_Vector* control2, const FT_Vector* to, void* user);
-    static void CalculateGlyphMetrics(FT_Face const &face, GlyphInfo &out_glyph_info);
     
     float font_size_ = 0;
     float distance_range_ = 1.0;
+    unsigned int padding_;
     
     FT_Face face_;
 };

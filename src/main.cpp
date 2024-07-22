@@ -88,10 +88,10 @@ void InitFonts() {
     sdf_bitmap_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::SdfFromBitmap, 8);
     sdf_bitmap_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(sdf_bitmap_font_, 64);
 
-    sdf_vector_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::SdfFromVector, 8);
+    sdf_vector_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::SdfFromVector, 3);
     sdf_vector_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(sdf_vector_font_, 64);
     
-    msdf_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::Msdf, 8);
+    msdf_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::Msdf, 3);
     msdf_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(msdf_font_, 64);
 
     original_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Bitmap, BufferType::Transient);

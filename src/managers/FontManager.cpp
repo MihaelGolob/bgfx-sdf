@@ -98,7 +98,7 @@ FontHandle FontManager::CreateFontByPixelSize(TrueTypeHandle ttf_handle, uint32_
     font.face_handle = font_type == FontType::Msdf ? CreateFace(&cached_files_[ttf_handle.idx]) : FontFaceHandle{bx::kInvalidHandle};
     
     if (font_type == FontType::Msdf) {
-        msdf_generator_.Init(cached_faces_[font.face_handle.idx], pixel_size); // todo: add support for multiple fonts rendered with msdf
+        msdf_generator_.Init(cached_faces_[font.face_handle.idx], pixel_size, glyph_padding); // todo: add support for multiple fonts rendered with msdf
     }
 
     FontHandle handle = {font_idx};
