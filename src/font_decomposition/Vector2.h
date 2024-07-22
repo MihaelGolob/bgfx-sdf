@@ -5,6 +5,7 @@
 #pragma once
 
 #include <freetype/ftoutln.h>
+#include <functional>
 
 class Vector2 {
 public:
@@ -26,6 +27,14 @@ public:
     Vector2 operator- (const Vector2& other) const;
     Vector2 operator* (float&& scalar) const;
     double operator* (const Vector2& other) const;
+    
+    struct HashFunction {
+        size_t operator()(const Vector2& v) const {
+            auto x_hash = std::hash<int>()(v.x);
+            auto y_hash = std::hash<int>()(v.y);
+            return x_hash ^ y_hash;
+        }
+    };
 };
 
 // A vector can also represent just a point in 2D space

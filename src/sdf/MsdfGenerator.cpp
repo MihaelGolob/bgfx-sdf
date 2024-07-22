@@ -19,7 +19,7 @@ void MsdfGenerator::Init(FT_Face face, uint32_t font_size, uint32_t padding) {
 
 void MsdfGenerator::BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t *output) {
     auto shape = ParseFtFace(code_point, face_);
-    shape.ApplyEdgeColoring(3.0);
+    shape.ApplyPreprocessing();
 
     CalculateGlyphMetrics(face_, glyph_info);
 
@@ -32,7 +32,7 @@ void MsdfGenerator::BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, ui
             auto padding_translation = Vector2(padding_, padding_);
             auto translation = glyph_translation - padding_translation;
             Vector2 p = Vector2((x + 0.5), (y + 0.5)) + translation;
-            
+
             auto distance = GenerateSdfPixel(shape, p);
             auto clamped = ClampDistanceToRange(distance);
             auto mapped_distance = MapDistanceToColorValue(clamped);
@@ -49,6 +49,7 @@ void MsdfGenerator::BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, ui
 
 void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t *output) {
     auto shape = ParseFtFace(code_point, face_);
+    shape.ApplyPreprocessing();
     shape.ApplyEdgeColoring(3.0);
 
     CalculateGlyphMetrics(face_, glyph_info);
@@ -123,7 +124,7 @@ double MsdfGenerator::GenerateSdfPixel(const Shape &shape, const Vector2 &p) {
 
 Shape MsdfGenerator::ParseFtFace(CodePoint code_point, FT_Face face) {
     auto glyph_index = FT_Get_Char_Index(face, code_point);
-    if (FT_Load_Glyph(face, glyph_index, 0)) {
+    if (FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT)) {
         PrintError("Failed to load glyph");
         return {};
     }
@@ -225,11 +226,11 @@ void MsdfGenerator::CalculateGlyphMetrics(FT_Face const &face, GlyphInfo &out_gl
     out_glyph_info.offset_y = -face->glyph->metrics.horiBearingY >> 6;
 
     out_glyph_info.bitmap_scale = 1;
-    
+
     if (out_glyph_info.width > 0 && out_glyph_info.height > 0) {
         out_glyph_info.width += padding_ * 2;
         out_glyph_info.height += padding_ * 2;
-        
+
         out_glyph_info.offset_x -= padding_;
         out_glyph_info.offset_y -= padding_;
     }
