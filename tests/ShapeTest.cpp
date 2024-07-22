@@ -190,55 +190,124 @@ TEST_CASE("Shape", "[Shape]") {
         hole.AddEdge(EdgeHolder({4, 1}, {5, 1}, {6, 2}));
         hole.AddEdge(EdgeHolder({6, 2}, {6, 4}));
         hole.AddEdge(EdgeHolder({6, 4}, {6, 6}));
-        hole.AddEdge(EdgeHolder({6, 6}, {5, 7}, {4,7}));
+        hole.AddEdge(EdgeHolder({6, 6}, {5, 7}, {4, 7}));
         hole.AddEdge(EdgeHolder({4, 7}, {3, 6}));
         hole.AddEdge(EdgeHolder({3, 6}, {3, 4}));
         hole.AddEdge(EdgeHolder({3, 4}, {3, 2}));
         hole.AddEdge(EdgeHolder({3, 2}, {4, 1}));
         shape.contours.emplace_back(hole);
-        
+
         shape.ApplyPreprocessing();
-        
+
         SECTION("(9,5) is outside") {
             auto point = Vector2(9, 5);
             auto distance = shape.SignedDistance(point);
 
             REQUIRE(distance < 0);
         }
-        
+
         SECTION("(6,0) is outside") {
             auto point = Vector2(6, 0);
             auto distance = shape.SignedDistance(point);
 
             REQUIRE(distance < 0);
         }
-        
+
         SECTION("(8.5, 6.5) is outside") {
             auto point = Vector2(8.5, 6.5);
             auto distance = shape.SignedDistance(point);
 
             REQUIRE(distance < 0);
         }
-        
+
         SECTION("(6,7) is inside") {
             auto point = Vector2(6, 7);
             auto distance = shape.SignedDistance(point);
 
             REQUIRE(distance > 0);
         }
-        
+
         SECTION("(7,7) is inside") {
             auto point = Vector2(7, 7);
             auto distance = shape.SignedDistance(point);
 
             REQUIRE(distance > 0);
         }
-        
+
         SECTION("(5.5, 7) is inside") {
             auto point = Vector2(5.5, 7);
             auto distance = shape.SignedDistance(point);
 
             REQUIRE(distance > 0);
+        }
+    }
+
+    SECTION("Glyph r") {
+        auto shape = Shape();
+        auto contour = Contour();
+        contour.AddEdge(EdgeHolder({6, 8}, {6, 6}));
+        contour.AddEdge(EdgeHolder({6, 6}, {5, 6}));
+        contour.AddEdge(EdgeHolder({5, 6}, {4, 6}));
+        contour.AddEdge(EdgeHolder({4, 6}, {3, 5}));
+        contour.AddEdge(EdgeHolder({3, 5}, {3, 4}));
+        contour.AddEdge(EdgeHolder({3, 4}, {3, 0}));
+        contour.AddEdge(EdgeHolder({3, 0}, {1, 0}));
+        contour.AddEdge(EdgeHolder({1, 0}, {1, 9}));
+        contour.AddEdge(EdgeHolder({1, 9}, {3, 9}));
+        contour.AddEdge(EdgeHolder({3, 9}, {3, 7}));
+        contour.AddEdge(EdgeHolder({3, 7}, {4, 8}));
+        contour.AddEdge(EdgeHolder({4, 8}, {5, 8}));
+        contour.AddEdge(EdgeHolder({5, 8}, {5, 9}, {6, 8}));
+        shape.contours.emplace_back(contour);
+        shape.ApplyPreprocessing();
+        
+        SECTION("(2,4) is inside") {
+            auto point = Vector2(2, 4);
+            auto distance = shape.SignedDistance(point);
+
+            REQUIRE(distance > 0);
+        }
+        
+        SECTION("(2,8) is inside") {
+            auto point = Vector2(2, 8);
+            auto distance = shape.SignedDistance(point);
+
+            REQUIRE(distance > 0);
+        }
+        
+        SECTION("(5,7) is inside") {
+            auto point = Vector2(5, 7);
+            auto distance = shape.SignedDistance(point);
+
+            REQUIRE(distance > 0);
+        }
+        
+        SECTION("(3.5,6) is inside") {
+            auto point = Vector2(3.5, 6);
+            auto distance = shape.SignedDistance(point);
+
+            REQUIRE(distance > 0);
+        }
+        
+        SECTION("(3.5, 6.5) is inside") {
+            auto point = Vector2(3.5, 6.5);
+            auto distance = shape.SignedDistance(point);
+
+            REQUIRE(distance > 0);
+        }
+        
+        SECTION("(4,5) is outside") {
+            auto point = Vector2(4, 5);
+            auto distance = shape.SignedDistance(point);
+
+            REQUIRE(distance < 0);
+        }
+        
+        SECTION("(3.5,8) is outside") {
+            auto point = Vector2(3.5, 8);
+            auto distance = shape.SignedDistance(point);
+
+            REQUIRE(distance < 0);
         }
     }
 }
