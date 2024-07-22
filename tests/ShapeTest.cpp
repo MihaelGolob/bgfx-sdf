@@ -197,6 +197,8 @@ TEST_CASE("Shape", "[Shape]") {
         hole.AddEdge(EdgeHolder({3, 2}, {4, 1}));
         shape.contours.emplace_back(hole);
         
+        shape.ApplyPreprocessing();
+        
         SECTION("(9,5) is outside") {
             auto point = Vector2(9, 5);
             auto distance = shape.SignedDistance(point);
