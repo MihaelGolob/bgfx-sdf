@@ -62,7 +62,7 @@ double Shape::SignedDistance(const Vector2 &p) const {
             if (fabs(distance) < fabs(min_distance)) {
                 min_distance = distance;
                 max_orthogonality = e->GetOrthogonality(p, t);
-            } else if (distance == min_distance) {
+            } else if (fabs(distance) == fabs(min_distance)) {
                 const auto orthogonality = e->GetOrthogonality(p, t);
                 if (orthogonality > max_orthogonality) {
                     // this is needed for correct sign if the distance is the same
@@ -90,7 +90,7 @@ double Shape::SignedPseudoDistance(const Vector2 &p) const {
                 min_distance = distance;
                 max_orthogonality = e->GetOrthogonality(p, t);
                 closest_edge = e;
-            } else if (distance == min_distance) {
+            } else if (fabs(distance) == fabs(min_distance)) {
                 const auto orthogonality = e->GetOrthogonality(p, t);
                 if (orthogonality > max_orthogonality) {
                     // this is needed for correct sign if the distance is the same
