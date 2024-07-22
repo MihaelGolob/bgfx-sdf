@@ -128,8 +128,8 @@ TEST_CASE("Shape", "[Shape]") {
             REQUIRE(distance < 0);
         }
         
-        SECTION("(6.5, 2.5) is outside") {
-            auto point = Vector2(6.5,2.5);
+        SECTION("(5, 3) is outside") {
+            auto point = Vector2(5,3);
             auto distance = shape.SignedDistance(point);
             
             REQUIRE(distance < 0);
@@ -149,8 +149,8 @@ TEST_CASE("Shape", "[Shape]") {
             REQUIRE(distance < 0);
         }
         
-        SECTION("(4, 10) is outside") {
-            auto point = Vector2(4,10);
+        SECTION("(7, 10) is outside") {
+            auto point = Vector2(7,10);
             auto distance = shape.SignedDistance(point);
             
             REQUIRE(distance < 0);
