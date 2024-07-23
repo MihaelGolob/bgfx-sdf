@@ -82,29 +82,40 @@ std::array<double, 3> MsdfGenerator::GenerateMsdfPixel(const Shape &shape, const
         float min_distance = INFINITY;
         const EdgeHolder *edge = nullptr;
         double near_parameter = 0;
+        double orthogonality = 0;
     } red, green, blue;
+
+    auto is_closer = [](const double d1, const double d2, const double orth1, const double orth2) {
+        if (fabs(d1) < fabs(d2)) return true;
+        else if (fabs(d1) == fabs(d2)) return orth1 > orth2;
+        return false;
+    };
 
     for (const Contour &c: shape.contours) {
         for (const EdgeHolder &e: c.edges) {
             double parameter = 0;
             auto distance = e->SignedDistance(p, parameter);
+            auto orthogonality = e->GetOrthogonality(p, parameter);
             auto abs_distance = std::abs(distance);
 
             // only save edges that have a common color with the channel
-            if ((int) e->color & (int) EdgeColor::Red && abs_distance < std::abs(red.min_distance)) {
+            if ((int) e->color & (int) EdgeColor::Red && is_closer(abs_distance, red.min_distance, orthogonality, red.orthogonality)) {
                 red.min_distance = distance;
                 red.edge = &e;
                 red.near_parameter = parameter;
+                red.orthogonality = orthogonality;
             }
-            if ((int) e->color & (int) EdgeColor::Green && abs_distance < std::abs(green.min_distance)) {
+            if ((int) e->color & (int) EdgeColor::Green && is_closer(abs_distance, green.min_distance, orthogonality, green.orthogonality)) {
                 green.min_distance = distance;
                 green.edge = &e;
                 green.near_parameter = parameter;
+                green.orthogonality = orthogonality;
             }
-            if ((int) e->color & (int) EdgeColor::Blue && abs_distance < std::abs(blue.min_distance)) {
+            if ((int) e->color & (int) EdgeColor::Blue && is_closer(abs_distance, blue.min_distance, orthogonality, blue.orthogonality)) {
                 blue.min_distance = distance;
                 blue.edge = &e;
                 blue.near_parameter = parameter;
+                blue.orthogonality = orthogonality;
             }
         }
     }
@@ -124,7 +135,7 @@ double MsdfGenerator::GenerateSdfPixel(const Shape &shape, const Vector2 &p) {
 
 Shape MsdfGenerator::ParseFtFace(CodePoint code_point, FT_Face face) {
     auto glyph_index = FT_Get_Char_Index(face, code_point);
-    if (FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT)) {
+    if (FT_Load_Glyph(face, glyph_index, FT_LOAD_NO_SCALE)) {
         PrintError("Failed to load glyph");
         return {};
     }
