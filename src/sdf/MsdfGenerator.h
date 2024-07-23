@@ -31,7 +31,7 @@ private:
     void CalculateGlyphMetrics(FT_Face const &face, GlyphInfo &out_glyph_info) const;
     
     // glyph decomposition
-    static Shape ParseFtFace(CodePoint code_point, FT_Face face);
+    Shape ParseFtFace(CodePoint code_point);
     static int FtMoveTo(const FT_Vector* to, void* user);
     static int FtLineTo(const FT_Vector* to, void* user);
     static int FtConicTo(const FT_Vector* control, const FT_Vector* to, void* user);

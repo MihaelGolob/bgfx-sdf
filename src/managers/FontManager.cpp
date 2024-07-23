@@ -29,6 +29,7 @@ void FontManager::Init() {
     cached_files_ = new CachedFile[MAX_OPENED_FILES];
     cached_fonts_ = new CachedFont[MAX_OPENED_FONT];
     cached_faces_ = new FT_Face[MAX_OPENED_FONT];
+    cached_msdf_generators_ = new MsdfGenerator[MAX_OPENED_MSDF_GEN];
     buffer_ = new uint8_t[MAX_FONT_BUFFER_SIZE];
     
     if (FT_Init_FreeType(&ft_library_)) {
@@ -46,8 +47,8 @@ FontManager::~FontManager() {
     // todo: why does this assert?
 //    BX_ASSERT(m_faceHandles.getNumHandles() == 0, "All the font faces must be destroyed before destroying the manager")
     delete[] cached_faces_;
-
     delete[] buffer_;
+    delete[] cached_msdf_generators_;
 
     if (own_atlas_) {
         delete atlas_;
@@ -95,10 +96,12 @@ FontHandle FontManager::CreateFontByPixelSize(TrueTypeHandle ttf_handle, uint32_
     font.font_info.pixel_size = uint16_t(pixel_size);
     font.cached_glyphs.clear();
     font.master_font_handle.idx = bx::kInvalidHandle;
-    font.face_handle = font_type == FontType::Msdf ? CreateFace(&cached_files_[ttf_handle.idx]) : FontFaceHandle{bx::kInvalidHandle};
-    
-    if (font_type == FontType::Msdf) {
-        msdf_generator_.Init(cached_faces_[font.face_handle.idx], pixel_size, glyph_padding); // todo: add support for multiple fonts rendered with msdf
+    if (FontTypeNeedsMsdfGeneration(font_type)) {
+        font.face_handle = CreateFace(&cached_files_[ttf_handle.idx]);
+        font.msdf_gen_handle = CreateMsdfGenerator(font.face_handle, pixel_size, glyph_padding);
+    } else {
+        font.face_handle.idx = bx::kInvalidHandle;
+        font.msdf_gen_handle.idx = bx::kInvalidHandle;
     }
 
     FontHandle handle = {font_idx};
@@ -117,6 +120,14 @@ FontFaceHandle FontManager::CreateFace(CachedFile* font_file) {
     return handle;
 }
 
+MsdfGenHandle FontManager::CreateMsdfGenerator(FontFaceHandle face_handle, uint32_t pixel_size, uint32_t padding) {
+    auto handle = MsdfGenHandle{msdf_gen_handles_.alloc()};
+    BX_ASSERT(handle.idx != bx::kInvalidHandle, "Invalid handle used")
+    
+    cached_msdf_generators_[handle.idx].Init(cached_faces_[face_handle.idx], pixel_size, padding);
+    
+    return handle;
+}
 
 FontHandle FontManager::CreateScaledFontToPixelSize(FontHandle base_font_handle, uint32_t pixel_size) {
     BX_ASSERT(isValid(base_font_handle), "Invalid handle used")
@@ -159,6 +170,7 @@ void FontManager::DestroyFont(FontHandle handle) {
     font.cached_glyphs.clear();
     font_handles_.free(handle.idx);
     face_handles_.free(font.face_handle.idx);
+    msdf_gen_handles_.free(font.msdf_gen_handle.idx);
 }
 
 bool FontManager::PreloadGlyph(FontHandle handle, const wchar_t *string) {
@@ -201,11 +213,11 @@ bool FontManager::PreloadGlyph(FontHandle handle, CodePoint code_point) {
                 font.true_type_font->BakeGlyphSdf(code_point, glyph_info, buffer_);
                 break;
             case FontType::SdfFromVector:
-                msdf_generator_.BakeGlyphSdf(code_point, glyph_info, buffer_);
+                cached_msdf_generators_[font.msdf_gen_handle.idx].BakeGlyphSdf(code_point, glyph_info, buffer_);
                 bitmap_type = AtlasRegion::TypeBgra8; // todo check how to do this with single channel texture
                 break;
             case FontType::Msdf:
-                msdf_generator_.BakeGlyphMsdf(code_point, glyph_info, buffer_);
+                cached_msdf_generators_[font.msdf_gen_handle.idx].BakeGlyphMsdf(code_point, glyph_info, buffer_);
                 bitmap_type = AtlasRegion::TypeBgra8;
                 break;
             default:
@@ -278,4 +290,8 @@ const GlyphInfo *FontManager::GetGlyphInfo(FontHandle handle, CodePoint code_poi
 bool FontManager::AddBitmap(GlyphInfo &glyph_info, const uint8_t *data, const AtlasRegion::Type bitmap_type) {
     glyph_info.region_index = atlas_->AddRegion((uint16_t) bx::ceil(glyph_info.width), (uint16_t) bx::ceil(glyph_info.height), data, bitmap_type);
     return true;
+}
+
+bool FontManager::FontTypeNeedsMsdfGeneration(FontType font_type) {
+    return font_type == FontType::Msdf || font_type == FontType::SdfFromVector;
 }

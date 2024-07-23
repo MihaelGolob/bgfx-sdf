@@ -26,6 +26,7 @@ class Atlas;
 #define MAX_OPENED_FILES 64
 #define MAX_OPENED_FONT  64
 #define MAX_OPENED_FACES 64
+#define MAX_OPENED_MSDF_GEN 8
 #define FONT_TYPE_ALPHA UINT32_C(0x00000100)
 
 namespace stl = tinystl;
@@ -49,6 +50,7 @@ private:
         int16_t padding{};
         // used for msdf rendering
         FontFaceHandle face_handle{};
+        MsdfGenHandle msdf_gen_handle{};
     };
     struct CachedFile {
         uint8_t *buffer;
@@ -84,6 +86,7 @@ public:
                                      FontType font_type = FontType::Bitmap, uint16_t glyph_padding = 6);
 
     FontFaceHandle CreateFace(CachedFile* font_file);
+    MsdfGenHandle CreateMsdfGenerator(FontFaceHandle face_handle, uint32_t pixel_size, uint32_t padding);
 
     /// Return a scaled child font whose height is a fixed pixel size.
     FontHandle CreateScaledFontToPixelSize(FontHandle base_font_handle, uint32_t pixel_size);
@@ -119,9 +122,9 @@ public:
 private:
     void Init();
     bool AddBitmap(GlyphInfo &glyph_info, const uint8_t *data, AtlasRegion::Type bitmap_type);
+    bool FontTypeNeedsMsdfGeneration(FontType font_type);
     
     FT_Library ft_library_{};
-    MsdfGenerator msdf_generator_;
 
     bool own_atlas_;
     Atlas *atlas_;
@@ -134,6 +137,9 @@ private:
     
     bx::HandleAllocT<MAX_OPENED_FACES> face_handles_;
     FT_Face *cached_faces_{};
+    
+    bx::HandleAllocT<MAX_OPENED_MSDF_GEN> msdf_gen_handles_;
+    MsdfGenerator *cached_msdf_generators_{};
 
     GlyphInfo black_glyph_{};
 

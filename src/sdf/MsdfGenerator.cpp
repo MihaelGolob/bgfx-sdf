@@ -18,7 +18,7 @@ void MsdfGenerator::Init(FT_Face face, uint32_t font_size, uint32_t padding) {
 }
 
 void MsdfGenerator::BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t *output) {
-    auto shape = ParseFtFace(code_point, face_);
+    auto shape = ParseFtFace(code_point);
     shape.ApplyPreprocessing();
 
     CalculateGlyphMetrics(face_, glyph_info);
@@ -48,7 +48,7 @@ void MsdfGenerator::BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, ui
 }
 
 void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t *output) {
-    auto shape = ParseFtFace(code_point, face_);
+    auto shape = ParseFtFace(code_point);
     shape.ApplyPreprocessing();
     shape.ApplyEdgeColoring(3.0);
 
@@ -133,9 +133,9 @@ double MsdfGenerator::GenerateSdfPixel(const Shape &shape, const Vector2 &p) {
     return shape.SignedDistance(p);
 }
 
-Shape MsdfGenerator::ParseFtFace(CodePoint code_point, FT_Face face) {
-    auto glyph_index = FT_Get_Char_Index(face, code_point);
-    if (FT_Load_Glyph(face, glyph_index, FT_LOAD_NO_SCALE)) {
+Shape MsdfGenerator::ParseFtFace(CodePoint code_point) {
+    auto glyph_index = FT_Get_Char_Index(face_, code_point);
+    if (FT_Load_Glyph(face_, glyph_index, FT_LOAD_NO_SCALE)) {
         PrintError("Failed to load glyph");
         return {};
     }
@@ -154,7 +154,7 @@ Shape MsdfGenerator::ParseFtFace(CodePoint code_point, FT_Face face) {
     ft_functions.shift = 0;
     ft_functions.delta = 0;
 
-    FT_Outline_Decompose(&face->glyph->outline, &ft_functions, &context);
+    FT_Outline_Decompose(&face_->glyph->outline, &ft_functions, &context);
 
     return output;
 }

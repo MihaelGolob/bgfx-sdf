@@ -8,3 +8,4 @@
 BGFX_HANDLE(TrueTypeHandle)
 BGFX_HANDLE(FontHandle)
 BGFX_HANDLE(FontFaceHandle)
+BGFX_HANDLE(MsdfGenHandle)
