@@ -220,12 +220,6 @@ void MsdfGenerator::ClampArrayToRange(std::array<double, 3> &array) {
     }
 }
 
-void MsdfGenerator::MapArrayToColorValue(std::array<double, 3> &array) {
-    for (int i = 0; i < 3; i++) {
-        array[i] = MapDistanceToColorValue(array[i]);
-    }
-}
-
 void MsdfGenerator::CalculateGlyphMetrics(FT_Face const &face, GlyphInfo &out_glyph_info) const {
     out_glyph_info.width = (face->glyph->metrics.width >> 6);
     out_glyph_info.height = (face->glyph->metrics.height >> 6);

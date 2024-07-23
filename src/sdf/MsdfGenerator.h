@@ -28,7 +28,6 @@ private:
     [[nodiscard]] int MapDistanceToColorValue(float distance) const;
     [[nodiscard]] float ClampDistanceToRange(float distance) const;
     void ClampArrayToRange(std::array<double, 3>& array);
-    void MapArrayToColorValue(std::array<double, 3>& array);
     void CalculateGlyphMetrics(FT_Face const &face, GlyphInfo &out_glyph_info) const;
     
     // glyph decomposition
