@@ -44,8 +44,6 @@ FontManager::~FontManager() {
     BX_ASSERT(files_handles_.getNumHandles() == 0, "All the font files must be destroyed before destroying the manager")
     delete[] cached_files_;
     
-    // todo: why does this assert?
-//    BX_ASSERT(m_faceHandles.getNumHandles() == 0, "All the font faces must be destroyed before destroying the manager")
     delete[] cached_faces_;
     delete[] buffer_;
     delete[] cached_msdf_generators_;
