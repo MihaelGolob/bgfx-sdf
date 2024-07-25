@@ -84,10 +84,14 @@ std::array<double, 3> MsdfGenerator::GenerateMsdfPixel(const Shape &shape, const
         double near_parameter = 0;
         double orthogonality = 0;
     } red, green, blue;
+    
+    auto round = [](double d, int decimals) {
+        return std::ceil(d * std::pow(10, decimals)) / std::pow(10, decimals);
+    };
 
-    auto is_closer = [](const double d1, const double d2, const double orth1, const double orth2) {
-        if (d1 < d2) return true;
-        else if (std::abs(d1 - d2) < 0.00001) return orth1 > orth2;
+    auto is_closer = [round](const double d1, const double d2, const double orth1, const double orth2) {
+        if (round(d1, 4) < round(d2, 4)) return true;
+        else if (round(d1, 4) == round(d2, 4)) return orth1 > orth2;
         return false;
     };
 
