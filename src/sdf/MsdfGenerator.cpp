@@ -87,7 +87,7 @@ std::array<double, 3> MsdfGenerator::GenerateMsdfPixel(const Shape &shape, const
 
     auto is_closer = [](const double d1, const double d2, const double orth1, const double orth2) {
         if (d1 < d2) return true;
-        else if (d1 == d2) return orth1 > orth2;
+        else if (std::abs(d1 - d2) < 0.00001) return orth1 > orth2;
         return false;
     };
 
