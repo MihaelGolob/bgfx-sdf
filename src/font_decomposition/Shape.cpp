@@ -26,7 +26,7 @@ void Shape::ApplyEdgeColoring(float max_angle) {
             if (previous_edge.IsValid()) {
                 const auto angle = EdgeSegment::GetAngleDeg(previous_edge, e, 1, 0);
                 const auto edges_have_opposite_direction = previous_edge->GetDirection(1) * e->GetDirection(0) < 0;
-                if (angle > max_angle || edges_have_opposite_direction) next_color();
+                if (std::abs(angle) > max_angle || edges_have_opposite_direction) next_color();
             }
 
             e->color = current_color;
