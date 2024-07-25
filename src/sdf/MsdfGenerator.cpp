@@ -86,8 +86,8 @@ std::array<double, 3> MsdfGenerator::GenerateMsdfPixel(const Shape &shape, const
     } red, green, blue;
 
     auto is_closer = [](const double d1, const double d2, const double orth1, const double orth2) {
-        if (fabs(d1) < fabs(d2)) return true;
-        else if (fabs(d1) == fabs(d2)) return orth1 > orth2;
+        if (d1 < d2) return true;
+        else if (d1 == d2) return orth1 > orth2;
         return false;
     };
 
@@ -96,22 +96,21 @@ std::array<double, 3> MsdfGenerator::GenerateMsdfPixel(const Shape &shape, const
             double parameter = 0;
             auto distance = e->SignedDistance(p, parameter);
             auto orthogonality = e->GetOrthogonality(p, parameter);
-            auto abs_distance = std::abs(distance);
 
             // only save edges that have a common color with the channel
-            if ((int) e->color & (int) EdgeColor::Red && is_closer(abs_distance, red.min_distance, orthogonality, red.orthogonality)) {
+            if ((int) e->color & (int) EdgeColor::Red && is_closer(std::abs(distance), std::abs(red.min_distance), orthogonality, red.orthogonality)) {
                 red.min_distance = distance;
                 red.edge = &e;
                 red.near_parameter = parameter;
                 red.orthogonality = orthogonality;
             }
-            if ((int) e->color & (int) EdgeColor::Green && is_closer(abs_distance, green.min_distance, orthogonality, green.orthogonality)) {
+            if ((int) e->color & (int) EdgeColor::Green && is_closer(std::abs(distance), std::abs(green.min_distance), orthogonality, green.orthogonality)) {
                 green.min_distance = distance;
                 green.edge = &e;
                 green.near_parameter = parameter;
                 green.orthogonality = orthogonality;
             }
-            if ((int) e->color & (int) EdgeColor::Blue && is_closer(abs_distance, blue.min_distance, orthogonality, blue.orthogonality)) {
+            if ((int) e->color & (int) EdgeColor::Blue && is_closer(std::abs(distance), std::abs(blue.min_distance), orthogonality, blue.orthogonality)) {
                 blue.min_distance = distance;
                 blue.edge = &e;
                 blue.near_parameter = parameter;
@@ -121,9 +120,9 @@ std::array<double, 3> MsdfGenerator::GenerateMsdfPixel(const Shape &shape, const
     }
 
     std::array<double, 3> res = {
-            red.edge ? (*red.edge)->DistanceToPseudoDistance(p, red.near_parameter, red.min_distance) : INFINITY,
-            green.edge ? (*green.edge)->DistanceToPseudoDistance(p, green.near_parameter, green.min_distance) : INFINITY,
-            blue.edge ? (*blue.edge)->DistanceToPseudoDistance(p, blue.near_parameter, blue.min_distance) : INFINITY
+            red.edge ? (*red.edge)->SignedPseudoDistance(p, red.near_parameter) : INFINITY,
+            green.edge ? (*green.edge)->SignedPseudoDistance(p, green.near_parameter) : INFINITY,
+            blue.edge ? (*blue.edge)->SignedPseudoDistance(p, blue.near_parameter) : INFINITY
     };
 
     return res;
