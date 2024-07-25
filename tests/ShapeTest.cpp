@@ -165,6 +165,47 @@ TEST_CASE("Shape", "[Shape]") {
         }
     }
 
+    SECTION("Glyph high quality t") {
+        Shape shape;
+        Contour contour;
+        contour.AddEdge(EdgeHolder({9, 3}, {11, 3}));
+        contour.AddEdge(EdgeHolder({11, 3}, {12, 3}, {12, 4}));
+        contour.AddEdge(EdgeHolder({12, 4}, {12, 0}));
+        contour.AddEdge(EdgeHolder({12, 0}, {10, 0}));
+        contour.AddEdge(EdgeHolder({10, 0}, {8, 0}));
+        contour.AddEdge(EdgeHolder({8, 0}, {5, 0}));
+        contour.AddEdge(EdgeHolder({5, 0}, {4, 0}, {3, 1}));
+        contour.AddEdge(EdgeHolder({3, 1}, {3, 5}));
+        contour.AddEdge(EdgeHolder({3, 5}, {3, 13}));
+        contour.AddEdge(EdgeHolder({3, 13}, {0, 13}));
+        contour.AddEdge(EdgeHolder({0, 13}, {0, 15}));
+        contour.AddEdge(EdgeHolder({0, 15}, {3, 17}));
+        contour.AddEdge(EdgeHolder({3, 17}, {4, 21}));
+        contour.AddEdge(EdgeHolder({4, 21}, {7, 21}));
+        contour.AddEdge(EdgeHolder({7, 21}, {7, 17}));
+        contour.AddEdge(EdgeHolder({7, 17}, {12, 17}));
+        contour.AddEdge(EdgeHolder({12, 17}, {12, 13}));
+        contour.AddEdge(EdgeHolder({12, 13}, {7, 13}));
+        contour.AddEdge(EdgeHolder({7, 13}, {7, 5}));
+        contour.AddEdge(EdgeHolder({7, 5}, {7, 4}, {8, 3}));
+        contour.AddEdge(EdgeHolder({8, 3}, {9, 3}));
+        shape.contours.emplace_back(contour);
+        
+        SECTION("(14, 6) is outside") {
+            auto point = Vector2(14, 6);
+            auto distance = shape.SignedDistance(point);
+
+            REQUIRE(distance < 0);
+        }
+        
+        SECTION("(11,6) is outside") {
+            auto point = Vector2(11, 6);
+            auto distance = shape.SignedDistance(point);
+
+            REQUIRE(distance < 0);
+        }
+    }
+
     SECTION("Gyph d") {
         auto shape = Shape();
         auto outline = Contour();
@@ -260,49 +301,49 @@ TEST_CASE("Shape", "[Shape]") {
         contour.AddEdge(EdgeHolder({5, 8}, {5, 9}, {6, 8}));
         shape.contours.emplace_back(contour);
         shape.ApplyPreprocessing();
-        
+
         SECTION("(2,4) is inside") {
             auto point = Vector2(2, 4);
             auto distance = shape.SignedDistance(point);
 
             REQUIRE(distance > 0);
         }
-        
+
         SECTION("(2,8) is inside") {
             auto point = Vector2(2, 8);
             auto distance = shape.SignedDistance(point);
 
             REQUIRE(distance > 0);
         }
-        
+
         SECTION("(5,7) is inside") {
             auto point = Vector2(5, 7);
             auto distance = shape.SignedDistance(point);
 
             REQUIRE(distance > 0);
         }
-        
+
         SECTION("(3.5,6) is inside") {
             auto point = Vector2(3.5, 6);
             auto distance = shape.SignedDistance(point);
 
             REQUIRE(distance > 0);
         }
-        
+
         SECTION("(3.5, 6.5) is inside") {
             auto point = Vector2(3.5, 6.5);
             auto distance = shape.SignedDistance(point);
 
             REQUIRE(distance > 0);
         }
-        
+
         SECTION("(4,5) is outside") {
             auto point = Vector2(4, 5);
             auto distance = shape.SignedDistance(point);
 
             REQUIRE(distance < 0);
         }
-        
+
         SECTION("(3.5,8) is outside") {
             auto point = Vector2(3.5, 8);
             auto distance = shape.SignedDistance(point);

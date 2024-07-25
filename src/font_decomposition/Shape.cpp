@@ -65,7 +65,7 @@ double Shape::SignedDistance(const Vector2 &p) const {
                 max_orthogonality = e->GetOrthogonality(p, t);
             } else if (fabs(distance) == fabs(min_distance)) {
                 const auto orthogonality = e->GetOrthogonality(p, t);
-                if (orthogonality > max_orthogonality) {
+                if (orthogonality >= max_orthogonality) {
                     // this is needed for correct sign if the distance is the same
                     max_orthogonality = orthogonality;
                     min_distance = distance;

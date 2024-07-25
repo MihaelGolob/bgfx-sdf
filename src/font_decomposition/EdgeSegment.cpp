@@ -31,7 +31,7 @@ double EdgeSegment::SignedDistance(const Vector2 &p, double &t) const {
 double EdgeSegment::GetOrthogonality(const Vector2 &p, double t) const {
     const auto direction = GetDirection(t);
     const auto x = (p - GetPoint(t)).Normalize();
-    return fabs(direction.Cross(x));
+    return direction.Cross(x);
 }
 
 int EdgeSegment::GetSign(const Vector2 &p, double &t) const {
