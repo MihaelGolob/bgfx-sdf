@@ -25,8 +25,8 @@ public:
     double GenerateSdfPixel(const Shape& shape, const Vector2& p);
     
 private:
-    [[nodiscard]] int MapDistanceToColorValue(float distance) const;
-    [[nodiscard]] float ClampDistanceToRange(float distance) const;
+    [[nodiscard]] int MapDistanceToColorValue(double distance) const;
+    [[nodiscard]] double ClampDistanceToRange(double distance) const;
     void ClampArrayToRange(std::array<double, 3>& array);
     void CalculateGlyphMetrics(FT_Face const &face, GlyphInfo &out_glyph_info) const;
     
@@ -37,8 +37,8 @@ private:
     static int FtConicTo(const FT_Vector* control, const FT_Vector* to, void* user);
     static int FtCubicTo(const FT_Vector* control1, const FT_Vector* control2, const FT_Vector* to, void* user);
     
-    float font_size_ = 0;
-    float distance_range_ = 1.0;
+    double font_size_ = 0;
+    double distance_range_ = 1.0;
     unsigned int padding_;
     
     FT_Face face_;

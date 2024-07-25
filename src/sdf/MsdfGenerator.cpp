@@ -79,7 +79,7 @@ void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, u
 std::array<double, 3> MsdfGenerator::GenerateMsdfPixel(const Shape &shape, const Vector2 &p) {
     // struct to hold the closest edge for each color
     struct {
-        float min_distance = INFINITY;
+        double min_distance = INFINITY;
         const EdgeHolder *edge = nullptr;
         double near_parameter = 0;
         double orthogonality = 0;
@@ -208,12 +208,12 @@ int MsdfGenerator::FtCubicTo(const FT_Vector *control1, const FT_Vector *control
     return 0;
 }
 
-int MsdfGenerator::MapDistanceToColorValue(float distance) const {
+int MsdfGenerator::MapDistanceToColorValue(double distance) const {
     return (int) std::lround((distance / distance_range_ + 0.5f) * 255);
 }
 
-float MsdfGenerator::ClampDistanceToRange(float distance) const {
-    float clamped = bx::clamp(distance, -distance_range_ / 2.0, distance_range_ / 2.0);
+double MsdfGenerator::ClampDistanceToRange(double distance) const {
+    double clamped = bx::clamp(distance, -distance_range_ / 2.0, distance_range_ / 2.0);
     return clamped;
 }
 
