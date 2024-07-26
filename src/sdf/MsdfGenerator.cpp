@@ -42,17 +42,11 @@ void MsdfGenerator::BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, ui
     auto shape = ParseFtFace(code_point, 1.0);
     shape.ApplyPreprocessing();
     
-    CalculateGlyphMetrics(face_, glyph_info);
-    glyph_info.width = font_size_;
-    glyph_info.height = font_size_;
-    glyph_info.advance_x = 20;
-    glyph_info.advance_y = 0;
-    glyph_info.offset_x = 0;
-    glyph_info.offset_y = 0;
-
     FT_BBox_ bbox{};
     FT_Outline_Get_CBox(&face_->glyph->outline, &bbox);
     auto distance_range = std::max(bbox.xMax - bbox.xMin, bbox.yMax - bbox.yMin);
+    
+    CalculateGlyphMetrics(face_, bbox, glyph_info);
     
     for (int y = 0; y < font_size_; y++) {
         for (int x = 0; x < font_size_; x++) {
@@ -63,7 +57,7 @@ void MsdfGenerator::BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, ui
             auto clamped = ClampDistanceToRange(distance, distance_range);
             auto mapped_distance = MapDistanceToColorValue(clamped, distance_range);
 
-            auto index = ((font_size_ - y - 1) * font_size_ + x) * 4; // flip over y axis
+            auto index = GetIndexFromCoordinate(x, y);
 
             output[index + 0] = mapped_distance;
             output[index + 1] = mapped_distance;
@@ -74,31 +68,30 @@ void MsdfGenerator::BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, ui
 }
 
 void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t *output) {
-    auto shape = ParseFtFace(code_point);
+    auto shape = ParseFtFace(code_point, 1.0);
     shape.ApplyPreprocessing();
     shape.ApplyEdgeColoring(3.0);
 
-    CalculateGlyphMetrics(face_, glyph_info);
+    FT_BBox_ bbox{};
+    FT_Outline_Get_CBox(&face_->glyph->outline, &bbox);
+    auto distance_range = std::max(bbox.xMax - bbox.xMin, bbox.yMax - bbox.yMin);
 
-    int width = glyph_info.width;
-    int height = glyph_info.height;
-    double distance_range = std::max(width, height);
+    CalculateGlyphMetrics(face_, bbox, glyph_info);
+
     // general msdf generation loop
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            auto glyph_translation = Vector2(face_->glyph->metrics.horiBearingX >> 6, -((face_->glyph->metrics.height >> 6) - (face_->glyph->metrics.horiBearingY >> 6)));
-            auto padding_translation = Vector2(padding_, padding_);
-            auto translation = glyph_translation - padding_translation;
-            Vector2 p = Vector2((x + 0.5), (y + 0.5)) + translation;
+    for (int y = 0; y < font_size_; y++) {
+        for (int x = 0; x < font_size_; x++) {
+            auto translation = Vector2(bbox.xMin, -bbox.yMin);
+            Vector2 p = Vector2((x - 0.5), (y + 0.5)) * font_scale_ - translation;
 
             auto res = GenerateMsdfPixel(shape, p);
-            auto index = ((height - y - 1) * width + x) * 4; // flip over y axis
-
             ClampArrayToRange(res, distance_range);
-            output[index] = MapDistanceToColorValue(res[0], distance_range);        // B
+
+            int index = GetIndexFromCoordinate(x, y);
+            output[index + 0] = MapDistanceToColorValue(res[0], distance_range);    // B
             output[index + 1] = MapDistanceToColorValue(res[1], distance_range);    // G
             output[index + 2] = MapDistanceToColorValue(res[2], distance_range);    // R
-            output[index + 3] = 255;                                         // A
+            output[index + 3] = 255;                                                         // A
         }
     }
 }
@@ -250,17 +243,13 @@ void MsdfGenerator::ClampArrayToRange(std::array<double, 3> &array, double dista
     }
 }
 
-void MsdfGenerator::CalculateGlyphMetrics(FT_Face const &face, GlyphInfo &out_glyph_info) const {
-    out_glyph_info.width = (face->glyph->metrics.width >> 6);
-    out_glyph_info.height = (face->glyph->metrics.height >> 6);
-
-    out_glyph_info.advance_x = face->glyph->advance.x >> 6;
-    out_glyph_info.advance_y = face->glyph->advance.y >> 6;
-
-    out_glyph_info.offset_x = face->glyph->metrics.horiBearingX >> 6;
-    out_glyph_info.offset_y = -face->glyph->metrics.horiBearingY >> 6;
-
-    out_glyph_info.bitmap_scale = 1;
+void MsdfGenerator::CalculateGlyphMetrics(FT_Face const &face, FT_BBox_ bbox, GlyphInfo &out_glyph_info) const {
+    out_glyph_info.width = font_size_;
+    out_glyph_info.height = font_size_;
+    out_glyph_info.advance_x = face_->glyph->advance.x * (1.0 / font_scale_);
+    out_glyph_info.advance_y = face_->glyph->advance.y * (1.0 / font_scale_);
+    out_glyph_info.offset_x = bbox.xMin * (1.0 / font_scale_);
+    out_glyph_info.offset_y = -bbox.yMin * (1.0 / font_scale_);
 
     if (out_glyph_info.width > 0 && out_glyph_info.height > 0) {
         out_glyph_info.width += padding_ * 2;
@@ -269,4 +258,8 @@ void MsdfGenerator::CalculateGlyphMetrics(FT_Face const &face, GlyphInfo &out_gl
         out_glyph_info.offset_x -= padding_;
         out_glyph_info.offset_y -= padding_;
     }
+}
+
+int MsdfGenerator::GetIndexFromCoordinate(int x, int y) const {
+    return ((font_size_ - y - 1) * font_size_ + x) * 4; // flip over y axis
 }
