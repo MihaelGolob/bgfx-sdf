@@ -83,25 +83,25 @@ void InitFonts() {
     // create different fonts to compare their rendering quality
     // apart from the original font they are all created as (max) 16x16 bitmaps
     // then they are scaled up 4x
-    original_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::Bitmap, 0);
+    original_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 64, FontType::Bitmap, 0);
     
     bitmap_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::Bitmap, 0);
-    bitmap_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(bitmap_font_, 16); // create scaled fonts to show the power of SDF
+    bitmap_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(bitmap_font_, 64); // create scaled fonts to show the power of SDF
     
     sdf_bitmap_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 10, FontType::SdfFromBitmap, 3);
-    sdf_bitmap_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(sdf_bitmap_font_, 16);
+    sdf_bitmap_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(sdf_bitmap_font_, 64);
 
-    sdf_vector_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::SdfFromVector, 3);
-    sdf_vector_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(sdf_vector_font_, 16);
+    sdf_vector_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::SdfFromVector, 0);
+    sdf_vector_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(sdf_vector_font_, 64);
     
-    msdf_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::Msdf, 3);
-    msdf_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(msdf_font_, 16);
+    msdf_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::Msdf, 0);
+    msdf_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(msdf_font_, 64);
 
     original_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Bitmap, BufferType::Transient);
     bitmap_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Bitmap, BufferType::Transient);
     sdf_bitmap_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::SdfFromBitmap, BufferType::Transient);
     sdf_vector_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::SdfFromVector, BufferType::Transient);
-    msdf_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Color, BufferType::Transient);
+    msdf_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Msdf, BufferType::Transient);
 }
 
 void HandleKeyPressed(int key) {
