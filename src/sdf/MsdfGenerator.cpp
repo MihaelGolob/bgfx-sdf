@@ -11,35 +11,61 @@
 void MsdfGenerator::Init(FT_Face face, uint32_t font_size, uint32_t padding) {
     face_ = face;
     font_size_ = font_size;
-    distance_range_ = 0.5 * font_size_; // todo: is this good enough?
     padding_ = padding;
 
-    FT_Set_Pixel_Sizes(face, 0, font_size_);
+    CalculateFontScale();
+}
+
+// Calculate how much to scale the glyphs in order to fit them all
+// into a texture of size font_size. Currently we just check all the
+// letters and adjust the scale so that the largest fits.
+// note: this might not be the most efficient way to do this.
+void MsdfGenerator::CalculateFontScale() {
+    long max_width = 0;
+    long max_height = 0;
+    
+    for (int i = 'A'; i <= 'z'; i++) {
+        auto glyph_index = FT_Get_Char_Index(face_, i);
+        FT_Load_Glyph(face_, glyph_index, FT_LOAD_NO_SCALE);
+        
+        FT_BBox_ bbox{};
+        FT_Outline_Get_CBox(&face_->glyph->outline, &bbox);
+        
+        max_width = std::max(max_width, bbox.xMax - bbox.xMin);
+        max_height = std::max(max_height, bbox.yMax - bbox.yMin);
+    }
+
+    font_scale_ = (double) std::max(max_width, max_height) / font_size_;
 }
 
 void MsdfGenerator::BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t *output) {
-    auto shape = ParseFtFace(code_point);
+    auto shape = ParseFtFace(code_point, 1.0);
     shape.ApplyPreprocessing();
-
+    
     CalculateGlyphMetrics(face_, glyph_info);
+    glyph_info.width = font_size_;
+    glyph_info.height = font_size_;
+    glyph_info.advance_x = 20;
+    glyph_info.advance_y = 0;
+    glyph_info.offset_x = 0;
+    glyph_info.offset_y = 0;
 
-    int width = glyph_info.width;
-    int height = glyph_info.height;
-
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            auto glyph_translation = Vector2(face_->glyph->metrics.horiBearingX >> 6, -((face_->glyph->metrics.height >> 6) - (face_->glyph->metrics.horiBearingY >> 6)));
-            auto padding_translation = Vector2(padding_, padding_);
-            auto translation = glyph_translation - padding_translation;
-            Vector2 p = Vector2((x + 0.5), (y + 0.5)) + translation;
-
+    FT_BBox_ bbox{};
+    FT_Outline_Get_CBox(&face_->glyph->outline, &bbox);
+    auto distance_range = std::max(bbox.xMax - bbox.xMin, bbox.yMax - bbox.yMin);
+    
+    for (int y = 0; y < font_size_; y++) {
+        for (int x = 0; x < font_size_; x++) {
+            auto translation = Vector2(bbox.xMin, -bbox.yMin);
+            Vector2 p = Vector2((x - 0.5), (y + 0.5)) * font_scale_ - translation;
+            
             auto distance = GenerateSdfPixel(shape, p);
-            auto clamped = ClampDistanceToRange(distance);
-            auto mapped_distance = MapDistanceToColorValue(clamped);
+            auto clamped = ClampDistanceToRange(distance, distance_range);
+            auto mapped_distance = MapDistanceToColorValue(clamped, distance_range);
 
-            auto index = ((height - y - 1) * width + x) * 4; // flip over y axis
+            auto index = ((font_size_ - y - 1) * font_size_ + x) * 4; // flip over y axis
 
-            output[index] = mapped_distance;
+            output[index + 0] = mapped_distance;
             output[index + 1] = mapped_distance;
             output[index + 2] = mapped_distance;
             output[index + 3] = 255;
@@ -56,6 +82,7 @@ void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, u
 
     int width = glyph_info.width;
     int height = glyph_info.height;
+    double distance_range = std::max(width, height);
     // general msdf generation loop
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
@@ -67,10 +94,10 @@ void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, u
             auto res = GenerateMsdfPixel(shape, p);
             auto index = ((height - y - 1) * width + x) * 4; // flip over y axis
 
-            ClampArrayToRange(res);
-            output[index] = MapDistanceToColorValue(res[0]);        // B
-            output[index + 1] = MapDistanceToColorValue(res[1]);    // G
-            output[index + 2] = MapDistanceToColorValue(res[2]);    // R
+            ClampArrayToRange(res, distance_range);
+            output[index] = MapDistanceToColorValue(res[0], distance_range);        // B
+            output[index + 1] = MapDistanceToColorValue(res[1], distance_range);    // G
+            output[index + 2] = MapDistanceToColorValue(res[2], distance_range);    // R
             output[index + 3] = 255;                                         // A
         }
     }
@@ -84,7 +111,7 @@ std::array<double, 3> MsdfGenerator::GenerateMsdfPixel(const Shape &shape, const
         double near_parameter = 0;
         double orthogonality = 0;
     } red, green, blue;
-    
+
     auto round = [](double d, int decimals) {
         return std::ceil(d * std::pow(10, decimals)) / std::pow(10, decimals);
     };
@@ -136,7 +163,7 @@ double MsdfGenerator::GenerateSdfPixel(const Shape &shape, const Vector2 &p) {
     return shape.SignedDistance(p);
 }
 
-Shape MsdfGenerator::ParseFtFace(CodePoint code_point) {
+Shape MsdfGenerator::ParseFtFace(CodePoint code_point, double scale) {
     auto glyph_index = FT_Get_Char_Index(face_, code_point);
     if (FT_Load_Glyph(face_, glyph_index, FT_LOAD_NO_SCALE)) {
         PrintError("Failed to load glyph");
@@ -146,7 +173,7 @@ Shape MsdfGenerator::ParseFtFace(CodePoint code_point) {
     Shape output{};
 
     FtContext context{};
-    context.scale = 1.0 / 64.0; // default for freetype
+    context.scale = scale;
     context.shape = &output;
 
     FT_Outline_Funcs_ ft_functions{};
@@ -208,18 +235,18 @@ int MsdfGenerator::FtCubicTo(const FT_Vector *control1, const FT_Vector *control
     return 0;
 }
 
-int MsdfGenerator::MapDistanceToColorValue(double distance) const {
-    return (int) std::lround((distance / distance_range_ + 0.5f) * 255);
+int MsdfGenerator::MapDistanceToColorValue(double distance, double distance_range) const {
+    return (int) std::lround((distance / distance_range + 0.5f) * 255);
 }
 
-double MsdfGenerator::ClampDistanceToRange(double distance) const {
-    double clamped = bx::clamp(distance, -distance_range_ / 2.0, distance_range_ / 2.0);
+double MsdfGenerator::ClampDistanceToRange(double distance, double distance_range) const {
+    double clamped = bx::clamp(distance, -distance_range / 2.0, distance_range / 2.0);
     return clamped;
 }
 
-void MsdfGenerator::ClampArrayToRange(std::array<double, 3> &array) {
+void MsdfGenerator::ClampArrayToRange(std::array<double, 3> &array, double distance_range) {
     for (int i = 0; i < 3; i++) {
-        array[i] = ClampDistanceToRange(array[i]);
+        array[i] = ClampDistanceToRange(array[i], distance_range);
     }
 }
 
@@ -243,4 +270,3 @@ void MsdfGenerator::CalculateGlyphMetrics(FT_Face const &face, GlyphInfo &out_gl
         out_glyph_info.offset_y -= padding_;
     }
 }
-

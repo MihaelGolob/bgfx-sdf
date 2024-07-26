@@ -25,21 +25,22 @@ public:
     double GenerateSdfPixel(const Shape& shape, const Vector2& p);
     
 private:
-    [[nodiscard]] int MapDistanceToColorValue(double distance) const;
-    [[nodiscard]] double ClampDistanceToRange(double distance) const;
-    void ClampArrayToRange(std::array<double, 3>& array);
+    [[nodiscard]] int MapDistanceToColorValue(double distance, double distance_range) const;
+    [[nodiscard]] double ClampDistanceToRange(double distance, double distance_range) const;
+    void ClampArrayToRange(std::array<double, 3>& array, double distance_range);
     void CalculateGlyphMetrics(FT_Face const &face, GlyphInfo &out_glyph_info) const;
+    void CalculateFontScale();
     
     // glyph decomposition
-    Shape ParseFtFace(CodePoint code_point);
+    Shape ParseFtFace(CodePoint code_point, double scale = 1 / 64.0);
     static int FtMoveTo(const FT_Vector* to, void* user);
     static int FtLineTo(const FT_Vector* to, void* user);
     static int FtConicTo(const FT_Vector* control, const FT_Vector* to, void* user);
     static int FtCubicTo(const FT_Vector* control1, const FT_Vector* control2, const FT_Vector* to, void* user);
     
-    double font_size_ = 0;
-    double distance_range_ = 1.0;
+    long font_size_ = 0;
     unsigned int padding_;
+    double font_scale_;
     
     FT_Face face_;
 };
