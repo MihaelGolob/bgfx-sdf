@@ -12,6 +12,9 @@ void MsdfGenerator::Init(FT_Face face, uint32_t font_size, uint32_t padding) {
     face_ = face;
     font_size_ = font_size;
     padding_ = padding;
+    
+    texture_height_ = font_size_ + 2 * padding;
+    texture_width_ = font_size_ + 2 * padding;
 
     font_scale_ = CalculateFontScale();
 }
@@ -50,16 +53,16 @@ void MsdfGenerator::BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, ui
     
     CalculateGlyphMetrics(face_, bbox, glyph_info);
     
-    for (int y = 0; y < font_size_; y++) {
-        for (int x = 0; x < font_size_; x++) {
-            auto translation = Vector2(bbox.xMin, -bbox.yMin);
-            Vector2 p = Vector2((x - 0.5), (y + 0.5)) * font_scale_ - translation;
+    for (int y = 0; y < texture_height_; y++) {
+        for (int x = 0; x < texture_width_; x++) {
+            auto translation = Vector2(bbox.xMin, -bbox.yMin) + Vector2(padding_, padding_) * font_scale_;
+            Vector2 p = Vector2((x + 0.5), (y + 0.5)) * font_scale_ - translation;
             
             auto distance = GenerateSdfPixel(shape, p);
             auto clamped = ClampDistanceToRange(distance, distance_range);
             auto mapped_distance = MapDistanceToColorValue(clamped, distance_range);
 
-            auto index = GetIndexFromCoordinate(x, y);
+            auto index = GetFlippedIndexFromCoordinate(x, y);
 
             output[index + 0] = mapped_distance;
             output[index + 1] = mapped_distance;
@@ -81,15 +84,15 @@ void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, u
     CalculateGlyphMetrics(face_, bbox, glyph_info);
 
     // general msdf generation loop
-    for (int y = 0; y < font_size_; y++) {
-        for (int x = 0; x < font_size_; x++) {
-            auto translation = Vector2(bbox.xMin, -bbox.yMin);
-            Vector2 p = Vector2((x - 0.5), (y + 0.5)) * font_scale_ - translation;
+    for (int y = 0; y < texture_height_; y++) {
+        for (int x = 0; x < texture_width_; x++) {
+            auto translation = Vector2(bbox.xMin, -bbox.yMin) + Vector2(padding_, padding_) * font_scale_;
+            Vector2 p = Vector2((x + 0.5), (y + 0.5)) * font_scale_ - translation;
 
             auto res = GenerateMsdfPixel(shape, p);
             ClampArrayToRange(res, distance_range);
 
-            int index = GetIndexFromCoordinate(x, y);
+            int index = GetFlippedIndexFromCoordinate(x, y);
             output[index + 0] = MapDistanceToColorValue(res[0], distance_range);    // B
             output[index + 1] = MapDistanceToColorValue(res[1], distance_range);    // G
             output[index + 2] = MapDistanceToColorValue(res[2], distance_range);    // R
@@ -246,22 +249,14 @@ void MsdfGenerator::ClampArrayToRange(std::array<double, 3> &array, double dista
 }
 
 void MsdfGenerator::CalculateGlyphMetrics(FT_Face const &face, FT_BBox_ bbox, GlyphInfo &out_glyph_info) const {
-    out_glyph_info.width = font_size_;
-    out_glyph_info.height = font_size_;
-    out_glyph_info.advance_x = face_->glyph->advance.x * (1.0 / font_scale_);
-    out_glyph_info.advance_y = face_->glyph->advance.y * (1.0 / font_scale_);
-    out_glyph_info.offset_x = bbox.xMin * (1.0 / font_scale_);
-    out_glyph_info.offset_y = -bbox.yMin * (1.0 / font_scale_);
-
-    if (out_glyph_info.width > 0 && out_glyph_info.height > 0) {
-        out_glyph_info.width += padding_ * 2;
-        out_glyph_info.height += padding_ * 2;
-
-        out_glyph_info.offset_x -= padding_;
-        out_glyph_info.offset_y -= padding_;
-    }
+    out_glyph_info.width = texture_width_;
+    out_glyph_info.height = texture_height_;
+    out_glyph_info.advance_x = std::floor(face_->glyph->advance.x * (1.0 / font_scale_));
+    out_glyph_info.advance_y = std::floor(face_->glyph->advance.y * (1.0 / font_scale_));
+    out_glyph_info.offset_x = bbox.xMin * (1.0 / font_scale_) - padding_;
+    out_glyph_info.offset_y = -bbox.yMin * (1.0 / font_scale_) - padding_;
 }
 
-int MsdfGenerator::GetIndexFromCoordinate(int x, int y) const {
-    return ((font_size_ - y - 1) * font_size_ + x) * 4; // flip over y axis
+int MsdfGenerator::GetFlippedIndexFromCoordinate(int x, int y) const {
+    return ((texture_height_ - y - 1) * texture_width_ + x) * 4; // flip over y axis
 }

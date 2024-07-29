@@ -30,7 +30,7 @@ private:
     void ClampArrayToRange(std::array<double, 3>& array, double distance_range);
     void CalculateGlyphMetrics(FT_Face const &face, FT_BBox_ bbox, GlyphInfo &out_glyph_info) const;
     [[nodiscard]] double CalculateFontScale();
-    int GetIndexFromCoordinate(int x, int y) const;
+    int GetFlippedIndexFromCoordinate(int x, int y) const;
     
     // glyph decomposition
     Shape ParseFtFace(CodePoint code_point, double scale = 1 / 64.0);
@@ -42,6 +42,9 @@ private:
     long font_size_ = 0;
     unsigned int padding_;
     double font_scale_;
+    
+    int texture_width_;
+    int texture_height_;
     
     FT_Face face_;
 };
