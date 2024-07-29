@@ -5,7 +5,7 @@ $input v_color0, v_texcoord0
 SAMPLERCUBE(s_texColor, 0);
 
 float median(float a, float b, float c) {
-    return max(min(a, b), min(max(a, b), c));
+    return a + b + c - min(a, min(b, c)) - max(a, max(b, c));
 }
 
 void main() {
