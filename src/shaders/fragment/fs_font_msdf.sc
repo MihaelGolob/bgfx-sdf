@@ -10,11 +10,10 @@ float median(float a, float b, float c) {
 
 void main() {
     vec4 color = textureCube(s_texColor, v_texcoord0.xyz);
-    float d = median(color.r, color.g, color.b) - 0.5;
-    float w = clamp(d / fwidth(d) + 0.5, 0.0, 1.0);
+    float d = median(color.r, color.g, color.b);
     
-    vec4 outside_color = vec4(0.0, 0.0, 0.0, 0.0);
-    vec4 inside_color = vec4(1.0, 1.0, 1.0, 1.0);
+    float aaf = fwidth(d);
+    float alpha = smoothstep(0.5 - aaf, 0.5 + aaf, d);
     
-    gl_FragColor = mix(outside_color, inside_color, w);
+    gl_FragColor = vec4(1.0, 1.0, 1.0, alpha);
 }
