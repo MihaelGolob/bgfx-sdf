@@ -253,7 +253,7 @@ void MsdfGenerator::CalculateGlyphMetrics(FT_Face const &face, FT_BBox_ bbox, Gl
     out_glyph_info.height = texture_height_;
     out_glyph_info.advance_x = std::floor(face_->glyph->advance.x * (1.0 / font_scale_));
     out_glyph_info.advance_y = std::floor(face_->glyph->advance.y * (1.0 / font_scale_));
-    out_glyph_info.offset_x = bbox.xMin * (1.0 / font_scale_) - padding_;
+    out_glyph_info.offset_x = -bbox.xMin * (1.0 / font_scale_) - padding_;
     out_glyph_info.offset_y = -bbox.yMin * (1.0 / font_scale_) - padding_;
 }
 
