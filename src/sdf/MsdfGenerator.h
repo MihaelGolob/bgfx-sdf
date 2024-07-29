@@ -29,7 +29,7 @@ private:
     [[nodiscard]] double ClampDistanceToRange(double distance, double distance_range) const;
     void ClampArrayToRange(std::array<double, 3>& array, double distance_range);
     void CalculateGlyphMetrics(FT_Face const &face, FT_BBox_ bbox, GlyphInfo &out_glyph_info) const;
-    void CalculateFontScale();
+    [[nodiscard]] double CalculateFontScale();
     int GetIndexFromCoordinate(int x, int y) const;
     
     // glyph decomposition

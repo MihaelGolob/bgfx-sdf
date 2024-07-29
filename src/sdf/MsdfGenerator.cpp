@@ -13,14 +13,16 @@ void MsdfGenerator::Init(FT_Face face, uint32_t font_size, uint32_t padding) {
     font_size_ = font_size;
     padding_ = padding;
 
-    CalculateFontScale();
+    font_scale_ = CalculateFontScale();
 }
 
-// Calculate how much to scale the glyphs in order to fit them all
-// into a texture of size font_size. Currently we just check all the
-// letters and adjust the scale so that the largest fits.
-// note: this might not be the most efficient way to do this.
-void MsdfGenerator::CalculateFontScale() {
+/* 
+ * Calculate how much to scale the glyphs in order to fit them all
+ * into a texture of size font_size. Currently we just check all the
+ * letters and adjust the scale so that the largest fits.
+ * note: this might not be the most efficient way to do this.
+*/
+double MsdfGenerator::CalculateFontScale() {
     long max_width = 0;
     long max_height = 0;
     
@@ -35,7 +37,7 @@ void MsdfGenerator::CalculateFontScale() {
         max_height = std::max(max_height, bbox.yMax - bbox.yMin);
     }
 
-    font_scale_ = (double) std::max(max_width, max_height) / font_size_;
+    return (double) std::max(max_width, max_height) / font_size_;
 }
 
 void MsdfGenerator::BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t *output) {
