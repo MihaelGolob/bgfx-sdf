@@ -31,6 +31,7 @@ private:
     void CalculateGlyphMetrics(FT_Face const &face, FT_BBox_ bbox, GlyphInfo &out_glyph_info) const;
     [[nodiscard]] double CalculateFontScale();
     int GetFlippedIndexFromCoordinate(int x, int y) const;
+    Vector2 GetGlyphCoordinate(Vector2 bitmap_coordinate, FT_BBox_ bbox) const;
     
     // glyph decomposition
     Shape ParseFtFace(CodePoint code_point, double scale = 1 / 64.0);
