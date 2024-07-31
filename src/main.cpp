@@ -51,7 +51,7 @@ TextBufferHandle msdf_text_buffer_;
 FunctionId key_pressed_id_;
 FunctionId key_released_id_;
 
-std::string dynamic_text_ = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789,";
+std::string dynamic_text_ = "ABCDVWXabcdvwx1234";
 
 bool shift_pressed_ = false;
 
@@ -80,22 +80,24 @@ void InitFonts() {
     
     font_file_ = font_manager_->CreateTtf("../assets/fonts/OpenSans-Bold.ttf");
     
+    int scale_from = 16;
+    int scale_to = 100;
     // create different fonts to compare their rendering quality
     // apart from the original font they are all created as (max) 16x16 bitmaps
     // then they are scaled up 4x
-    original_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 64, FontType::Bitmap, 0);
+    original_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_to, FontType::Bitmap, 0);
     
-    bitmap_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::Bitmap, 0);
-    bitmap_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(bitmap_font_, 64); // create scaled fonts to show the power of SDF
+    bitmap_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from, FontType::Bitmap, 0);
+    bitmap_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(bitmap_font_, scale_to); // create scaled fonts to show the power of SDF
     
-    sdf_bitmap_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::SdfFromBitmap, 3);
-    sdf_bitmap_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(sdf_bitmap_font_, 64);
+    sdf_bitmap_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from, FontType::SdfFromBitmap, 5);
+    sdf_bitmap_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(sdf_bitmap_font_, scale_to);
 
-    sdf_vector_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::SdfFromVector, 3);
-    sdf_vector_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(sdf_vector_font_, 64);
+    sdf_vector_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from, FontType::SdfFromVector, 5);
+    sdf_vector_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(sdf_vector_font_, scale_to);
     
-    msdf_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 16, FontType::Msdf, 3);
-    msdf_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(msdf_font_, 64);
+    msdf_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from, FontType::Msdf, 5);
+    msdf_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(msdf_font_, scale_to);
 
     original_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Bitmap, BufferType::Transient);
     bitmap_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Bitmap, BufferType::Transient);
@@ -187,16 +189,16 @@ void Update() {
         text_buffer_manager_->SetPenPosition(original_text_buffer_, 10.0f, 10.0f);
         text_buffer_manager_->AppendText(original_text_buffer_, original_font_, dynamic_text_.c_str());
         
-        text_buffer_manager_->SetPenPosition(bitmap_text_buffer_, 10.0f, 80.0f);
+        text_buffer_manager_->SetPenPosition(bitmap_text_buffer_, 10.0f, 110.0f);
         text_buffer_manager_->AppendText(bitmap_text_buffer_, bitmap_scaled_font_, dynamic_text_.c_str());
         
-        text_buffer_manager_->SetPenPosition(sdf_bitmap_text_buffer_, 10.0f, 150.0f);
+        text_buffer_manager_->SetPenPosition(sdf_bitmap_text_buffer_, 10.0f, 220.0f);
         text_buffer_manager_->AppendText(sdf_bitmap_text_buffer_, sdf_bitmap_scaled_font_, dynamic_text_.c_str());
 
-        text_buffer_manager_->SetPenPosition(sdf_vector_text_buffer_, 10.0f, 220.0f);
+        text_buffer_manager_->SetPenPosition(sdf_vector_text_buffer_, 10.0f, 320.0f);
         text_buffer_manager_->AppendText(sdf_vector_text_buffer_, sdf_vector_scaled_font_, dynamic_text_.c_str()); 
         
-        text_buffer_manager_->SetPenPosition(msdf_text_buffer_, 10.0f, 290.0f);
+        text_buffer_manager_->SetPenPosition(msdf_text_buffer_, 10.0f, 420.0f);
         text_buffer_manager_->AppendText(msdf_text_buffer_, msdf_scaled_font_, dynamic_text_.c_str());
         
         SetViewTransform();
