@@ -117,6 +117,7 @@ char InputManager::GetKeyChar(int key) {
         case GLFW_KEY_8: return '8';
         case GLFW_KEY_9: return '9';
         case GLFW_KEY_SPACE: return ' ';
+        case GLFW_KEY_COMMA: return ',';
         default: {
             PrintError("Key not found in GetKeyChar!");
             return ' ';

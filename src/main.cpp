@@ -134,6 +134,7 @@ void InitInputManager() {
     keys_to_track.push_back(GLFW_KEY_SPACE);
     keys_to_track.push_back(GLFW_KEY_BACKSPACE);
     keys_to_track.push_back(GLFW_KEY_LEFT_SHIFT);
+    keys_to_track.push_back(GLFW_KEY_COMMA);
     
     // include numbers
     for (int i = 48; i <= 57; i++) {
