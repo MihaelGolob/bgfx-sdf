@@ -14,7 +14,7 @@
 #include "utilities.h"
 
 // constants
-constexpr int k_window_width_ = 1800; 
+constexpr int k_window_width_ = 2200; 
 constexpr int k_window_height_ = 900;
 
 // global variables
@@ -51,7 +51,7 @@ TextBufferHandle msdf_text_buffer_;
 FunctionId key_pressed_id_;
 FunctionId key_released_id_;
 
-std::string dynamic_text_ = "Lorem ipsum dolor sit amet, consectetur adipiscing elit";
+std::string dynamic_text_ = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789,";
 
 bool shift_pressed_ = false;
 
