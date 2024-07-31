@@ -28,7 +28,7 @@ private:
     [[nodiscard]] int MapDistanceToColorValue(double distance, double distance_range) const;
     [[nodiscard]] double ClampDistanceToRange(double distance, double distance_range) const;
     void ClampArrayToRange(std::array<double, 3>& array, double distance_range);
-    void CalculateGlyphMetrics(FT_Face const &face, FT_BBox_ bbox, GlyphInfo &out_glyph_info) const;
+    void CalculateGlyphMetrics(FT_BBox_ bbox, GlyphInfo &out_glyph_info) const;
     [[nodiscard]] double CalculateFontScale();
     int GetFlippedIndexFromCoordinate(int x, int y) const;
     Vector2 GetGlyphCoordinate(Vector2 bitmap_coordinate, FT_BBox_ bbox) const;

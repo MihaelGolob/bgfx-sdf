@@ -51,7 +51,7 @@ void MsdfGenerator::BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, ui
     FT_Outline_Get_CBox(&face_->glyph->outline, &bbox);
     auto distance_range = std::max(bbox.xMax - bbox.xMin, bbox.yMax - bbox.yMin);
 
-    CalculateGlyphMetrics(face_, bbox, glyph_info);
+    CalculateGlyphMetrics(bbox, glyph_info);
 
     for (int y = 0; y < texture_height_; y++) {
         for (int x = 0; x < texture_width_; x++) {
@@ -79,7 +79,7 @@ void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, u
     FT_Outline_Get_CBox(&face_->glyph->outline, &bbox);
     auto distance_range = std::max(bbox.xMax - bbox.xMin, bbox.yMax - bbox.yMin);
 
-    CalculateGlyphMetrics(face_, bbox, glyph_info);
+    CalculateGlyphMetrics(bbox, glyph_info);
 
     // general msdf generation loop
     for (int y = 0; y < texture_height_; y++) {
@@ -244,7 +244,7 @@ void MsdfGenerator::ClampArrayToRange(std::array<double, 3> &array, double dista
     }
 }
 
-void MsdfGenerator::CalculateGlyphMetrics(FT_Face const &face, FT_BBox_ bbox, GlyphInfo &out_glyph_info) const {
+void MsdfGenerator::CalculateGlyphMetrics(FT_BBox_ bbox, GlyphInfo &out_glyph_info) const {
     out_glyph_info.width = texture_width_;
     out_glyph_info.height = texture_height_;
     out_glyph_info.advance_x = std::floor(face_->glyph->advance.x * (1.0 / font_scale_));
