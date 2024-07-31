@@ -6,6 +6,7 @@
 #include <cmath>
 #include "EdgeSegment.h"
 #include "../helper/EquationSolver.h"
+#include "../utilities.h"
 
 // edge segment -------------------------------------
 EdgeSegment *EdgeSegment::CreateEdgeSegment(const Vector2 &p0, const Vector2 &p1) {
@@ -35,6 +36,10 @@ double EdgeSegment::GetOrthogonality(const Vector2 &p, double t) const {
 }
 
 int EdgeSegment::GetSign(const Vector2 &p, double &t) const {
+    if (t < 0.0 || t > 1.0) {
+        PrintError("Edge segment sign should be calculated for t in [0, 1].");
+    }
+    
     return (GetPoint(t) - p).Cross(GetDirection(t)) > 0 ? -1 : 1;
 }
 
@@ -87,7 +92,8 @@ Vector2 LinearSegment::GetDirection(double t) const {
 double LinearSegment::SignedPseudoDistance(const Vector2 &p, double &t) const {
     t = (p - points_[0]) * (points_[1] - points_[0]) / (points_[1] - points_[0]).Length2();
 
-    return (GetPoint(t) - p).Length() * GetSign(p, t);
+    double x = std::clamp(t, 0.0, 1.0);
+    return (GetPoint(t) - p).Length() * GetSign(p, x);
 }
 
 // quadratic segment --------------------------------
@@ -126,7 +132,8 @@ double QuadraticSegment::SignedPseudoDistance(const Vector2 &p, double &t) const
         }
     }
 
-    return min_distance * GetSign(p, t);
+    double x = std::clamp(t, 0.0, 1.0);
+    return min_distance * GetSign(p, x);
 }
 
 Vector2 QuadraticSegment::GetPoint(double t) const {
@@ -193,7 +200,8 @@ double CubicSegment::SignedPseudoDistance(const Vector2 &p, double &t) const {
         }
     }
 
-    return min_distance * GetSign(p, t);
+    double x = std::clamp(t, 0.0, 1.0);
+    return min_distance * GetSign(p, x);
 }
 
 Vector2 CubicSegment::GetPoint(double t) const {
