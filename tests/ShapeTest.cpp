@@ -365,19 +365,45 @@ TEST_CASE("Shape", "[Shape]") {
         contour.AddEdge(EdgeHolder({137, 81}, {154, 167}, {164, 238}));
         contour.AddEdge(EdgeHolder({164, 238}, {444, 238}));
         shape.contours.emplace_back(contour);
-        
+
         SECTION("(50, 300) is outside") {
             auto point = Vector2(50, 300);
             auto distance = shape.SignedPseudoDistance(point);
 
             REQUIRE(distance < 0);
         }
-        
+
         SECTION("(-50, 400) is outside") {
             auto point = Vector2(-120, 350);
             auto distance = shape.SignedPseudoDistance(point);
 
             REQUIRE(distance < 0);
+        }
+    }
+
+    SECTION("Glyph V") {
+        auto shape = Shape();
+        auto contour = Contour();
+        contour.AddEdge(EdgeHolder({1331, 1462}, {834, 0}));
+        contour.AddEdge(EdgeHolder({834, 0}, {496, 0}));
+        contour.AddEdge(EdgeHolder({496, 0}, {0, 1462}));
+        contour.AddEdge(EdgeHolder({0, 1462}, {313, 1462}));
+        contour.AddEdge(EdgeHolder({313, 1462}, {588, 592}));
+        contour.AddEdge(EdgeHolder({588, 592}, {595, 570}, {611, 509}));
+        contour.AddEdge(EdgeHolder({611, 509}, {627, 449}, {643, 381}));
+        contour.AddEdge(EdgeHolder({643, 381}, {660, 314}, {666, 270}));
+        contour.AddEdge(EdgeHolder({666, 270}, {672, 314}, {687, 381}));
+        contour.AddEdge(EdgeHolder({687, 381}, {703, 448}, {718, 508}));
+        contour.AddEdge(EdgeHolder({718, 508}, {734, 569}, {741, 592}));
+        contour.AddEdge(EdgeHolder({741, 592}, {1018, 1462}));
+        contour.AddEdge(EdgeHolder({1018, 1462}, {1331, 1462}));
+        shape.contours.emplace_back(contour);
+        
+        SECTION("(600, 200) is inside") {
+            auto point = Vector2(600, 200);
+            auto distance = shape.SignedDistance(point);
+
+            REQUIRE(distance > 0);
         }
     }
 }
