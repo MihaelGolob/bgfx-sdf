@@ -78,6 +78,8 @@ double Shape::SignedDistance(const Vector2 &p) const {
 }
 
 double Shape::SignedPseudoDistance(const Vector2 &p) const {
+    if (contours.empty()) return INFINITY;
+    
     double min_distance = INFINITY;
     double max_orthogonality = 0;
     EdgeHolder closest_edge;
@@ -93,7 +95,7 @@ double Shape::SignedPseudoDistance(const Vector2 &p) const {
                 closest_edge = e;
             } else if (fabs(fabs(distance) - fabs(min_distance)) < 0.00001) {
                 const auto orthogonality = e->GetOrthogonality(p, t);
-                if (orthogonality > max_orthogonality) {
+                if (orthogonality >= max_orthogonality) {
                     // this is needed for correct sign if the distance is the same
                     max_orthogonality = orthogonality;
                     min_distance = distance;
@@ -103,7 +105,8 @@ double Shape::SignedPseudoDistance(const Vector2 &p) const {
         }
     }
 
-    return closest_edge->SignedPseudoDistance(p, min_distance);
+    double t;
+    return closest_edge->SignedPseudoDistance(p, t);
 }
 
 void Shape::ApplyPreprocessing() {
