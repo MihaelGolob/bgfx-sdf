@@ -14,7 +14,7 @@
 #include "utilities.h"
 
 // constants
-constexpr int k_window_width_ = 2200; 
+constexpr int k_window_width_ = 1500; 
 constexpr int k_window_height_ = 900;
 
 // global variables
@@ -78,7 +78,7 @@ void InitFonts() {
     font_manager_ = new FontManager(1024);
     text_buffer_manager_ = new TextBufferManager(font_manager_);
     
-    font_file_ = font_manager_->CreateTtf("../assets/fonts/OpenSans-Bold.ttf");
+    font_file_ = font_manager_->CreateTtf("../assets/fonts/Helvetica-Bold.ttf");
     
     int scale_from = 16;
     int scale_to = 100;

@@ -119,6 +119,8 @@ void Shape::RemoveLoopEdges() {
     // todo: this might be caused by the glyph decomposition
     // todo: so it might not be needed when that is fixed!
     for (auto &c: contours) {
+        if (c.edges.empty()) continue;
+        
         std::unordered_set<Vector2, Vector2::HashFunction> visited_points;
         Vector2 start_point = c.edges.front()->GetPoint(0);
         
