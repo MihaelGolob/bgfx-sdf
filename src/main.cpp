@@ -90,13 +90,13 @@ void InitFonts() {
     bitmap_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from, FontType::Bitmap, 0);
     bitmap_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(bitmap_font_, scale_to); // create scaled fonts to show the power of SDF
     
-    sdf_bitmap_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from, FontType::SdfFromBitmap, 5);
+    sdf_bitmap_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from, FontType::SdfFromBitmap, 2);
     sdf_bitmap_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(sdf_bitmap_font_, scale_to);
 
-    sdf_vector_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from, FontType::SdfFromVector, 5);
+    sdf_vector_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from, FontType::SdfFromVector, 2);
     sdf_vector_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(sdf_vector_font_, scale_to);
     
-    msdf_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from, FontType::Msdf, 5);
+    msdf_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from, FontType::Msdf, 2);
     msdf_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(msdf_font_, scale_to);
 
     original_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Bitmap, BufferType::Transient);
