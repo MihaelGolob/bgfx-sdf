@@ -7,6 +7,7 @@
 
 #include "MsdfGenerator.h"
 #include "../utilities.h"
+#include "../font_decomposition/FontParser.h"
 
 void MsdfGenerator::Init(FT_Face face, uint32_t font_size, uint32_t padding) {
     face_ = face;
@@ -44,7 +45,7 @@ double MsdfGenerator::CalculateFontScale() {
 }
 
 void MsdfGenerator::BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t *output) {
-    auto shape = ParseFtFace(code_point, 1.0);
+    auto shape = FontParser::ParseFtFace(code_point, &face_, 1.0);
     shape.ApplyPreprocessing();
 
     FT_BBox_ bbox{};
@@ -71,7 +72,7 @@ void MsdfGenerator::BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, ui
 }
 
 void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t *output) {
-    auto shape = ParseFtFace(code_point, 1.0);
+    auto shape = FontParser::ParseFtFace(code_point, &face_, 1.0);
     shape.ApplyPreprocessing();
     shape.ApplyEdgeColoring(3.0);
 
@@ -155,78 +156,6 @@ std::array<double, 3> MsdfGenerator::GenerateMsdfPixel(const Shape &shape, const
 
 double MsdfGenerator::GenerateSdfPixel(const Shape &shape, const Vector2 &p) {
     return shape.SignedDistance(p);
-}
-
-Shape MsdfGenerator::ParseFtFace(CodePoint code_point, double scale) {
-    auto glyph_index = FT_Get_Char_Index(face_, code_point);
-    if (FT_Load_Glyph(face_, glyph_index, FT_LOAD_NO_SCALE)) {
-        PrintError("Failed to load glyph");
-        return {};
-    }
-
-    Shape output{};
-
-    FtContext context{};
-    context.scale = scale;
-    context.shape = &output;
-
-    FT_Outline_Funcs_ ft_functions{};
-    ft_functions.move_to = &FtMoveTo;
-    ft_functions.line_to = &FtLineTo;
-    ft_functions.conic_to = &FtConicTo;
-    ft_functions.cubic_to = &FtCubicTo;
-    ft_functions.shift = 0;
-    ft_functions.delta = 0;
-
-    FT_Outline_Decompose(&face_->glyph->outline, &ft_functions, &context);
-
-    return output;
-}
-
-int MsdfGenerator::FtMoveTo(const FT_Vector *to, void *user) {
-    auto context = reinterpret_cast<FtContext *>(user);
-    if (!context->contour || context->contour->HasEdges()) {
-        context->contour = &context->shape->AddEmptyContour();
-    }
-    context->position = Point2(*to, context->scale);
-    return 0;
-}
-
-int MsdfGenerator::FtLineTo(const FT_Vector *to, void *user) {
-    auto context = reinterpret_cast<FtContext *>(user);
-    auto end_point = Point2(*to, context->scale);
-    if (end_point != context->position) {
-        context->contour->AddEdge(EdgeHolder(context->position, end_point));
-        context->position = end_point;
-    }
-
-    return 0;
-}
-
-int MsdfGenerator::FtConicTo(const FT_Vector *control, const FT_Vector *to, void *user) {
-    auto context = reinterpret_cast<FtContext *>(user);
-    auto control_point = Point2(*control, context->scale);
-    auto end_point = Point2(*to, context->scale);
-    if (end_point != context->position) {
-        auto temp = EdgeHolder(context->position, control_point, end_point);
-        context->contour->AddEdge(temp);
-        context->position = end_point;
-    }
-
-    return 0;
-}
-
-int MsdfGenerator::FtCubicTo(const FT_Vector *control1, const FT_Vector *control2, const FT_Vector *to, void *user) {
-    auto context = reinterpret_cast<FtContext *>(user);
-    auto control_point1 = Point2(*control1, context->scale);
-    auto control_point2 = Point2(*control2, context->scale);
-    auto end_point = Point2(*to, context->scale);
-    if (end_point != context->position || (control_point1 - end_point).Cross(control_point2 - end_point)) {
-        context->contour->AddEdge(EdgeHolder(context->position, control_point1, control_point2, end_point));
-        context->position = end_point;
-    }
-
-    return 0;
 }
 
 int MsdfGenerator::MapDistanceToColorValue(double distance, double distance_range) const {

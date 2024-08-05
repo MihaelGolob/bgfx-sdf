@@ -33,13 +33,6 @@ private:
     int GetFlippedIndexFromCoordinate(int x, int y) const;
     Vector2 GetGlyphCoordinate(Vector2 bitmap_coordinate, FT_BBox_ bbox) const;
     
-    // glyph decomposition
-    Shape ParseFtFace(CodePoint code_point, double scale = 1 / 64.0);
-    static int FtMoveTo(const FT_Vector* to, void* user);
-    static int FtLineTo(const FT_Vector* to, void* user);
-    static int FtConicTo(const FT_Vector* control, const FT_Vector* to, void* user);
-    static int FtCubicTo(const FT_Vector* control1, const FT_Vector* control2, const FT_Vector* to, void* user);
-    
     long font_size_ = 0;
     unsigned int padding_;
     double font_scale_;
@@ -48,12 +41,4 @@ private:
     int texture_height_;
     
     FT_Face face_;
-};
-
-// used for decomposition of the glyph
-struct FtContext {
-    double scale;
-    Point2 position;
-    Shape *shape;
-    Contour *contour;
 };
