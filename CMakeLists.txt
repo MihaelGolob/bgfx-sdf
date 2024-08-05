@@ -4,6 +4,7 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 project(bgfx-sdf)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
+add_compile_definitions(NOMINMAX) # windows.h conflicts with min/max function from bx
 # find src/* -name "*.cpp" -printf "%p\n"
 add_library(bgfx-sdf STATIC
 #		src/main.cpp
