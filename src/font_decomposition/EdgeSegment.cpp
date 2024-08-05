@@ -8,6 +8,8 @@
 #include "../helper/EquationSolver.h"
 #include "../utilities.h"
 
+#define PI 3.14159265359
+
 // edge segment -------------------------------------
 EdgeSegment *EdgeSegment::CreateEdgeSegment(const Vector2 &p0, const Vector2 &p1) {
     return new LinearSegment(p0, p1);
@@ -39,12 +41,12 @@ int EdgeSegment::GetSign(const Vector2 &p, double &t) const {
     if (t < 0.0 || t > 1.0) {
         PrintError("Edge segment sign should be calculated for t in [0, 1].");
     }
-    
+
     return (GetPoint(t) - p).Cross(GetDirection(t)) > 0 ? -1 : 1;
 }
 
 double EdgeSegment::GetAngleDeg(const EdgeSegment *edge1, const EdgeSegment *edge2, double t1, double t2) {
-    return std::asin(edge1->GetDirection(t1).Cross(edge2->GetDirection(t2))) * 180 / M_PI;
+    return std::asin(edge1->GetDirection(t1).Cross(edge2->GetDirection(t2))) * 180 / PI;
 }
 
 double EdgeSegment::DistanceToPseudoDistance(const Vector2 &p, double t, double distance) const {
