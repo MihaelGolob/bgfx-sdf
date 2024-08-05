@@ -28,10 +28,20 @@ private:
     [[nodiscard]] int MapDistanceToColorValue(double distance, double distance_range) const;
     [[nodiscard]] double ClampDistanceToRange(double distance, double distance_range) const;
     void ClampArrayToRange(std::array<double, 3>& array, double distance_range);
+    
     void CalculateGlyphMetrics(FT_BBox_ bbox, GlyphInfo &out_glyph_info) const;
+    
     [[nodiscard]] double CalculateFontScale();
-    int GetFlippedIndexFromCoordinate(int x, int y) const;
-    Vector2 GetGlyphCoordinate(Vector2 bitmap_coordinate, FT_BBox_ bbox) const;
+    
+    void MsdfCollisionCorrection(uint8_t* map, int threshold);
+    [[nodiscard]] int FindHighestDifferenceInNeighbours(int x, int y, uint8_t* map);
+    [[nodiscard]] bool HigherThanThreshold(const std::vector<int>& x, int how_many, int threshold);
+    [[nodiscard]] bool AreCellsOfDifferentSign(int a, int b);
+    [[nodiscard]] int GetMedian(int a, int b, int c);
+    
+    [[nodiscard]] int GetFlippedIndexFromCoordinate(int x, int y) const;
+    [[nodiscard]] int GetIndexFromCoordinate(int x, int y) const;
+    [[nodiscard]] Vector2 GetGlyphCoordinate(Vector2 bitmap_coordinate, FT_BBox_ bbox) const;
     
     long font_size_ = 0;
     unsigned int padding_;
@@ -39,6 +49,8 @@ private:
     
     int texture_width_;
     int texture_height_;
+    
+    int collision_correction_threshold_;
     
     FT_Face face_;
 };

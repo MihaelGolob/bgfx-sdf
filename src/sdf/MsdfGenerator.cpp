@@ -18,6 +18,7 @@ void MsdfGenerator::Init(FT_Face face, uint32_t font_size, uint32_t padding) {
     texture_width_ = font_size_ + 2 * padding;
 
     font_scale_ = CalculateFontScale();
+    collision_correction_threshold_ = 30;
 }
 
 /* 
@@ -96,6 +97,8 @@ void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, u
             output[index + 3] = 255;                                                         // A
         }
     }
+
+    MsdfCollisionCorrection(output, collision_correction_threshold_);
 }
 
 std::array<double, 3> MsdfGenerator::GenerateMsdfPixel(const Shape &shape, const Vector2 &p) {
@@ -186,7 +189,56 @@ int MsdfGenerator::GetFlippedIndexFromCoordinate(int x, int y) const {
     return ((texture_height_ - y - 1) * texture_width_ + x) * 4; // flip over y axis
 }
 
+int MsdfGenerator::GetIndexFromCoordinate(int x, int y) const {
+    return (y * texture_width_ + x) * 4;
+}
+
 Vector2 MsdfGenerator::GetGlyphCoordinate(Vector2 bitmap_coordinate, FT_BBox_ bbox) const {
     auto translation = Vector2(bbox.xMin, -bbox.yMin) + Vector2(padding_, padding_) * font_scale_;
     return Vector2((bitmap_coordinate.x + 0.5), (bitmap_coordinate.y + 0.5)) * font_scale_ - translation;
+}
+
+void MsdfGenerator::MsdfCollisionCorrection(uint8_t *map, int threshold) {
+    for (int y = 0; y < texture_height_; y++) {
+        for (int x = 0; x < texture_width_; x++) {
+            int blue_jump = FindHighestDifferenceInNeighbours(x, y, map);
+            int green_jump = FindHighestDifferenceInNeighbours(x, y, map + 1);
+            int red_jump = FindHighestDifferenceInNeighbours(x, y, map + 2);
+
+            if (HigherThanThreshold({blue_jump, green_jump, red_jump}, 2, threshold)) {
+                int index = GetIndexFromCoordinate(x, y);
+                int median = GetMedian(map[index], map[index + 1], map[index + 2]);
+                map[index] = median;
+                map[index + 1] = median;
+                map[index + 2] = median;
+            }
+        }
+    }
+}
+
+int MsdfGenerator::FindHighestDifferenceInNeighbours(int x, int y, uint8_t *map) {
+    int index = GetIndexFromCoordinate(x, y);
+    int right_index = GetIndexFromCoordinate(x + 1, y);
+    int down_index = GetIndexFromCoordinate(x, y + 1);
+
+    int right_diff = AreCellsOfDifferentSign(map[index], map[right_index]) ? std::abs(map[index] - map[right_index]) : 0;
+    int down_diff = AreCellsOfDifferentSign(map[index], map[down_index]) ? std::abs(map[index] - map[down_index]) : 0;
+
+    return std::max(right_diff, down_diff);
+}
+
+bool MsdfGenerator::HigherThanThreshold(const std::vector<int> &x, int how_many, int threshold) {
+    int count = 0;
+    for (const auto &i: x) {
+        count += i > threshold;
+    }
+    return count >= how_many;
+}
+
+int MsdfGenerator::GetMedian(int a, int b, int c) {
+    return a + b + c - std::min(a, std::min(b, c)) - std::max(a, std::max(b, c));
+}
+
+bool MsdfGenerator::AreCellsOfDifferentSign(int a, int b) {
+    return (a - 127) * (b - 127) < 0;
 }
