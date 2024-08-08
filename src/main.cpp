@@ -1,13 +1,11 @@
 ﻿#include <iostream>
 
-#include <bgfx/bgfx.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
 #include "managers/FontManager.h"
 #include "managers/TextBufferManager.h"
 #include "managers/InputManager.h"
-#include "utilities.h"
 
 // constants
 constexpr int k_window_width_ = 1500;
