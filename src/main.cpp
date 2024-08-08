@@ -131,6 +131,14 @@ void ClearTextBuffers() {
     text_buffer_manager_->ClearTextBuffer(msdf_text_buffer_);
 }
 
+void DrawTextBuffers() {
+    text_buffer_manager_->SubmitTextBuffer(original_text_buffer_, 0);
+    text_buffer_manager_->SubmitTextBuffer(bitmap_text_buffer_, 0);
+    text_buffer_manager_->SubmitTextBuffer(msdf_text_buffer_, 0);
+    text_buffer_manager_->SubmitTextBuffer(sdf_vector_text_buffer_, 0);
+    text_buffer_manager_->SubmitTextBuffer(sdf_bitmap_text_buffer_, 0);
+}
+
 void Update() {
     ClearTextBuffers();
 
@@ -149,20 +157,10 @@ void Update() {
     text_buffer_manager_->SetPenPosition(msdf_text_buffer_, 10.0f, 420.0f);
     text_buffer_manager_->AppendText(msdf_text_buffer_, msdf_scaled_font_, dynamic_text_.c_str());
 
-    // draw text buffers
-    text_buffer_manager_->SubmitTextBuffer(original_text_buffer_, 0);
-    text_buffer_manager_->SubmitTextBuffer(bitmap_text_buffer_, 0);
-    text_buffer_manager_->SubmitTextBuffer(msdf_text_buffer_, 0);
-    text_buffer_manager_->SubmitTextBuffer(sdf_vector_text_buffer_, 0);
-    text_buffer_manager_->SubmitTextBuffer(sdf_bitmap_text_buffer_, 0);
-
+    DrawTextBuffers();
 }
 
-void Shutdown() {
-    // destroy ttf file handles
-    font_manager_->DestroyTtf(font_file_);
-
-    // destroy font handles
+void DestroyAllFonts() {
     font_manager_->DestroyFont(original_font_);
 
     font_manager_->DestroyFont(bitmap_font_);
@@ -176,23 +174,32 @@ void Shutdown() {
 
     font_manager_->DestroyFont(msdf_font_);
     font_manager_->DestroyFont(msdf_scaled_font_);
+}
 
-    // destroy text buffer handles
+void DestroyAllTextBuffers() {
     text_buffer_manager_->DestroyTextBuffer(original_text_buffer_);
     text_buffer_manager_->DestroyTextBuffer(bitmap_text_buffer_);
     text_buffer_manager_->DestroyTextBuffer(sdf_bitmap_text_buffer_);
     text_buffer_manager_->DestroyTextBuffer(sdf_vector_text_buffer_);
     text_buffer_manager_->DestroyTextBuffer(msdf_text_buffer_);
+}
 
-    // unsubscribe from input manager
-    InputManager::UnsubscribeKeyPressed(key_pressed_id_);
-    InputManager::UnsubscribeKeyReleased(key_released_id_);
-
-    // destroy managers
+void DestroyAllManagers() {
     delete font_manager_;
     delete text_buffer_manager_;
     delete input_manager_;
     delete window_;
+}
+
+void Shutdown() {
+    font_manager_->DestroyTtf(font_file_);
+    DestroyAllFonts();
+    DestroyAllTextBuffers();
+
+    InputManager::UnsubscribeKeyPressed(key_pressed_id_);
+    InputManager::UnsubscribeKeyReleased(key_released_id_);
+
+    DestroyAllManagers();
 }
 
 int main() {
