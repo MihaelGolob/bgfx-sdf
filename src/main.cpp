@@ -1,10 +1,6 @@
-﻿#define GLFW_EXPOSE_NATIVE_WIN32
-
-#include <iostream>
+﻿#include <iostream>
 
 #include <bgfx/bgfx.h>
-#include <GLFW/glfw3.h>
-#include <GLFW/glfw3native.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -14,16 +10,16 @@
 #include "utilities.h"
 
 // constants
-constexpr int k_window_width_ = 1500; 
+constexpr int k_window_width_ = 1500;
 constexpr int k_window_height_ = 900;
 
 // global variables
-GLFWwindow* window_;
+Window *window_;
 
 // managers
-FontManager* font_manager_;
-TextBufferManager* text_buffer_manager_;
-InputManager* input_manager_;
+FontManager *font_manager_;
+TextBufferManager *text_buffer_manager_;
+InputManager *input_manager_;
 
 // fonts
 TrueTypeHandle font_file_;
@@ -55,47 +51,28 @@ std::string dynamic_text_ = "ABCDVWXabcdvwx1234";
 
 bool shift_pressed_ = false;
 
-GLFWwindow* CreateAndLinkWindow() {
-    glfwInit();
-    GLFWwindow* window = glfwCreateWindow(k_window_width_, k_window_height_, "BGFX fonts", nullptr, nullptr);
-
-    bgfx::Init bgfx_init;
-    bgfx_init.type = bgfx::RendererType::Count;
-    bgfx_init.resolution.width = k_window_width_;
-    bgfx_init.resolution.height = k_window_height_;
-    bgfx_init.resolution.reset = BGFX_RESET_VSYNC;
-    bgfx_init.platformData.nwh = glfwGetWin32Window(window);
-    bgfx::init(bgfx_init);
-
-    bgfx::setDebug(BGFX_DEBUG_NONE);
-    bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x303030ff, 1.0f, 0);
-    bgfx::setViewRect(0, 0, 0, k_window_width_, k_window_height_);
-
-    return window;
-}
-
 void InitFonts() {
     font_manager_ = new FontManager(1024);
     text_buffer_manager_ = new TextBufferManager(font_manager_);
-    
+
     font_file_ = font_manager_->CreateTtf("../assets/fonts/Helvetica-Bold.ttf");
-    
+
     int scale_from = 16;
     int scale_to = 100;
     // create different fonts to compare their rendering quality
     // apart from the original font they are all created as (max) 16x16 bitmaps
     // then they are scaled up 4x
     original_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_to, FontType::Bitmap, 0);
-    
+
     bitmap_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from, FontType::Bitmap, 0);
     bitmap_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(bitmap_font_, scale_to); // create scaled fonts to show the power of SDF
-    
+
     sdf_bitmap_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from, FontType::SdfFromBitmap, 2);
     sdf_bitmap_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(sdf_bitmap_font_, scale_to);
 
     sdf_vector_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from, FontType::SdfFromVector, 2);
     sdf_vector_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(sdf_vector_font_, scale_to);
-    
+
     msdf_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from, FontType::Msdf, 2);
     msdf_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(msdf_font_, scale_to);
 
@@ -127,47 +104,47 @@ void HandleKeyReleased(int key) {
 
 void InitInputManager() {
     std::vector<int> keys_to_track;
-    
+
     // include alphabet
     for (int i = 65; i <= 90; i++) {
         keys_to_track.push_back(i);
     }
-    
+
     keys_to_track.push_back(GLFW_KEY_SPACE);
     keys_to_track.push_back(GLFW_KEY_BACKSPACE);
     keys_to_track.push_back(GLFW_KEY_LEFT_SHIFT);
     keys_to_track.push_back(GLFW_KEY_COMMA);
-    
+
     // include numbers
     for (int i = 48; i <= 57; i++) {
         keys_to_track.push_back(i);
     }
-    
+
     input_manager_ = new InputManager(window_, keys_to_track);
     key_pressed_id_ = InputManager::SubscribeKeyPressed(HandleKeyPressed);
     key_released_id_ = InputManager::SubscribeKeyReleased(HandleKeyReleased);
 }
 
 void SetViewTransform() {
-    const bx::Vec3 at  = { 0.0f, 0.0f,  10.0f };
-    const bx::Vec3 eye = { 0.0f, 0.0f, -1.0f };
+    const bx::Vec3 at = {0.0f, 0.0f, 10.0f};
+    const bx::Vec3 eye = {0.0f, 0.0f, -1.0f};
     float view[16];
     bx::mtxLookAt(view, eye, at);
 
     float ortho[16];
     bx::mtxOrtho(ortho,
-                0.0f,
-                float(k_window_width_),
-                float(k_window_height_),
-                0.0f,
-                0.0f,
-                100.0f,
-                0.0f,
-                bgfx::getCaps()->homogeneousDepth
+                 0.0f,
+                 float(k_window_width_),
+                 float(k_window_height_),
+                 0.0f,
+                 0.0f,
+                 100.0f,
+                 0.0f,
+                 bgfx::getCaps()->homogeneousDepth
     );
 
     bgfx::setViewTransform(0, view, ortho);
-    bgfx::setViewRect(0, 0, 0, uint16_t(k_window_width_), uint16_t(k_window_height_) );
+    bgfx::setViewRect(0, 0, 0, uint16_t(k_window_width_), uint16_t(k_window_height_));
 }
 
 void ClearTextBuffers() {
@@ -179,92 +156,89 @@ void ClearTextBuffers() {
 }
 
 void Update() {
-    while(!glfwWindowShouldClose(window_)) {
-        // rendering
-        glfwPollEvents();
-        bgfx::touch(0);
-        
-        ClearTextBuffers();
+    bgfx::touch(0);
 
-        text_buffer_manager_->SetPenPosition(original_text_buffer_, 10.0f, 10.0f);
-        text_buffer_manager_->AppendText(original_text_buffer_, original_font_, dynamic_text_.c_str());
-        
-        text_buffer_manager_->SetPenPosition(bitmap_text_buffer_, 10.0f, 110.0f);
-        text_buffer_manager_->AppendText(bitmap_text_buffer_, bitmap_scaled_font_, dynamic_text_.c_str());
-        
-        text_buffer_manager_->SetPenPosition(sdf_bitmap_text_buffer_, 10.0f, 220.0f);
-        text_buffer_manager_->AppendText(sdf_bitmap_text_buffer_, sdf_bitmap_scaled_font_, dynamic_text_.c_str());
+    ClearTextBuffers();
 
-        text_buffer_manager_->SetPenPosition(sdf_vector_text_buffer_, 10.0f, 320.0f);
-        text_buffer_manager_->AppendText(sdf_vector_text_buffer_, sdf_vector_scaled_font_, dynamic_text_.c_str()); 
-        
-        text_buffer_manager_->SetPenPosition(msdf_text_buffer_, 10.0f, 420.0f);
-        text_buffer_manager_->AppendText(msdf_text_buffer_, msdf_scaled_font_, dynamic_text_.c_str());
-        
-        SetViewTransform();
+    text_buffer_manager_->SetPenPosition(original_text_buffer_, 10.0f, 10.0f);
+    text_buffer_manager_->AppendText(original_text_buffer_, original_font_, dynamic_text_.c_str());
 
-        // draw text buffers
-        text_buffer_manager_->SubmitTextBuffer(original_text_buffer_, 0);
-        text_buffer_manager_->SubmitTextBuffer(bitmap_text_buffer_, 0);
-        text_buffer_manager_->SubmitTextBuffer(msdf_text_buffer_, 0);
-        text_buffer_manager_->SubmitTextBuffer(sdf_vector_text_buffer_, 0);
-        text_buffer_manager_->SubmitTextBuffer(sdf_bitmap_text_buffer_, 0);
+    text_buffer_manager_->SetPenPosition(bitmap_text_buffer_, 10.0f, 110.0f);
+    text_buffer_manager_->AppendText(bitmap_text_buffer_, bitmap_scaled_font_, dynamic_text_.c_str());
 
-        bgfx::frame();
-    }
+    text_buffer_manager_->SetPenPosition(sdf_bitmap_text_buffer_, 10.0f, 220.0f);
+    text_buffer_manager_->AppendText(sdf_bitmap_text_buffer_, sdf_bitmap_scaled_font_, dynamic_text_.c_str());
+
+    text_buffer_manager_->SetPenPosition(sdf_vector_text_buffer_, 10.0f, 320.0f);
+    text_buffer_manager_->AppendText(sdf_vector_text_buffer_, sdf_vector_scaled_font_, dynamic_text_.c_str());
+
+    text_buffer_manager_->SetPenPosition(msdf_text_buffer_, 10.0f, 420.0f);
+    text_buffer_manager_->AppendText(msdf_text_buffer_, msdf_scaled_font_, dynamic_text_.c_str());
+
+    SetViewTransform();
+
+    // draw text buffers
+    text_buffer_manager_->SubmitTextBuffer(original_text_buffer_, 0);
+    text_buffer_manager_->SubmitTextBuffer(bitmap_text_buffer_, 0);
+    text_buffer_manager_->SubmitTextBuffer(msdf_text_buffer_, 0);
+    text_buffer_manager_->SubmitTextBuffer(sdf_vector_text_buffer_, 0);
+    text_buffer_manager_->SubmitTextBuffer(sdf_bitmap_text_buffer_, 0);
+
+    bgfx::frame();
 }
 
 void Shutdown() {
-    glfwDestroyWindow(window_);
-    glfwTerminate();
-    
+    delete window_;
+
     // destroy ttf file handles
     font_manager_->DestroyTtf(font_file_);
-    
+
     // destroy font handles
     font_manager_->DestroyFont(original_font_);
-    
+
     font_manager_->DestroyFont(bitmap_font_);
     font_manager_->DestroyFont(bitmap_scaled_font_);
-    
+
     font_manager_->DestroyFont(sdf_bitmap_font_);
     font_manager_->DestroyFont(sdf_bitmap_scaled_font_);
-    
+
     font_manager_->DestroyFont(sdf_vector_font_);
     font_manager_->DestroyFont(sdf_vector_scaled_font_);
-    
+
     font_manager_->DestroyFont(msdf_font_);
     font_manager_->DestroyFont(msdf_scaled_font_);
-    
+
     // destroy text buffer handles
     text_buffer_manager_->DestroyTextBuffer(original_text_buffer_);
     text_buffer_manager_->DestroyTextBuffer(bitmap_text_buffer_);
     text_buffer_manager_->DestroyTextBuffer(sdf_bitmap_text_buffer_);
     text_buffer_manager_->DestroyTextBuffer(sdf_vector_text_buffer_);
     text_buffer_manager_->DestroyTextBuffer(msdf_text_buffer_);
-    
+
     // unsubscribe from input manager
     InputManager::UnsubscribeKeyPressed(key_pressed_id_);
     InputManager::UnsubscribeKeyReleased(key_released_id_);
-    
+
     // destroy managers
     delete font_manager_;
     delete text_buffer_manager_;
     delete input_manager_;
-    
+
     bgfx::shutdown();
 }
 
 int main() {
     // initialization
-    window_ = CreateAndLinkWindow();
+    window_ = new Window(k_window_width_, k_window_height_, "BGFX fonts");
+    window_->SetUpdateLoop(Update);
+
     InitFonts();
     InitInputManager();
-    
+
     // update loop
-    Update();
-    
+    window_->StartUpdate();
+
     Shutdown();
-    
+
     return 0;
 }

@@ -9,6 +9,7 @@
 #include <vector>
 #include <functional>
 #include "../utilities.h"
+#include "../window/Window.h"
 
 struct FunctionId {
     unsigned int id;
@@ -31,7 +32,7 @@ struct FunctionHandler {
 
 class InputManager {
 public:
-    InputManager(GLFWwindow* window, const std::vector<int>& keys_to_track);
+    InputManager(Window* window, const std::vector<int>& keys_to_track);
     ~InputManager();
     
     static bool IsKeyPressed(int key);
@@ -45,7 +46,7 @@ public:
     static char GetKeyChar(int key);
     
 private:
-    static void KeyCallback([[maybe_unused]] GLFWwindow* window, int key, [[maybe_unused]] int scancode, int action, [[maybe_unused]] int mods);
+    static void KeyCallback(int key, WindowKeyAction action);
     static std::map<int, bool> keys_map_;
 
     static std::vector<FunctionHandler<void (int)>> key_pressed_callbacks_;

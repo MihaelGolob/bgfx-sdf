@@ -10,12 +10,12 @@ std::vector<FunctionHandler<void (int)>> InputManager::key_pressed_callbacks_;
 std::vector<FunctionHandler<void (int)>> InputManager::key_released_callbacks_;
 unsigned int InputManager::id_counter_ = 0;
 
-InputManager::InputManager(GLFWwindow *window, const std::vector<int>& keys_to_track) {
+InputManager::InputManager(Window* window, const std::vector<int>& keys_to_track) {
     for (int key : keys_to_track) {
         keys_map_[key] = false;
     }
     
-    glfwSetKeyCallback(window, InputManager::KeyCallback);
+    window->SetKeyCallback(InputManager::KeyCallback);
 }
 
 InputManager::~InputManager() {
@@ -28,13 +28,13 @@ InputManager::~InputManager() {
     }
 }
 
-void InputManager::KeyCallback([[maybe_unused]] GLFWwindow *window, int key, [[maybe_unused]] int scancode, int action, [[maybe_unused]] int mods) {
-    if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+void InputManager::KeyCallback(int key, WindowKeyAction action) {
+    if (action == WindowKeyAction::Press || action == WindowKeyAction::Repeat) {
         keys_map_[key] = true;
         for (const auto& callback : key_pressed_callbacks_) {
             callback.function(key);
         }
-    } else if (action == GLFW_RELEASE) {
+    } else if (action == WindowKeyAction::Release) {
         keys_map_[key] = false;
         for (const auto& callback : key_released_callbacks_) {
             callback.function(key);
