@@ -56,6 +56,12 @@ add_library(bgfx-sdf STATIC
 		src/helper/DebugShapeGenerator.h
 		src/font_decomposition/FontParser.cpp
 		src/font_decomposition/FontParser.h
+		src/window/Window.cpp
+		src/window/Window.h
+		src/window/Renderer.cpp
+		src/window/Renderer.h
+		src/window/WindowHandle.cpp
+		src/window/WindowHandle.h
 )
 
 target_compile_features(bgfx-sdf PUBLIC cxx_std_17)
