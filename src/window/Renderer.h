@@ -10,4 +10,12 @@ class Renderer {
 public:
     Renderer(int width, int height, WindowHandle window);
     ~Renderer();
+
+    void SetViewTransform() const;
+
+    void onBeforeLoop();
+    void onAfterLoop();
+
+private:
+    int window_width_, window_height_;
 };

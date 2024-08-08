@@ -125,28 +125,6 @@ void InitInputManager() {
     key_released_id_ = InputManager::SubscribeKeyReleased(HandleKeyReleased);
 }
 
-void SetViewTransform() {
-    const bx::Vec3 at = {0.0f, 0.0f, 10.0f};
-    const bx::Vec3 eye = {0.0f, 0.0f, -1.0f};
-    float view[16];
-    bx::mtxLookAt(view, eye, at);
-
-    float ortho[16];
-    bx::mtxOrtho(ortho,
-                 0.0f,
-                 float(k_window_width_),
-                 float(k_window_height_),
-                 0.0f,
-                 0.0f,
-                 100.0f,
-                 0.0f,
-                 bgfx::getCaps()->homogeneousDepth
-    );
-
-    bgfx::setViewTransform(0, view, ortho);
-    bgfx::setViewRect(0, 0, 0, uint16_t(k_window_width_), uint16_t(k_window_height_));
-}
-
 void ClearTextBuffers() {
     text_buffer_manager_->ClearTextBuffer(original_text_buffer_);
     text_buffer_manager_->ClearTextBuffer(bitmap_text_buffer_);
@@ -156,8 +134,6 @@ void ClearTextBuffers() {
 }
 
 void Update() {
-    bgfx::touch(0);
-
     ClearTextBuffers();
 
     text_buffer_manager_->SetPenPosition(original_text_buffer_, 10.0f, 10.0f);
@@ -175,8 +151,6 @@ void Update() {
     text_buffer_manager_->SetPenPosition(msdf_text_buffer_, 10.0f, 420.0f);
     text_buffer_manager_->AppendText(msdf_text_buffer_, msdf_scaled_font_, dynamic_text_.c_str());
 
-    SetViewTransform();
-
     // draw text buffers
     text_buffer_manager_->SubmitTextBuffer(original_text_buffer_, 0);
     text_buffer_manager_->SubmitTextBuffer(bitmap_text_buffer_, 0);
@@ -184,12 +158,9 @@ void Update() {
     text_buffer_manager_->SubmitTextBuffer(sdf_vector_text_buffer_, 0);
     text_buffer_manager_->SubmitTextBuffer(sdf_bitmap_text_buffer_, 0);
 
-    bgfx::frame();
 }
 
 void Shutdown() {
-    delete window_;
-
     // destroy ttf file handles
     font_manager_->DestroyTtf(font_file_);
 
@@ -223,8 +194,7 @@ void Shutdown() {
     delete font_manager_;
     delete text_buffer_manager_;
     delete input_manager_;
-
-    bgfx::shutdown();
+    delete window_;
 }
 
 int main() {

@@ -10,10 +10,11 @@
 Window::Window(int width, int height, const std::string &title) {
     glfwInit();
     window_ = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
-    glfwSetWindowUserPointer(window_, static_cast<void*>(this));
-    
+    glfwSetWindowUserPointer(window_, static_cast<void *>(this));
+
     auto window_handle = WindowHandle(window_);
     renderer_ = new Renderer(width, height, window_handle);
+    renderer_->SetViewTransform();
 }
 
 Window::~Window() {
@@ -30,18 +31,20 @@ void Window::SetUpdateLoop(const std::function<void()> &update_loop) {
 void Window::StartUpdate() {
     while (!glfwWindowShouldClose(window_)) {
         glfwPollEvents();
+        renderer_->onBeforeLoop();
         update_loop_();
+        renderer_->onAfterLoop();
     }
 }
 
 void Window::SetKeyCallback(const std::function<void(int, WindowKeyAction)> &key_callback) {
     key_callback_ = key_callback;
-    
-    glfwSetKeyCallback(window_, [] (GLFWwindow *window, int key, int scancode, int action, int mods) {
+
+    glfwSetKeyCallback(window_, [](GLFWwindow *window, int key, int scancode, int action, int mods) {
         // needed because glfw takes a plain old function pointer, which doesn't work with captures
-        auto self = static_cast<Window*>(glfwGetWindowUserPointer(window));
+        auto self = static_cast<Window *>(glfwGetWindowUserPointer(window));
         self->key_callback_(key, self->ConvertToWindowKeyAction(action));
-    }); 
+    });
 }
 
 WindowKeyAction Window::ConvertToWindowKeyAction(int action) {
@@ -56,5 +59,9 @@ WindowKeyAction Window::ConvertToWindowKeyAction(int action) {
             PrintError("Unknown key action!");
             return WindowKeyAction::None;
     }
-    
+
+}
+
+Renderer *Window::GetRenderer() {
+    return renderer_;
 }
