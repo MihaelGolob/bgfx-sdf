@@ -19,6 +19,8 @@ void Setup() {
 }
 
 void Shutdown() {
+    font_manager_->DestroyTtf(font_file_);
+    
     delete font_manager_;
     delete text_buffer_manager_;
     delete window_;
@@ -35,12 +37,11 @@ void Update() {
 }
 
 int main() {
-    Setup();
-
-    BenchmarkAtlasGeneration();
-    
     window_ = new Window(k_window_width_, k_window_height_, "Benchmark");
     window_->SetUpdateLoop(Update);
+    Setup();
+    
+    BenchmarkAtlasGeneration();
     
     window_->StartUpdate();
     
