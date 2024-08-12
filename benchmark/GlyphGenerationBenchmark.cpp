@@ -26,16 +26,22 @@ std::vector<double> GlyphGenerationBenchmark::RunBenchmark() {
     std::vector<double> mean_times;
 
     for (auto font_type: font_types_) {
+        std::string message = "Running benchmark for font type: ";
+        message.append(FontInfo::FontTypeToString(font_type));
+        PrintCyan(message.c_str());
+        
         double total_time = 0;
+        std::string char_set = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         const auto font = font_manager_->CreateFontByPixelSize(font_file_, 0, 32, font_type, 0);
 
         for (int i = 0; i < num_iterations_; i++) {
             auto output = new uint8_t[32 * 32 * 4];
             auto bitmap_type = AtlasRegion::Type::TypeGray;
+            auto code_point = char_set[i % char_set.size()];
 
             {
                 Timer timer("GenerateGlyph", [&](double time) { total_time += time; }, print_progress_);
-                font_manager_->GenerateGlyph(font, 'A', output, bitmap_type);
+                font_manager_->GenerateGlyph(font, code_point, output, bitmap_type);
             }
             
             delete[] output;

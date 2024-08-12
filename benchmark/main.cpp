@@ -28,7 +28,7 @@ void Shutdown() {
 }
 
 void PrintGlyphBenchmarkResults(std::vector<double> results, std::vector<FontType> font_types) {
-    PrintGreen("Glyph benchmark results:\n");
+    PrintGreen("Glyph benchmark results:");
     for (int i = 0; i < font_types.size(); i++) {
         std::string str = "Font type: ";
         str.append(FontInfo::FontTypeToString(font_types[i]));
@@ -44,7 +44,7 @@ void BenchmarkGlyphGeneration() {
     auto font_types = std::vector<FontType>{FontType::Bitmap, FontType::SdfFromBitmap, FontType::SdfFromVector, FontType::Msdf};
     
     auto glyph_generation_benchmark = GlyphGenerationBenchmark(font_manager_, text_buffer_manager_, font_file_);
-    glyph_generation_benchmark.SetupBenchmark(font_types, 10, false);
+    glyph_generation_benchmark.SetupBenchmark(font_types, 500, false);
     auto mean_times = glyph_generation_benchmark.RunBenchmark();
     
     PrintGlyphBenchmarkResults(mean_times, font_types);
