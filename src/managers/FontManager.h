@@ -102,6 +102,8 @@ public:
 
     /// Preload a single glyph, return true on success.
     bool PreloadGlyph(FontHandle handle, CodePoint code_point);
+    
+    bool GenerateGlyph(FontHandle font_handle, CodePoint code_point, uint8_t* output, AtlasRegion::Type& bitmap_type);
 
     /// Return the font descriptor of a font.
     ///

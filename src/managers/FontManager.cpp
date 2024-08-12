@@ -166,9 +166,17 @@ void FontManager::DestroyFont(FontHandle handle) {
     }
 
     font.cached_glyphs.clear();
-    font_handles_.free(handle.idx);
-    face_handles_.free(font.face_handle.idx);
-    msdf_gen_handles_.free(font.msdf_gen_handle.idx);
+    if (isValid(handle)) {
+        font_handles_.free(handle.idx);
+    }
+    
+    if (isValid(font.face_handle)) {
+        face_handles_.free(font.face_handle.idx);
+    }
+    
+    if (isValid(font.msdf_gen_handle)) {
+        msdf_gen_handles_.free(font.msdf_gen_handle.idx);
+    }
 }
 
 bool FontManager::PreloadGlyph(FontHandle handle, const wchar_t *string) {
@@ -252,6 +260,32 @@ bool FontManager::PreloadGlyph(FontHandle handle, CodePoint code_point) {
     }
 
     return false;
+}
+
+bool FontManager::GenerateGlyph(FontHandle handle, CodePoint code_point, uint8_t *output, AtlasRegion::Type& bitmap_type) {
+    CachedFont &font = cached_fonts_[handle.idx];
+    GlyphInfo glyph_info {};
+    
+    switch (font.font_info.font_type) {
+        case FontType::Bitmap:
+            font.true_type_font->BakeGlyphAlpha(code_point, glyph_info, output);
+            break;
+        case FontType::SdfFromBitmap:
+            font.true_type_font->BakeGlyphSdf(code_point, glyph_info, output);
+            break;
+        case FontType::SdfFromVector:
+            cached_msdf_generators_[font.msdf_gen_handle.idx].BakeGlyphSdf(code_point, glyph_info, output);
+            bitmap_type = AtlasRegion::TypeBgra8;
+            break;
+        case FontType::Msdf:
+            cached_msdf_generators_[font.msdf_gen_handle.idx].BakeGlyphMsdf(code_point, glyph_info, output);
+            bitmap_type = AtlasRegion::TypeBgra8;
+            break;
+        default:
+            BX_ASSERT(false, "TextureType not supported yet")
+    }
+    
+    return true;
 }
 
 const FontInfo &FontManager::GetFontInfo(FontHandle handle) const {
