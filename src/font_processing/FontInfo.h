@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <string>
+
 enum class FontType {
     Bitmap, // normal
     SdfFromBitmap, // signed distance field
@@ -33,4 +35,19 @@ struct FontInfo {
 
     /// Scale to apply to glyph data.
     float scale;
+    
+    std::string FontTypeToString(FontType type) {
+        switch (type) {
+            case FontType::Bitmap:
+                return "Bitmap";
+            case FontType::SdfFromBitmap:
+                return "SdfFromBitmap";
+            case FontType::SdfFromVector:
+                return "SdfFromVector";
+            case FontType::Msdf:
+                return "Msdf";
+            case FontType::Color:
+                return "Color";
+        }
+    }
 };
