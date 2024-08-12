@@ -2,6 +2,7 @@
 #include <managers/FontManager.h>
 #include <managers/TextBufferManager.h>
 #include <font_processing/FontInfo.h>
+#include <utilities.h>
 #include "GlyphGenerationBenchmark.h"
 
 const int k_window_width_ = 1500;
@@ -26,10 +27,27 @@ void Shutdown() {
     delete window_;
 }
 
-void BenchmarkAtlasGeneration() {
-    auto glyph_generation_benchmark = GlyphGenerationBenchmark(font_manager_, text_buffer_manager_, &font_file_);
+void PrintGlyphBenchmarkResults(std::vector<double> results, std::vector<FontType> font_types) {
+    PrintGreen("Glyph benchmark results:\n");
+    for (int i = 0; i < font_types.size(); i++) {
+        std::string str = "Font type: ";
+        str.append(FontInfo::FontTypeToString(font_types[i]));
+        str.append(" took on average ");
+        str.append(std::to_string(results[i]));
+        str.append(" ms.");
+
+        PrintGreen(str.c_str());
+    } 
+}
+
+void BenchmarkGlyphGeneration() {
     auto font_types = std::vector<FontType>{FontType::Bitmap, FontType::SdfFromBitmap, FontType::SdfFromVector, FontType::Msdf};
-    glyph_generation_benchmark.SetupBenchmark(font_types, 10, true);
+    
+    auto glyph_generation_benchmark = GlyphGenerationBenchmark(font_manager_, text_buffer_manager_, font_file_);
+    glyph_generation_benchmark.SetupBenchmark(font_types, 10, false);
+    auto mean_times = glyph_generation_benchmark.RunBenchmark();
+    
+    PrintGlyphBenchmarkResults(mean_times, font_types);
 }
 
 void Update() {
@@ -40,10 +58,10 @@ int main() {
     window_ = new Window(k_window_width_, k_window_height_, "Benchmark");
     window_->SetUpdateLoop(Update);
     Setup();
+
+    BenchmarkGlyphGeneration();
     
-    BenchmarkAtlasGeneration();
-    
-    window_->StartUpdate();
+//    window_->StartUpdate();
     
     Shutdown();
     return 0;
