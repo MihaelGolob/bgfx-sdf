@@ -36,7 +36,7 @@ struct FontInfo {
     /// Scale to apply to glyph data.
     float scale;
     
-    std::string FontTypeToString(FontType type) {
+    static std::string FontTypeToString(FontType type) {
         switch (type) {
             case FontType::Bitmap:
                 return "Bitmap";
