@@ -14,6 +14,11 @@ void PrintError(const std::string& error);
 void PrintInfo(const char* info);
 void PrintInfo(const std::string& info);
 
+void PrintRed(const char* info);
+void PrintBlue(const char* info);
+void PrintCyan(const char* info);
+void PrintGreen(const char* info);
+
 class FileReader : public bx::FileReader {
     typedef bx::FileReader super;
 

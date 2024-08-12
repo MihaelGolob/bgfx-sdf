@@ -18,6 +18,22 @@ void PrintInfo(const std::string& info) {
     PrintInfo(info.c_str());
 }
 
+void PrintRed(const char* info) {
+    std::cout << "\033[0;31m" << info << "\033[0m" << std::endl;
+}
+
+void PrintBlue(const char* info) {
+    std::cout << "\033[0;34m" << info << "\033[0m" << std::endl;
+}
+
+void PrintCyan(const char* info) {
+    std::cout << "\033[0;36m" << info << "\033[0m" << std::endl;
+}
+
+void PrintGreen(const char* info) {
+    std::cout << "\033[0;32m" << info << "\033[0m" << std::endl;
+}
+
 // file reading 
 bx::AllocatorI* GetDefaultAllocator() {
     BX_PRAGMA_DIAGNOSTIC_PUSH()
