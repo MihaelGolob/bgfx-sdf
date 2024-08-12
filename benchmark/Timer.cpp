@@ -5,9 +5,12 @@
 #include "Timer.h"
 #include <iostream>
 
-Timer::Timer(const std::string &name) {
-    start_timepoint_ = std::chrono::high_resolution_clock::now();
+Timer::Timer(const std::string &name, const std::function<void(double)> &callback, bool print) {
     name_ = name;
+    print_ = print;
+    callback_ = callback;
+    
+    start_timepoint_ = std::chrono::high_resolution_clock::now();
 }
 
 Timer::~Timer() {
@@ -22,6 +25,6 @@ void Timer::Stop() {
     auto duration = end_time - start_time;
     double ms = duration * 0.001;
     
-    std::cout << "\033[1;36mTimer-" << name_ << ": " << duration << "us (" << ms << "ms)" << "\033[0m" << std::endl;
+    if (print_) std::cout << "\033[1;36mTimer-" << name_ << ": " << duration << "us (" << ms << "ms)" << "\033[0m" << std::endl;
+    if (callback_) callback_(ms);
 }
-
