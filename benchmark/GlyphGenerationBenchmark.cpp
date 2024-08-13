@@ -32,10 +32,10 @@ std::vector<double> GlyphGenerationBenchmark::RunBenchmark() {
         
         double total_time = 0;
         std::string char_set = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        const auto font = font_manager_->CreateFontByPixelSize(font_file_, 0, 32, font_type, 0);
+        const auto font = font_manager_->CreateFontByPixelSize(font_file_, 0, 60, font_type, 2);
 
         for (int i = 0; i < num_iterations_; i++) {
-            auto output = new uint8_t[32 * 32 * 4];
+            auto output = new uint8_t[64 * 64 * 4];
             auto bitmap_type = AtlasRegion::Type::TypeGray;
             auto code_point = char_set[i % char_set.size()];
 
