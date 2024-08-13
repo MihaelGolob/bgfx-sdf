@@ -8,7 +8,7 @@
 #include <managers/FontManager.cpp>
 #include <managers/TextBufferManager.cpp>
 
-GlyphGenerationBenchmark::GlyphGenerationBenchmark(FontManager *font_manager, TextBufferManager *text_buffer_manager, TrueTypeHandle font_file) {
+GlyphGenerationBenchmark::GlyphGenerationBenchmark(FontManager *font_manager, TrueTypeHandle font_file) {
     font_manager_ = font_manager;
     font_file_ = font_file;
 

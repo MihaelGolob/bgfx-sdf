@@ -43,7 +43,7 @@ void PrintGlyphBenchmarkResults(std::vector<double> results, std::vector<FontTyp
 void BenchmarkGlyphGeneration() {
     auto font_types = std::vector<FontType>{FontType::Bitmap, FontType::SdfFromBitmap, FontType::SdfFromVector, FontType::Msdf};
     
-    auto glyph_generation_benchmark = GlyphGenerationBenchmark(font_manager_, text_buffer_manager_, font_file_);
+    auto glyph_generation_benchmark = GlyphGenerationBenchmark(font_manager_, font_file_);
     glyph_generation_benchmark.SetupBenchmark(font_types, 500, false);
     auto mean_times = glyph_generation_benchmark.RunBenchmark();
     
