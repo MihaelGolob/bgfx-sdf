@@ -28,8 +28,12 @@ void Window::SetUpdateLoop(const std::function<void()> &update_loop) {
     update_loop_ = update_loop;
 }
 
-void Window::StartUpdate() {
+void Window::StartUpdate(const std::function<bool()>& should_pause) {
     while (!glfwWindowShouldClose(window_)) {
+        if (should_pause && should_pause()) {
+            break;
+        }
+        
         glfwPollEvents();
         renderer_->onBeforeLoop();
         update_loop_();

@@ -19,8 +19,8 @@ public:
     Window(const Window &) = delete;
     Window &operator=(const Window &) = delete;
 
-    void SetUpdateLoop(const std::function<void()> &update_loop);
-    void StartUpdate();
+    void SetUpdateLoop(const std::function<void()> &update_loop = nullptr);
+    void StartUpdate(const std::function<bool()>& should_pause);
 
     void SetKeyCallback(const std::function<void(int, WindowKeyAction)> &key_callback);
 
