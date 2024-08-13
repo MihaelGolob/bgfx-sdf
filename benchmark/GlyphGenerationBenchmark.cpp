@@ -26,7 +26,7 @@ std::vector<double> GlyphGenerationBenchmark::RunBenchmark() {
     std::vector<double> mean_times;
 
     for (auto font_type: font_types_) {
-        std::string message = "Running benchmark for font type: ";
+        std::string message = "Running generation benchmark for font type: ";
         message.append(FontInfo::FontTypeToString(font_type));
         PrintCyan(message.c_str());
         

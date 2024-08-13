@@ -49,13 +49,13 @@ void BenchmarkGlyphGeneration() {
     glyph_generation_benchmark.SetupBenchmark(font_types_to_test_, 500, false);
     auto mean_times = glyph_generation_benchmark.RunBenchmark();
     
-    PrintGlyphBenchmarkResults("Glyph Generation Results", mean_times, font_types_to_test_);
+    PrintGlyphBenchmarkResults("Glyph Generation Results (ms / glyph generated)", mean_times, font_types_to_test_);
 }
 
 void BenchmarkGlyphRendering() {
     auto glyph_rendering_benchmark = GlyphRenderingBenchmark(window_, font_manager_, text_buffer_manager_, font_file_);
     glyph_rendering_benchmark.SetupBenchmark(500, 60, font_types_to_test_, [&](const std::vector<double>& results) {
-        PrintGlyphBenchmarkResults("Glyph Rendering Results", results, font_types_to_test_);
+        PrintGlyphBenchmarkResults("Glyph Rendering Results (ms / frame)", results, font_types_to_test_);
     });
     glyph_rendering_benchmark.RunBenchmark();
 }
