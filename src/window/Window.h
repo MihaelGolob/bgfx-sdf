@@ -20,7 +20,7 @@ public:
     Window &operator=(const Window &) = delete;
 
     void SetUpdateLoop(const std::function<void()> &update_loop = nullptr);
-    void StartUpdate(const std::function<bool()>& should_pause);
+    void StartUpdate(const std::function<bool()>& should_pause = nullptr);
 
     void SetKeyCallback(const std::function<void(int, WindowKeyAction)> &key_callback);
 
