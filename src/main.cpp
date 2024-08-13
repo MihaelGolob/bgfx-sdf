@@ -53,7 +53,7 @@ void InitFonts() {
     font_manager_ = new FontManager(1024);
     text_buffer_manager_ = new TextBufferManager(font_manager_);
 
-    font_file_ = font_manager_->CreateTtf("../assets/fonts/Helvetica-Bold.ttf");
+    font_file_ = font_manager_->CreateTtf("../assets/fonts/OpenSans-Bold.ttf");
 
     int scale_from = 16;
     int scale_to = 100;
@@ -62,7 +62,7 @@ void InitFonts() {
     // then they are scaled up 4x
     original_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_to, FontType::Bitmap, 0);
 
-    bitmap_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from, FontType::Bitmap, 0);
+    bitmap_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from + 4, FontType::Bitmap, 0);
     bitmap_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(bitmap_font_, scale_to); // create scaled fonts to show the power of SDF
 
     sdf_bitmap_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from, FontType::SdfFromBitmap, 2);
