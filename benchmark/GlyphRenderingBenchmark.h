@@ -18,6 +18,7 @@ private:
     void Update();
     void OnIterationResults(double time);
     
+    void SetTextToDisplay();
     void CreateTextBuffers(FontType font_type);
     void DestroyTextBuffers();
     
@@ -41,6 +42,7 @@ private:
     
     bool iteration_finished_ = false;
     const wchar_t* char_set_ = L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    std::string text_to_display_;
     
     std::vector<double> mean_frame_times_;
 };
