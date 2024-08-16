@@ -11,6 +11,7 @@ V diplomski nalogi bom podrobno preučil delovanje SDF in MSDF in ti dve metodi 
 - Klonirajte repozitorij (`git clone https://github.com/MihaelGolob/bgfx-sdf`)
 - Prenesite vse module projekta (`git submodule update --init --recursive`)
 - Odprite bgfx-sdf projekt z urejevalnikom, ki podpira Cmake (na primer JetBrains CLion). Alternativno lahko ročno prevedete kodo z ukazom `make`.
+- Za primerjavo sem v projekt uvozil knjižnico originalnega avtorja [msdfgen](https://github.com/Chlumsky/msdfgen). Uporabil sem [vcpkg](https://vcpkg.io/en/), ki ga morate namestiti in pognati ukaz `vcpkg install mdfgen` 
 - V svojem IDE nastavite delovno mapo ("working directory") na `/src` in zaženite program
 - V mapi `src` najdete vso izvorno kodo
 
