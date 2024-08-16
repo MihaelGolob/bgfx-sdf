@@ -4,6 +4,8 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 project(bgfx-sdf)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
+find_package(msdfgen CONFIG REQUIRED)
+
 add_compile_definitions(NOMINMAX) # windows.h conflicts with min/max function from bx
 # find src/* -name "*.cpp" -printf "%p\n"
 add_library(bgfx-sdf STATIC
@@ -72,7 +74,7 @@ target_compile_options(bgfx-sdf PUBLIC
 
 add_subdirectory(libs/bgfx.cmake)
 add_subdirectory(libs/glfw)
-add_subdirectory(libs/freetype)
+#add_subdirectory(libs/freetype) collides with bgfx freetype
 add_subdirectory(tests)
 add_subdirectory(application)
 add_subdirectory(benchmark)
@@ -104,7 +106,7 @@ include_directories(bgfx-sdf
 )
 
 target_link_libraries(bgfx-sdf
-        bgfx bx bimg glfw freetype
+        bgfx bx bimg glfw freetype msdfgen::msdfgen-ext
 )
 
 #add_dependencies(bgfx-sdf run_shader_compilation)
