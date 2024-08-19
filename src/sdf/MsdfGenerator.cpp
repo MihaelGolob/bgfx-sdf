@@ -77,10 +77,6 @@ void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, u
     shape.ApplyPreprocessing();
     shape.ApplyEdgeColoring(15.0);
     
-    if (code_point == 'W') {
-        std::cout << shape.ToString() << std::endl;
-    }
-
     FT_BBox_ bbox{};
     FT_Outline_Get_CBox(&face_->glyph->outline, &bbox);
     auto distance_range = std::max(bbox.xMax - bbox.xMin, bbox.yMax - bbox.yMin);
