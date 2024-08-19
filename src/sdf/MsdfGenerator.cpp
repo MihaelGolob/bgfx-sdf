@@ -18,7 +18,7 @@ void MsdfGenerator::Init(FT_Face face, uint32_t font_size, uint32_t padding) {
     texture_width_ = font_size_ + 2 * padding;
 
     font_scale_ = CalculateFontScale();
-    collision_correction_threshold_ = 30;
+    collision_correction_threshold_ = 20;
 }
 
 /* 
@@ -75,7 +75,7 @@ void MsdfGenerator::BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, ui
 void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t *output) {
     auto shape = FontParser::ParseFtFace(code_point, &face_, 1.0);
     shape.ApplyPreprocessing();
-    shape.ApplyEdgeColoring(3.0);
+    shape.ApplyEdgeColoring(15.0);
     
     if (code_point == 'W') {
         std::cout << shape.ToString() << std::endl;
@@ -112,7 +112,7 @@ std::array<double, 3> MsdfGenerator::GenerateMsdfPixel(const Shape &shape, const
         const EdgeHolder *edge = nullptr;
         double near_parameter = 0;
         double orthogonality = 0;
-    } red, green, blue;
+    } r, g, b;
 
     auto round = [](double d, int decimals) {
         return std::ceil(d * std::pow(10, decimals)) / std::pow(10, decimals);
@@ -131,31 +131,31 @@ std::array<double, 3> MsdfGenerator::GenerateMsdfPixel(const Shape &shape, const
             auto orthogonality = e->GetOrthogonality(p, parameter);
 
             // only save edges that have a common color with the channel
-            if ((int) e->color & (int) EdgeColor::Red && is_closer(std::abs(distance), std::abs(red.min_distance), orthogonality, red.orthogonality)) {
-                red.min_distance = distance;
-                red.edge = &e;
-                red.near_parameter = parameter;
-                red.orthogonality = orthogonality;
+            if ((int) e->color & (int) EdgeColor::Red && is_closer(std::abs(distance), std::abs(r.min_distance), orthogonality, r.orthogonality)) {
+                r.min_distance = distance;
+                r.edge = &e;
+                r.near_parameter = parameter;
+                r.orthogonality = orthogonality;
             }
-            if ((int) e->color & (int) EdgeColor::Green && is_closer(std::abs(distance), std::abs(green.min_distance), orthogonality, green.orthogonality)) {
-                green.min_distance = distance;
-                green.edge = &e;
-                green.near_parameter = parameter;
-                green.orthogonality = orthogonality;
+            if ((int) e->color & (int) EdgeColor::Green && is_closer(std::abs(distance), std::abs(g.min_distance), orthogonality, g.orthogonality)) {
+                g.min_distance = distance;
+                g.edge = &e;
+                g.near_parameter = parameter;
+                g.orthogonality = orthogonality;
             }
-            if ((int) e->color & (int) EdgeColor::Blue && is_closer(std::abs(distance), std::abs(blue.min_distance), orthogonality, blue.orthogonality)) {
-                blue.min_distance = distance;
-                blue.edge = &e;
-                blue.near_parameter = parameter;
-                blue.orthogonality = orthogonality;
+            if ((int) e->color & (int) EdgeColor::Blue && is_closer(std::abs(distance), std::abs(b.min_distance), orthogonality, b.orthogonality)) {
+                b.min_distance = distance;
+                b.edge = &e;
+                b.near_parameter = parameter;
+                b.orthogonality = orthogonality;
             }
         }
     }
 
     std::array<double, 3> res = {
-            red.edge ? (*red.edge)->SignedPseudoDistance(p, red.near_parameter) : INFINITY,
-            green.edge ? (*green.edge)->SignedPseudoDistance(p, green.near_parameter) : INFINITY,
-            blue.edge ? (*blue.edge)->SignedPseudoDistance(p, blue.near_parameter) : INFINITY
+            r.edge ? (*r.edge)->SignedDistance(p, r.near_parameter) : INFINITY,
+            g.edge ? (*g.edge)->SignedDistance(p, g.near_parameter) : INFINITY,
+            b.edge ? (*b.edge)->SignedDistance(p, b.near_parameter) : INFINITY
     };
 
     return res;
