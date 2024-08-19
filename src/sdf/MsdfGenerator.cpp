@@ -148,11 +148,7 @@ std::array<double, 3> MsdfGenerator::GenerateMsdfPixel(const Shape &shape, const
         }
     }
 
-    std::array<double, 3> res = {
-            r.edge ? (*r.edge)->SignedDistance(p, r.near_parameter) : INFINITY,
-            g.edge ? (*g.edge)->SignedDistance(p, g.near_parameter) : INFINITY,
-            b.edge ? (*b.edge)->SignedDistance(p, b.near_parameter) : INFINITY
-    };
+    std::array<double, 3> res = {r.min_distance, g.min_distance, b.min_distance};
 
     return res;
 }
