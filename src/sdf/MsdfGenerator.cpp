@@ -76,6 +76,10 @@ void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, u
     auto shape = FontParser::ParseFtFace(code_point, &face_, 1.0);
     shape.ApplyPreprocessing();
     shape.ApplyEdgeColoring(3.0);
+    
+    if (code_point == 'W') {
+        std::cout << shape.ToString() << std::endl;
+    }
 
     FT_BBox_ bbox{};
     FT_Outline_Get_CBox(&face_->glyph->outline, &bbox);

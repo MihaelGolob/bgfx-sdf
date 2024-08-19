@@ -6,6 +6,7 @@
 
 #include <freetype/ftoutln.h>
 #include <functional>
+#include <string>
 
 class Vector2 {
 public:
@@ -35,6 +36,8 @@ public:
             return x_hash ^ y_hash;
         }
     };
+    
+    std::string ToString() const;
 };
 
 // A vector can also represent just a point in 2D space

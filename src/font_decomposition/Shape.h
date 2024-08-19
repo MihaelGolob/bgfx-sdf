@@ -17,6 +17,8 @@ public:
     [[nodiscard]] double SignedDistance(const Vector2 &p) const;
     [[nodiscard]] double SignedPseudoDistance(const Vector2 &p) const;
     
+    std::string ToString() const;
+    
 public:
     std::vector<Contour> contours;
     

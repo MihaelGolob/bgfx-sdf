@@ -98,6 +98,18 @@ double LinearSegment::SignedPseudoDistance(const Vector2 &p, double &t) const {
     return (GetPoint(t) - p).Length() * GetSign(p, x);
 }
 
+std::string LinearSegment::ToString() const {
+    std::string res;
+    res.append("[");
+    for (int i = 0; i < 2; i++) {
+        res.append(points_[i].ToString());
+        if (i != 1) res.append(",");
+    }
+    res.append("]");
+
+    return res;
+}
+
 // quadratic segment --------------------------------
 QuadraticSegment::QuadraticSegment(const Vector2 &p0, const Vector2 &p1, const Vector2 &p2) : points_{p0, p1, p2} {}
 
@@ -163,6 +175,18 @@ std::vector<double> QuadraticSegment::CandidateTValues(const Vector2 &p) const {
     const auto d = -(p1 * p0);
 
     return SolveCubicEquation(a, b, c, d);
+}
+
+std::string QuadraticSegment::ToString() const {
+    std::string res;
+    res.append("[");
+    for (int i = 0; i < 3; i++) {
+        res.append(points_[i].ToString());
+        if (i != 2) res.append(",");
+    }
+    res.append("]");
+
+    return res;
 }
 
 // cubic segment ------------------------------------
@@ -236,4 +260,16 @@ std::vector<double> CubicSegment::CandidateTValues(const Vector2 &p) const {
     const auto f = -(p1 * p0);
 
     return SolveQuinticEquation(a, b, c, d, e, f);
+}
+
+std::string CubicSegment::ToString() const {
+    std::string res;
+    res.append("[");
+    for (int i = 0; i < 4; i++) {
+        res.append(points_[i].ToString());
+        if (i != 3) res.append(",");
+    }
+    res.append("]");
+
+    return res;
 }

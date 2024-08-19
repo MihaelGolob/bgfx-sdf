@@ -63,3 +63,14 @@ Vector2 Vector2::Normalize() {
     return *this;
 }
 
+std::string Vector2::ToString() const {
+    std::string res;
+    res.append("(");
+    res.append(std::to_string(x));
+    res.append(",");
+    res.append(std::to_string(y));
+    res.append(")");
+    
+    return res;
+}
+

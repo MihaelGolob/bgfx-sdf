@@ -4,6 +4,7 @@
 
 #include <cmath>
 #include <unordered_set>
+#include <string>
 #include "Shape.h"
 
 Contour &Shape::AddEmptyContour() {
@@ -141,4 +142,12 @@ void Shape::RemoveLoopEdges() {
             }
         }
     }
+}
+
+std::string Shape::ToString() const {
+    std::string res;
+    for (const auto &c: contours) {
+        res += c.ToString() + "\n";
+    }
+    return res;
 }

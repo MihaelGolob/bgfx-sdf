@@ -14,4 +14,6 @@ public:
     void AddEdge(const EdgeHolder& edge);
     
     [[nodiscard]] bool HasEdges() const;
+    
+    std::string ToString() const;
 };
