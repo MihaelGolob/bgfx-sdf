@@ -56,6 +56,8 @@ add_library(bgfx-sdf STATIC
         src/helper/EquationSolver.cpp
         src/helper/DebugShapeGenerator.cpp
         src/helper/DebugShapeGenerator.h
+        src/helper/Timer.cpp
+        src/helper/Timer.h
         src/font_decomposition/FontParser.cpp
         src/font_decomposition/FontParser.h
         src/window/Window.cpp

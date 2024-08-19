@@ -3,8 +3,8 @@
 //
 
 #include <utilities.h>
+#include <helper/Timer.h>
 #include "GlyphRenderingBenchmark.h"
-#include "Timer.h"
 
 GlyphRenderingBenchmark::GlyphRenderingBenchmark(Window *window, FontManager *font_manager, TextBufferManager *text_buffer_manager, TrueTypeHandle font_file) {
     window_ = window;

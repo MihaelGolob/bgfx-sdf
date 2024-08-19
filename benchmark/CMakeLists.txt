@@ -7,8 +7,6 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
 add_executable(bgfx-sdf-benchmark ./main.cpp ../libs/stb/stb_truetype.h
         GlyphGenerationBenchmark.cpp
         GlyphGenerationBenchmark.h
-        Timer.cpp
-        Timer.h
         GlyphRenderingBenchmark.cpp
         GlyphRenderingBenchmark.h)
 

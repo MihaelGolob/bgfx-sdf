@@ -3,10 +3,10 @@
 //
 
 #include "GlyphGenerationBenchmark.h"
-#include "Timer.h"
 
 #include <managers/FontManager.cpp>
 #include <managers/TextBufferManager.cpp>
+#include <helper/Timer.h>
 
 GlyphGenerationBenchmark::GlyphGenerationBenchmark(FontManager *font_manager, TrueTypeHandle font_file) {
     font_manager_ = font_manager;
