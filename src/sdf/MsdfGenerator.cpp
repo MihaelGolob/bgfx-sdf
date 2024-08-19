@@ -18,7 +18,7 @@ void MsdfGenerator::Init(FT_Face face, uint32_t font_size, uint32_t padding) {
     texture_width_ = font_size_ + 2 * padding;
 
     font_scale_ = CalculateFontScale();
-    collision_correction_threshold_ = 20;
+    collision_correction_threshold_ = 33;
 }
 
 /* 
