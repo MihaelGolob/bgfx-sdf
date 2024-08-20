@@ -4,7 +4,6 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 project(bgfx-sdf)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
-find_package(msdfgen CONFIG REQUIRED)
 
 add_compile_definitions(NOMINMAX) # windows.h conflicts with min/max function from bx
 # find src/* -name "*.cpp" -printf "%p\n"
@@ -69,30 +68,24 @@ add_library(bgfx-sdf STATIC
 )
 
 target_compile_features(bgfx-sdf PUBLIC cxx_std_17)
-target_compile_options(bgfx-sdf PUBLIC
-        # $<$<CXX_COMPILER_ID:MSVC>:/W4> # /WX
-        # $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic> # -Werror
-)
-
-add_subdirectory(libs/bgfx.cmake)
-add_subdirectory(libs/glfw)
-#add_subdirectory(libs/freetype) collides with bgfx freetype
-add_subdirectory(tests)
-add_subdirectory(application)
-add_subdirectory(benchmark)
-
-#add_definitions(STB_TRUE_TYPE_IMPLEMENTATION)
+target_compile_options(bgfx-sdf PUBLIC)
 
 # disable glfw tests, examples and documentation
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 
-# command for compiling shaders
-#add_custom_target(run_shader_compilation
-#	COMMAND bash -c "make -C ${CMAKE_SOURCE_DIR}/src/shaders rebuild"
-#	COMMENT "Compiling shaders"
-#)
+# msdfgen options
+set(MSDFGEN_CORE_ONLY ON)
+
+add_subdirectory(libs/bgfx.cmake )
+add_subdirectory(libs/glfw)
+add_subdirectory(libs/freetype)
+add_subdirectory(libs/msdfgen)
+
+add_subdirectory(tests)
+add_subdirectory(application)
+add_subdirectory(benchmark)
 
 include_directories(bgfx-sdf
         SYSTEM
@@ -102,13 +95,14 @@ include_directories(bgfx-sdf
 
         libs/glfw/include
         libs/freetype/include
+        libs/msdfgen/include
 
         libs/stb
         libs/poly34
 )
 
 target_link_libraries(bgfx-sdf
-        bgfx bx bimg glfw freetype msdfgen::msdfgen-ext
+        bgfx bx bimg glfw freetype msdfgen::msdfgen-core
 )
 
 #add_dependencies(bgfx-sdf run_shader_compilation)

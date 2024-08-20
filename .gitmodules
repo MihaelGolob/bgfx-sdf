@@ -10,3 +10,6 @@
 [submodule "tests/lib"]
 	path = tests/lib
 	url = https://github.com/catchorg/Catch2.git
+[submodule "libs/msdfgen"]
+	path = libs/msdfgen
+	url = https://github.com/Chlumsky/msdfgen
