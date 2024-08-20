@@ -20,6 +20,7 @@
 #include "../font_processing/TrueTypeFont.h"
 #include "../sdf/MsdfGenerator.h"
 #include "../font_processing/AtlasRegion.h"
+#include "../sdf/MsdfOriginalGenerator.h"
 
 class Atlas;
 
@@ -142,6 +143,8 @@ private:
     
     bx::HandleAllocT<MAX_OPENED_MSDF_GEN> msdf_gen_handles_;
     MsdfGenerator *cached_msdf_generators_{};
+    
+    MsdfOriginalGenerator* msdf_original_generator_;
 
     GlyphInfo black_glyph_{};
 

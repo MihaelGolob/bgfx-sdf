@@ -64,6 +64,8 @@ add_library(bgfx-sdf STATIC
         src/window/Renderer.h
         src/window/WindowHandle.cpp
         src/window/WindowHandle.h
+        src/sdf/MsdfOriginalGenerator.h
+        src/sdf/MsdfOriginalGenerator.cpp
 )
 
 target_compile_features(bgfx-sdf PUBLIC cxx_std_17)

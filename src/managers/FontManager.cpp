@@ -14,6 +14,7 @@
 #include "FontManager.h"
 #include "../font_processing/CubeAtlas.h"
 #include "../utilities.h"
+#include "../sdf/MsdfOriginalGenerator.h"
 
 #define MAX_FONT_BUFFER_SIZE (512 * 512 * 4)
 
@@ -31,6 +32,7 @@ void FontManager::Init() {
     cached_faces_ = new FT_Face[MAX_OPENED_FONT];
     cached_msdf_generators_ = new MsdfGenerator[MAX_OPENED_MSDF_GEN];
     buffer_ = new uint8_t[MAX_FONT_BUFFER_SIZE];
+    msdf_original_generator_ = new MsdfOriginalGenerator();
     
     if (FT_Init_FreeType(&ft_library_)) {
         BX_ASSERT(false, "Failed to initialize freetype library")
@@ -47,6 +49,8 @@ FontManager::~FontManager() {
     delete[] cached_faces_;
     delete[] buffer_;
     delete[] cached_msdf_generators_;
+    
+    delete msdf_original_generator_;
 
     if (own_atlas_) {
         delete atlas_;
@@ -101,6 +105,8 @@ FontHandle FontManager::CreateFontByPixelSize(TrueTypeHandle ttf_handle, uint32_
         font.face_handle.idx = bx::kInvalidHandle;
         font.msdf_gen_handle.idx = bx::kInvalidHandle;
     }
+    
+    msdf_original_generator_->Init(cached_files_[ttf_handle.idx].path, pixel_size);
 
     FontHandle handle = {font_idx};
     return handle;
@@ -226,6 +232,10 @@ bool FontManager::PreloadGlyph(FontHandle handle, CodePoint code_point) {
                 cached_msdf_generators_[font.msdf_gen_handle.idx].BakeGlyphMsdf(code_point, glyph_info, buffer_);
                 bitmap_type = AtlasRegion::TypeBgra8;
                 break;
+            case FontType::MsdfOriginal:
+                msdf_original_generator_->BakeGlyphMsdf(code_point, glyph_info, buffer_);
+                bitmap_type = AtlasRegion::TypeBgra8;
+                break;
             default:
                 BX_ASSERT(false, "TextureType not supported yet")
         }
@@ -279,6 +289,10 @@ bool FontManager::GenerateGlyph(FontHandle handle, CodePoint code_point, uint8_t
             break;
         case FontType::Msdf:
             cached_msdf_generators_[font.msdf_gen_handle.idx].BakeGlyphMsdf(code_point, glyph_info, output);
+            bitmap_type = AtlasRegion::TypeBgra8;
+            break;
+        case FontType::MsdfOriginal:
+            msdf_original_generator_->BakeGlyphMsdf(code_point, glyph_info, buffer_);
             bitmap_type = AtlasRegion::TypeBgra8;
             break;
         default:

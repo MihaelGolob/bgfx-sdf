@@ -11,6 +11,7 @@ enum class FontType {
     SdfFromBitmap, // signed distance field
     SdfFromVector,
     Msdf, // multichannel signed distance field
+    MsdfOriginal, // msdfgen by Viktor Chlumsky
     Color, // multichannel color bitmap
 };
 
