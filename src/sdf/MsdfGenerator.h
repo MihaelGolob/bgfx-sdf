@@ -16,7 +16,7 @@ class MsdfGenerator {
 private:
     
 public:
-    void Init(FT_Face face, uint32_t font_size, uint32_t padding);
+    void Init(FT_Face face, uint32_t font_size, uint32_t padding, bool apply_preprocessing = false);
     
     void BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t* output);
     void BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t* output);
@@ -51,6 +51,7 @@ private:
     int texture_height_;
     
     int collision_correction_threshold_;
+    bool apply_preprocessing_;
     
     FT_Face face_;
 };

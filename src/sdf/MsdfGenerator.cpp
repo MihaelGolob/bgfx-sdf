@@ -9,7 +9,7 @@
 #include "../utilities.h"
 #include "../font_decomposition/FontParser.h"
 
-void MsdfGenerator::Init(FT_Face face, uint32_t font_size, uint32_t padding) {
+void MsdfGenerator::Init(FT_Face face, uint32_t font_size, uint32_t padding, bool apply_preprocessing) {
     face_ = face;
     font_size_ = font_size;
     padding_ = padding;
@@ -19,6 +19,7 @@ void MsdfGenerator::Init(FT_Face face, uint32_t font_size, uint32_t padding) {
 
     font_scale_ = CalculateFontScale();
     collision_correction_threshold_ = 33;
+    apply_preprocessing_ = apply_preprocessing;
 }
 
 /* 
@@ -47,7 +48,7 @@ double MsdfGenerator::CalculateFontScale() {
 
 void MsdfGenerator::BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t *output) {
     auto shape = FontParser::ParseFtFace(code_point, &face_, 1.0);
-    shape.ApplyPreprocessing();
+    if (apply_preprocessing_) shape.ApplyPreprocessing();
 
     FT_BBox_ bbox{};
     FT_Outline_Get_CBox(&face_->glyph->outline, &bbox);
@@ -74,7 +75,7 @@ void MsdfGenerator::BakeGlyphSdf(CodePoint code_point, GlyphInfo &glyph_info, ui
 
 void MsdfGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t *output) {
     auto shape = FontParser::ParseFtFace(code_point, &face_, 1.0);
-    shape.ApplyPreprocessing();
+    if (apply_preprocessing_) shape.ApplyPreprocessing();
     shape.ApplyEdgeColoring(15.0);
     
     FT_BBox_ bbox{};
