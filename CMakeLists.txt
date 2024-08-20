@@ -2,11 +2,10 @@ cmake_minimum_required(VERSION 3.13)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 project(bgfx-sdf)
-
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
 
 add_compile_definitions(NOMINMAX) # windows.h conflicts with min/max function from bx
-# find src/* -name "*.cpp" -printf "%p\n"
+
 add_library(bgfx-sdf STATIC
         #		src/main.cpp
         src/managers/FontManager.cpp
@@ -75,17 +74,15 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 
-# msdfgen options
-set(MSDFGEN_CORE_ONLY ON)
-
 add_subdirectory(libs/bgfx.cmake )
 add_subdirectory(libs/glfw)
-add_subdirectory(libs/freetype)
 add_subdirectory(libs/msdfgen)
 
 add_subdirectory(tests)
 add_subdirectory(application)
 add_subdirectory(benchmark)
+
+find_package(Freetype REQUIRED)
 
 include_directories(bgfx-sdf
         SYSTEM
@@ -102,7 +99,7 @@ include_directories(bgfx-sdf
 )
 
 target_link_libraries(bgfx-sdf
-        bgfx bx bimg glfw freetype msdfgen::msdfgen-core
+        bgfx bx bimg glfw freetype msdfgen::msdfgen-core msdfgen::msdfgen-ext
 )
 
 #add_dependencies(bgfx-sdf run_shader_compilation)
