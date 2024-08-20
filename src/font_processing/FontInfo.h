@@ -47,6 +47,8 @@ struct FontInfo {
                 return "SdfFromVector";
             case FontType::Msdf:
                 return "Msdf";
+            case FontType::MsdfOriginal:
+                return "MsdfOriginal";
             case FontType::Color:
                 return "Color";
         }
