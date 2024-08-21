@@ -52,8 +52,8 @@ void MsdfOriginalGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph
 
     for (int y = 0; y < texture_height; y++) {
         for (int x = 0; x < texture_width; x++) {
-            const auto pixel = msdf(x, msdf.width() - y);
-            const auto index = (y * msdf.width() + x) * 4;
+            const auto pixel = msdf(x, texture_height - y);
+            const auto index = (y * texture_width + x) * 4;
             
             output[index + 0] = static_cast<uint8_t>(pixel[0] * 255);
             output[index + 1] = static_cast<uint8_t>(pixel[1] * 255);

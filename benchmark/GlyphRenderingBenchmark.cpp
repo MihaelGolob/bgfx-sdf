@@ -31,9 +31,9 @@ void GlyphRenderingBenchmark::RunBenchmark() {
         // setup
         font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, 60, font_type, 2);
         font_manager_->PreloadGlyph(font_, char_set_);
+        
         CreateTextBuffers(font_type);
         SetTextToDisplay();
-
 
         {
             Timer timer("Rendering benchmark", [&](double time) { OnIterationResults(time); });

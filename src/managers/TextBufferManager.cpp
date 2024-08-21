@@ -160,6 +160,7 @@ void TextBufferManager::SubmitTextBuffer(TextBufferHandle handle, bgfx::ViewId i
             bgfx::setState(0 | BGFX_STATE_WRITE_RGB | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA));
             break;
         }
+        case FontType::MsdfOriginal:
         case FontType::Msdf: {
             program = msdf_program_;
             bgfx::setState(0 | BGFX_STATE_WRITE_RGB | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA));

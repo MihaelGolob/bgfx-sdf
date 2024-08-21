@@ -20,9 +20,9 @@ private:
     
     FT_Face face_{};
     double scale_{};
-    int padding_;
-    int texture_width;
-    int texture_height;
+    int padding_{};
+    int texture_width{};
+    int texture_height{};
     
     msdfgen::FreetypeHandle *ft_;
     msdfgen::FontHandle *font_{};

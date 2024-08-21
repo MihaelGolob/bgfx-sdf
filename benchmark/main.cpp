@@ -14,7 +14,7 @@ FontManager *font_manager_;
 TextBufferManager *text_buffer_manager_;
 TrueTypeHandle font_file_;
 
-auto font_types_to_test_ = std::vector<FontType>{FontType::Bitmap, FontType::SdfFromBitmap, FontType::SdfFromVector, FontType::Msdf, FontType::MsdfOriginal};
+auto font_types_to_test_ = std::vector<FontType>{ FontType::MsdfOriginal};
 
 void Setup() {
     font_manager_ = new FontManager(1024);
@@ -63,7 +63,7 @@ int main() {
     window_ = new Window(k_window_width_, k_window_height_, "Benchmark");
     Setup();
 
-    BenchmarkGlyphGeneration();
+//    BenchmarkGlyphGeneration();
     BenchmarkGlyphRendering();
 
     Shutdown();

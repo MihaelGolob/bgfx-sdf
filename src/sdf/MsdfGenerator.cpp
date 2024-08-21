@@ -149,9 +149,7 @@ std::array<double, 3> MsdfGenerator::GenerateMsdfPixel(const Shape &shape, const
         }
     }
 
-    std::array<double, 3> res = {r.min_distance, g.min_distance, b.min_distance};
-
-    return res;
+    return {r.min_distance, g.min_distance, b.min_distance};
 }
 
 double MsdfGenerator::GenerateSdfPixel(const Shape &shape, const Vector2 &p) {
