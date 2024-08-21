@@ -1,7 +1,6 @@
 ﻿#include <iostream>
-
-#include <ft2build.h>
-#include FT_FREETYPE_H
+#include <vector>
+#include <utility>
 
 #include "managers/FontManager.h"
 #include "managers/TextBufferManager.h"
@@ -21,29 +20,15 @@ InputManager *input_manager_;
 
 // fonts
 TrueTypeHandle font_file_;
+
+std::vector<std::pair<FontHandle, FontType>> fonts_;
+std::vector<std::pair<FontHandle, FontType>> scaled_fonts_;
+std::vector<std::pair<TextBufferHandle, FontType>> text_buffers_;
+
+std::vector<FontType> font_types_ = {FontType::Bitmap, FontType::SdfFromBitmap, FontType::SdfFromVector, FontType::Msdf, FontType::MsdfOriginal};
+
 FontHandle original_font_;
-
-FontHandle bitmap_font_;
-FontHandle bitmap_scaled_font_;
-
-FontHandle sdf_bitmap_font_;
-FontHandle sdf_bitmap_scaled_font_;
-
-FontHandle sdf_vector_font_;
-FontHandle sdf_vector_scaled_font_;
-
-FontHandle msdf_font_;
-FontHandle msdf_scaled_font_;
-
-FontHandle msdf_orig_font_;
-FontHandle msdf_orig_scaled_font_;
-
 TextBufferHandle original_text_buffer_;
-TextBufferHandle bitmap_text_buffer_;
-TextBufferHandle sdf_bitmap_text_buffer_;
-TextBufferHandle sdf_vector_text_buffer_;
-TextBufferHandle msdf_text_buffer_;
-TextBufferHandle msdf_orig_text_buffer_;
 
 // function handlers
 FunctionId key_pressed_id_;
@@ -60,33 +45,22 @@ void InitFonts() {
     font_file_ = font_manager_->CreateTtf("../assets/fonts/OpenSans-Bold.ttf");
 
     int scale_from = 16;
-    int scale_to = 100;
+    int scale_to = 140;
     // create different fonts to compare their rendering quality
     // apart from the original font they are all created as (max) 16x16 bitmaps
     // then they are scaled up 4x
     original_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_to, FontType::Bitmap, 0);
-
-    bitmap_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from + 4, FontType::Bitmap, 0);
-    bitmap_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(bitmap_font_, scale_to); // create scaled fonts to show the power of SDF
-
-    sdf_bitmap_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from, FontType::SdfFromBitmap, 2);
-    sdf_bitmap_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(sdf_bitmap_font_, scale_to);
-
-    sdf_vector_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from, FontType::SdfFromVector, 2);
-    sdf_vector_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(sdf_vector_font_, scale_to);
-
-    msdf_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from, FontType::Msdf, 2);
-    msdf_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(msdf_font_, scale_to);
-    
-    msdf_orig_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from, FontType::MsdfOriginal, 2);
-    msdf_orig_scaled_font_ = font_manager_->CreateScaledFontToPixelSize(msdf_orig_font_, scale_to);
-
     original_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Bitmap, BufferType::Transient);
-    bitmap_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Bitmap, BufferType::Transient);
-    sdf_bitmap_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::SdfFromBitmap, BufferType::Transient);
-    sdf_vector_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::SdfFromVector, BufferType::Transient);
-    msdf_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Msdf, BufferType::Transient);
-    msdf_orig_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Msdf, BufferType::Transient);
+   
+    for (const auto& type : font_types_) { 
+        auto font = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from, type, 2);
+        auto scaled_font = font_manager_->CreateScaledFontToPixelSize(font, scale_to);
+        auto buffer = text_buffer_manager_->CreateTextBuffer(type, BufferType::Transient);
+        
+        fonts_.emplace_back(font, type);
+        scaled_fonts_.emplace_back(scaled_font, type);
+        text_buffers_.emplace_back(buffer, type);
+    }
 }
 
 
@@ -134,20 +108,16 @@ void InitInputManager() {
 
 void ClearTextBuffers() {
     text_buffer_manager_->ClearTextBuffer(original_text_buffer_);
-    text_buffer_manager_->ClearTextBuffer(bitmap_text_buffer_);
-    text_buffer_manager_->ClearTextBuffer(sdf_bitmap_text_buffer_);
-    text_buffer_manager_->ClearTextBuffer(sdf_vector_text_buffer_);
-    text_buffer_manager_->ClearTextBuffer(msdf_text_buffer_);
-    text_buffer_manager_->ClearTextBuffer(msdf_orig_text_buffer_);
+    for (const auto& buffer : text_buffers_) {
+        text_buffer_manager_->ClearTextBuffer(buffer.first);
+    }
 }
 
 void DrawTextBuffers() {
     text_buffer_manager_->SubmitTextBuffer(original_text_buffer_, 0);
-    text_buffer_manager_->SubmitTextBuffer(bitmap_text_buffer_, 0);
-    text_buffer_manager_->SubmitTextBuffer(msdf_text_buffer_, 0);
-    text_buffer_manager_->SubmitTextBuffer(sdf_vector_text_buffer_, 0);
-    text_buffer_manager_->SubmitTextBuffer(sdf_bitmap_text_buffer_, 0);
-    text_buffer_manager_->SubmitTextBuffer(msdf_orig_text_buffer_, 0);
+    for (const auto& buffer : text_buffers_) {
+        text_buffer_manager_->SubmitTextBuffer(buffer.first, 0);
+    }
 }
 
 void Update() {
@@ -155,51 +125,45 @@ void Update() {
 
     text_buffer_manager_->SetPenPosition(original_text_buffer_, 10.0f, 10.0f);
     text_buffer_manager_->AppendText(original_text_buffer_, original_font_, dynamic_text_.c_str());
-
-    text_buffer_manager_->SetPenPosition(bitmap_text_buffer_, 10.0f, 110.0f);
-    text_buffer_manager_->AppendText(bitmap_text_buffer_, bitmap_scaled_font_, dynamic_text_.c_str());
-
-    text_buffer_manager_->SetPenPosition(sdf_bitmap_text_buffer_, 10.0f, 220.0f);
-    text_buffer_manager_->AppendText(sdf_bitmap_text_buffer_, sdf_bitmap_scaled_font_, dynamic_text_.c_str());
-
-    text_buffer_manager_->SetPenPosition(sdf_vector_text_buffer_, 10.0f, 320.0f);
-    text_buffer_manager_->AppendText(sdf_vector_text_buffer_, sdf_vector_scaled_font_, dynamic_text_.c_str());
-
-    text_buffer_manager_->SetPenPosition(msdf_text_buffer_, 10.0f, 420.0f);
-    text_buffer_manager_->AppendText(msdf_text_buffer_, msdf_scaled_font_, dynamic_text_.c_str());
     
-    text_buffer_manager_->SetPenPosition(msdf_orig_text_buffer_, 10.0f, 520.0f);
-    text_buffer_manager_->AppendText(msdf_orig_text_buffer_, msdf_orig_scaled_font_, dynamic_text_.c_str());
+    const auto get_buffer_for_type = [&](FontType type) {
+        for (const auto& buffer : text_buffers_) {
+            if (buffer.second == type) {
+                return buffer.first;
+            }
+        }
+        return TextBufferHandle();
+    };
+    
+    for (int i = 0; i < scaled_fonts_.size(); i++) {
+        const auto font = scaled_fonts_[i].first;
+        const auto type = scaled_fonts_[i].second;
+        
+        text_buffer_manager_->SetPenPosition(get_buffer_for_type(type), 10.0f, 10.0f + 120.0f * (i + 1));
+        text_buffer_manager_->AppendText(get_buffer_for_type(type), font, dynamic_text_.c_str());
+    }
 
     DrawTextBuffers();
 }
 
 void DestroyAllFonts() {
     font_manager_->DestroyFont(original_font_);
-
-    font_manager_->DestroyFont(bitmap_font_);
-    font_manager_->DestroyFont(bitmap_scaled_font_);
-
-    font_manager_->DestroyFont(sdf_bitmap_font_);
-    font_manager_->DestroyFont(sdf_bitmap_scaled_font_);
-
-    font_manager_->DestroyFont(sdf_vector_font_);
-    font_manager_->DestroyFont(sdf_vector_scaled_font_);
-
-    font_manager_->DestroyFont(msdf_font_);
-    font_manager_->DestroyFont(msdf_scaled_font_);
     
-    font_manager_->DestroyFont(msdf_orig_font_);
-    font_manager_->DestroyFont(msdf_orig_scaled_font_);
+    for (const auto& font : fonts_) {
+        font_manager_->DestroyFont(font.first);
+    }
+    
+    for (const auto& font : scaled_fonts_) {
+        font_manager_->DestroyFont(font.first);
+    }
 }
 
 void DestroyAllTextBuffers() {
     text_buffer_manager_->DestroyTextBuffer(original_text_buffer_);
-    text_buffer_manager_->DestroyTextBuffer(bitmap_text_buffer_);
-    text_buffer_manager_->DestroyTextBuffer(sdf_bitmap_text_buffer_);
-    text_buffer_manager_->DestroyTextBuffer(sdf_vector_text_buffer_);
-    text_buffer_manager_->DestroyTextBuffer(msdf_text_buffer_);
-    text_buffer_manager_->DestroyTextBuffer(msdf_orig_text_buffer_);
+    
+    for (const auto& buffer : text_buffers_) {
+        text_buffer_manager_->DestroyTextBuffer(buffer.first);
+    }
 }
 
 void DestroyAllManagers() {
