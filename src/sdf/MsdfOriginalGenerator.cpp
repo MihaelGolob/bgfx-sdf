@@ -47,7 +47,7 @@ void MsdfOriginalGenerator::BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph
     shape.normalize();
     msdfgen::edgeColoringSimple(shape, 3.0);
     msdfgen::Bitmap<float, 3> msdf(texture_width, texture_height);
-    msdfgen::SDFTransformation t(msdfgen::Projection(font_size_, msdfgen::Vector2(0.1, 0.2)), msdfgen::Range(1.8));
+    msdfgen::SDFTransformation t(msdfgen::Projection(font_size_, msdfgen::Vector2(0.125, 0.2)), msdfgen::Range(1.8));
     msdfgen::generateMSDF(msdf, shape, t);
 
     for (int y = 0; y < texture_height; y++) {
