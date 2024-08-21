@@ -101,12 +101,11 @@ FontHandle FontManager::CreateFontByPixelSize(TrueTypeHandle ttf_handle, uint32_
     if (FontTypeNeedsMsdfGeneration(font_type)) {
         font.face_handle = CreateFace(&cached_files_[ttf_handle.idx]);
         font.msdf_gen_handle = CreateMsdfGenerator(font.face_handle, pixel_size, glyph_padding);
+        msdf_original_generator_->Init(cached_files_[ttf_handle.idx].path, cached_faces_[font.face_handle.idx], pixel_size);
     } else {
         font.face_handle.idx = bx::kInvalidHandle;
         font.msdf_gen_handle.idx = bx::kInvalidHandle;
     }
-    
-    msdf_original_generator_->Init(cached_files_[ttf_handle.idx].path, pixel_size);
 
     FontHandle handle = {font_idx};
     return handle;
@@ -339,5 +338,5 @@ bool FontManager::AddBitmap(GlyphInfo &glyph_info, const uint8_t *data, const At
 }
 
 bool FontManager::FontTypeNeedsMsdfGeneration(FontType font_type) {
-    return font_type == FontType::Msdf || font_type == FontType::SdfFromVector;
+    return font_type == FontType::Msdf || font_type == FontType::SdfFromVector || font_type == FontType::MsdfOriginal;
 }
