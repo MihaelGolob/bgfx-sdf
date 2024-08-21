@@ -101,7 +101,7 @@ FontHandle FontManager::CreateFontByPixelSize(TrueTypeHandle ttf_handle, uint32_
     if (FontTypeNeedsMsdfGeneration(font_type)) {
         font.face_handle = CreateFace(&cached_files_[ttf_handle.idx]);
         font.msdf_gen_handle = CreateMsdfGenerator(font.face_handle, pixel_size, glyph_padding);
-        msdf_original_generator_->Init(cached_files_[ttf_handle.idx].path, cached_faces_[font.face_handle.idx], pixel_size);
+        msdf_original_generator_->Init(cached_files_[ttf_handle.idx].path, cached_faces_[font.face_handle.idx], pixel_size, glyph_padding);
     } else {
         font.face_handle.idx = bx::kInvalidHandle;
         font.msdf_gen_handle.idx = bx::kInvalidHandle;

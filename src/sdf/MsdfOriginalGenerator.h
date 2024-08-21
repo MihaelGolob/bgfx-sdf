@@ -12,7 +12,7 @@
 class MsdfOriginalGenerator {
 public:
     MsdfOriginalGenerator();
-    void Init(const std::string& font_path, FT_Face face, int font_size);
+    void Init(const std::string& font_path, FT_Face face, int font_size, int padding);
     void BakeGlyphMsdf(CodePoint code_point, GlyphInfo &glyph_info, uint8_t *output);
     
 private:
@@ -20,6 +20,9 @@ private:
     
     FT_Face face_{};
     double scale_{};
+    int padding_;
+    int texture_width;
+    int texture_height;
     
     msdfgen::FreetypeHandle *ft_;
     msdfgen::FontHandle *font_{};
