@@ -14,7 +14,6 @@
 #include "FontManager.h"
 #include "../font_processing/CubeAtlas.h"
 #include "../utilities.h"
-#include "../sdf/MsdfOriginalGenerator.h"
 
 #define MAX_FONT_BUFFER_SIZE (512 * 512 * 4)
 
@@ -291,7 +290,7 @@ bool FontManager::GenerateGlyph(FontHandle handle, CodePoint code_point, uint8_t
             bitmap_type = AtlasRegion::TypeBgra8;
             break;
         case FontType::MsdfOriginal:
-            msdf_original_generator_->BakeGlyphMsdf(code_point, glyph_info, buffer_);
+            msdf_original_generator_->BakeGlyphMsdf(code_point, glyph_info, output);
             bitmap_type = AtlasRegion::TypeBgra8;
             break;
         default:
