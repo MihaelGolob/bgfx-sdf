@@ -35,9 +35,9 @@ void Window::StartUpdate(const std::function<bool()>& should_pause) {
         }
         
         glfwPollEvents();
-        renderer_->onBeforeLoop();
+        renderer_->OnBeforeLoop();
         update_loop_();
-        renderer_->onAfterLoop();
+        renderer_->OnAfterLoop();
     }
 }
 

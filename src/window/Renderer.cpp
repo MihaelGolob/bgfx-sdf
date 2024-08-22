@@ -24,11 +24,13 @@ Renderer::~Renderer() {
     bgfx::shutdown();
 }
 
-void Renderer::onBeforeLoop() {
+void Renderer::OnBeforeLoop() {
+    if (manual_mode_) return;
     bgfx::touch(0);
 }
 
-void Renderer::onAfterLoop() {
+void Renderer::OnAfterLoop() {
+    if (manual_mode_) return;
     bgfx::frame();
 }
 
@@ -52,4 +54,8 @@ void Renderer::SetViewTransform() const {
 
     bgfx::setViewTransform(0, view, ortho);
     bgfx::setViewRect(0, 0, 0, uint16_t(window_width_), uint16_t(window_height_));
+}
+
+void Renderer::SetManualMode(bool manual_mode) {
+    manual_mode_ = manual_mode;
 }

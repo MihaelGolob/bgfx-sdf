@@ -13,9 +13,12 @@ public:
 
     void SetViewTransform() const;
 
-    void onBeforeLoop();
-    void onAfterLoop();
+    void OnBeforeLoop();
+    void OnAfterLoop();
+    
+    void SetManualMode(bool manual_mode);
 
 private:
     int window_width_, window_height_;
+    bool manual_mode_ = false;
 };
