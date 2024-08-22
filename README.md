@@ -20,3 +20,4 @@ V diplomski nalogi bom podrobno preučil delovanje SDF in MSDF in ti dve metodi 
 - V direktoriju `src/shaders/` najdete vse senčilnike
 - Če naredite v spremembo v senčilniku, ga morate prevesti, preden se bo sprememba poznala
 - To naredite tako, da v programu `bash` v direktoriju `src/shaders/` poženete ukaz `make rebuild`
+- vsi senčilniki se prav tako avtomatsko prevedejo, ko poženete program
