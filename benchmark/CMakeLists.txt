@@ -8,7 +8,9 @@ add_executable(bgfx-sdf-benchmark ./main.cpp ../libs/stb/stb_truetype.h
         GlyphGenerationBenchmark.cpp
         GlyphGenerationBenchmark.h
         GlyphRenderingBenchmark.cpp
-        GlyphRenderingBenchmark.h)
+        GlyphRenderingBenchmark.h
+        GlyphPrecisionBenchmark.cpp
+        GlyphPrecisionBenchmark.h)
 
 include_directories(bgfx-sdf-benchmark SYSTEM ../libs/stb ../src)
 target_link_libraries(bgfx-sdf-benchmark bgfx-sdf -static)
