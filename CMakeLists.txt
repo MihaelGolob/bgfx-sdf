@@ -103,15 +103,3 @@ include_directories(bgfx-sdf
 target_link_libraries(bgfx-sdf
         bgfx bx bimg glfw freetype msdfgen::msdfgen-core msdfgen::msdfgen-ext
 )
-
-add_custom_target(
-        rebuild_shaders
-        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR}/src/shaders make rebuild
-        BYPRODUCTS ${CMAKE_SOURCE_DIR}/src/shaders/shader_output_file
-)
-
-add_custom_command(
-        TARGET bgfx-sdf
-        PRE_BUILD
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target rebuild_shaders
-)
