@@ -38,10 +38,11 @@ std::vector<double> GlyphGenerationBenchmark::RunBenchmark() {
             auto output = new uint8_t[64 * 64 * 4];
             auto bitmap_type = AtlasRegion::Type::TypeGray;
             auto code_point = char_set[i % char_set.size()];
+            GlyphInfo info{};
 
             {
                 Timer timer("GenerateGlyph", [&](double time) { total_time += time; }, print_progress_);
-                font_manager_->GenerateGlyph(font, code_point, output, bitmap_type);
+                font_manager_->GenerateGlyph(font, code_point, output, bitmap_type, info);
             }
             
             delete[] output;

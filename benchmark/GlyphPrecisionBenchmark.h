@@ -11,17 +11,18 @@ class Window;
 
 class GlyphPrecisionBenchmark {
 public:
-    GlyphPrecisionBenchmark(FontManager* font_manager, Window* window, TrueTypeHandle font_handle);
+    GlyphPrecisionBenchmark(FontManager* font_manager, Window* window, TrueTypeHandle font_file_handle);
     ~GlyphPrecisionBenchmark();
     void RunBenchmark();
     
 private:
     void Update();
     void GenerateGlyph();
+    void WriteBufferToImageIfReady(uint32_t current_frame);
     
     FontManager* font_manager_;
     Window* window_;
-    TrueTypeHandle font_handle_{};
+    TrueTypeHandle font_file_handle_{};
     
     bgfx::TextureHandle render_texture_{};
     bgfx::TextureHandle frame_buffer_texture_{};
@@ -31,5 +32,6 @@ private:
     int texture_height_{1024};
     
     uint8_t* out_buffer_{};
-    uint32_t current_frame_{0};
+    uint8_t* glyph_buffer_{};
+    uint32_t read_frame_{0};
 };

@@ -270,9 +270,8 @@ bool FontManager::PreloadGlyph(FontHandle handle, CodePoint code_point) {
     return false;
 }
 
-bool FontManager::GenerateGlyph(FontHandle handle, CodePoint code_point, uint8_t *output, AtlasRegion::Type& bitmap_type) {
+bool FontManager::GenerateGlyph(FontHandle handle, CodePoint code_point, uint8_t *output, AtlasRegion::Type& bitmap_type, GlyphInfo& glyph_info) {
     CachedFont &font = cached_fonts_[handle.idx];
-    GlyphInfo glyph_info {};
     
     switch (font.font_info.font_type) {
         case FontType::Bitmap:

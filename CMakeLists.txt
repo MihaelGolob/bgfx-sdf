@@ -16,6 +16,7 @@ add_library(bgfx-sdf STATIC
         src/font_processing/utf8.h
 
         libs/stb/stb_truetype.h
+        libs/stb/stb_image_write.h
         libs/poly34/poly34.h
         libs/poly34/poly34.cpp
 
