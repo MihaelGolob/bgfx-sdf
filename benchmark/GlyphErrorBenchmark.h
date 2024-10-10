@@ -25,7 +25,7 @@ private:
     TrueTypeHandle font_file_handle_{};
     
     bgfx::TextureHandle render_texture_{};
-    bgfx::TextureHandle frame_buffer_texture_{};
+    bgfx::TextureHandle target_texture_{};
     bgfx::FrameBufferHandle frame_buffer_{};
     
     int texture_width_{1024};
@@ -34,4 +34,5 @@ private:
     uint8_t* out_buffer_{};
     uint8_t* glyph_buffer_{};
     uint32_t read_frame_{0};
+    bool is_frame_read_{false};
 };
