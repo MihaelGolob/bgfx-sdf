@@ -3,14 +3,14 @@
 //
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
-#include "GlyphPrecisionBenchmark.h"
+#include "GlyphErrorBenchmark.h"
 
 #include <utilities.h>
 #include <window/Window.h>
 #include <managers/FontManager.h>
 #include <stb_image_write.h>
 
-GlyphPrecisionBenchmark::GlyphPrecisionBenchmark(FontManager *font_manager, Window* window, TrueTypeHandle font_file_handle) :
+GlyphErrorBenchmark::GlyphErrorBenchmark(FontManager *font_manager, Window* window, TrueTypeHandle font_file_handle) :
         font_manager_(font_manager), window_(window), font_file_handle_(font_file_handle) {
     
     render_texture_ = bgfx::createTexture2D(texture_width_, texture_height_, false, 1, bgfx::TextureFormat::RGBA8, BGFX_TEXTURE_READ_BACK | BGFX_TEXTURE_BLIT_DST);
@@ -30,14 +30,14 @@ GlyphPrecisionBenchmark::GlyphPrecisionBenchmark(FontManager *font_manager, Wind
     GenerateGlyph();
 }
 
-GlyphPrecisionBenchmark::~GlyphPrecisionBenchmark() {
+GlyphErrorBenchmark::~GlyphErrorBenchmark() {
     window_->GetRenderer()->SetManualMode(false);
     bgfx::destroy(render_texture_);
     delete[] out_buffer_;
     delete[] glyph_buffer_;
 }
 
-void GlyphPrecisionBenchmark::GenerateGlyph() {
+void GlyphErrorBenchmark::GenerateGlyph() {
     const auto font = font_manager_->CreateFontByPixelSize(font_file_handle_, 0, 100, FontType::Bitmap, 0);
     AtlasRegion::Type atlas_type;
     GlyphInfo info{};
@@ -47,11 +47,11 @@ void GlyphPrecisionBenchmark::GenerateGlyph() {
     stbi_write_png("glyph.png", info.width, info.height, 1, glyph_buffer_, info.width);
 }
 
-void GlyphPrecisionBenchmark::RunBenchmark() {
+void GlyphErrorBenchmark::RunBenchmark() {
     window_->StartUpdate();
 }
 
-void GlyphPrecisionBenchmark::Update() {
+void GlyphErrorBenchmark::Update() {
     bgfx::setViewRect(0, 0, 0, bgfx::BackbufferRatio::Equal);
     bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x303030ff, 1.0f, 0);
     bgfx::setViewFrameBuffer(0, frame_buffer_);
@@ -64,7 +64,7 @@ void GlyphPrecisionBenchmark::Update() {
     WriteBufferToImageIfReady(current_frame);
 }
 
-void GlyphPrecisionBenchmark::WriteBufferToImageIfReady(uint32_t current_frame) {
+void GlyphErrorBenchmark::WriteBufferToImageIfReady(uint32_t current_frame) {
     if (read_frame_ == 0) {
         read_frame_ = bgfx::readTexture(render_texture_, out_buffer_);
         return;

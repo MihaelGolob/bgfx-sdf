@@ -5,7 +5,7 @@
 #include <utilities.h>
 #include "GlyphGenerationBenchmark.h"
 #include "GlyphRenderingBenchmark.h"
-#include "GlyphPrecisionBenchmark.h"
+#include "GlyphErrorBenchmark.h"
 
 const int k_window_width_ = 1500;
 const int k_window_height_ = 900;
@@ -60,9 +60,9 @@ void BenchmarkGlyphRendering() {
     glyph_rendering_benchmark.RunBenchmark();
 }
 
-void BenchmarkGlyphPrecision() {
-    auto glyph_precision_benchmark = GlyphPrecisionBenchmark(font_manager_, window_, font_file_);
-    glyph_precision_benchmark.RunBenchmark();
+void BenchmarkGlyphError() {
+    auto glyph_error_benchmark = GlyphErrorBenchmark(font_manager_, window_, font_file_);
+    glyph_error_benchmark.RunBenchmark();
 }
 
 int main() {
@@ -71,7 +71,7 @@ int main() {
 
 //    BenchmarkGlyphGeneration();
 //    BenchmarkGlyphRendering();
-    BenchmarkGlyphPrecision();
+    BenchmarkGlyphError();
 
     Shutdown();
     return 0;

@@ -9,10 +9,10 @@
 class FontManager;
 class Window;
 
-class GlyphPrecisionBenchmark {
+class GlyphErrorBenchmark {
 public:
-    GlyphPrecisionBenchmark(FontManager* font_manager, Window* window, TrueTypeHandle font_file_handle);
-    ~GlyphPrecisionBenchmark();
+    GlyphErrorBenchmark(FontManager* font_manager, Window* window, TrueTypeHandle font_file_handle);
+    ~GlyphErrorBenchmark();
     void RunBenchmark();
     
 private:
