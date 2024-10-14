@@ -62,10 +62,12 @@ static const bgfx::EmbeddedShader embedded_shaders_[] = {
 GlyphErrorBenchmark::GlyphErrorBenchmark(FontManager *font_manager, Window *window, TrueTypeHandle font_file_handle) : font_manager_(font_manager), window_(window),
                                                                                                                        font_file_handle_(font_file_handle) {
     PosTexCoordVertex::Init();
-    bgfx::setDebug(BGFX_DEBUG_TEXT | BGFX_DEBUG_STATS);
+//    bgfx::setDebug(BGFX_DEBUG_TEXT | BGFX_DEBUG_STATS);
     InitializeTextures();
 
-    bgfx::setViewFrameBuffer(0, frame_buffer_);
+    bgfx::setViewFrameBuffer(1, frame_buffer_);
+    bgfx::setViewClear(1, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x0050aaff, 1.0f, 0);
+
     bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x0050aaff, 1.0f, 0);
 
     window_->SetUpdateLoop([this]() { Update(); });
@@ -139,7 +141,20 @@ void GlyphErrorBenchmark::RunBenchmark() {
 }
 
 void GlyphErrorBenchmark::Update() {
-    bgfx::setViewRect(0, 0, 0, texture_width_, texture_height_);
+    // render to texture
+    bgfx::setViewRect(1, 0, 0, texture_width_, texture_height_);
+    bgfx::touch(1);
+
+    bgfx::setVertexBuffer(0, vb_);
+    bgfx::setIndexBuffer(ib_);
+
+    bgfx::setTexture(0, tex_color_uniform_, glyph_texture_);
+
+    bgfx::setState(0 | BGFX_STATE_WRITE_RGB);
+    bgfx::submit(1, basic_program_);
+
+    // render to window
+    bgfx::setViewRect(0, 0, 0, window_->GetWindowWidth(), window_->GetWindowHeight());
     bgfx::touch(0);
 
     bgfx::setVertexBuffer(0, vb_);
@@ -150,7 +165,8 @@ void GlyphErrorBenchmark::Update() {
     bgfx::setState(0 | BGFX_STATE_WRITE_RGB);
     bgfx::submit(0, basic_program_);
 
-    bgfx::blit(1, render_texture_, 0, 0, target_texture_, 0, 0, texture_width_, texture_height_);
+    // copy render texture and save
+    bgfx::blit(2, render_texture_, 0, 0, target_texture_, 0, 0, texture_width_, texture_height_);
     const auto current_frame = bgfx::frame();
     WriteBufferToImageIfReady(current_frame);
 }

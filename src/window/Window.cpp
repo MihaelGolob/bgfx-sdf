@@ -7,7 +7,7 @@
 #include "WindowHandle.h"
 #include "../utilities.h"
 
-Window::Window(int width, int height, const std::string &title) {
+Window::Window(int width, int height, const std::string &title) : window_width_(width), window_height_(height) {
     glfwInit();
     window_ = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
     glfwSetWindowUserPointer(window_, static_cast<void *>(this));
@@ -68,4 +68,12 @@ WindowKeyAction Window::ConvertToWindowKeyAction(int action) {
 
 Renderer *Window::GetRenderer() {
     return renderer_;
+}
+
+int Window::GetWindowWidth() const {
+    return window_width_;
+}
+
+int Window::GetWindowHeight() const {
+    return window_height_;
 }
