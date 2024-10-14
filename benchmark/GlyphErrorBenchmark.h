@@ -5,6 +5,8 @@
 #pragma once
 
 #include <font_processing/FontHandles.h>
+#include "font_processing/FontInfo.h"
+#include <managers/FontManager.h>
 
 class FontManager;
 
@@ -19,11 +21,11 @@ public:
 private:
     void Update();
 
-    void GenerateGlyph();
+    void GenerateGlyph(FontType font_type, int font_size, CodePoint code_point);
     void CreateQuad();
-    void InitializeShaders();
+    void InitializeShaders(FontType font_type);
     void InitializeTextures();
-    void AdjustQuadForGlyph(int glyph_width, int glyph_height);
+    void AdjustQuadForGlyph(int glyph_width, int glyph_height, int padding);
 
     void WriteBufferToImageIfReady(uint32_t current_frame);
 

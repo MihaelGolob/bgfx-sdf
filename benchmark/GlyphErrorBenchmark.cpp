@@ -8,7 +8,6 @@
 
 #include <utilities.h>
 #include <window/Window.h>
-#include <managers/FontManager.h>
 #include <stb_image_write.h>
 
 // shaders
@@ -16,6 +15,7 @@
 #include "../src/shaders/vertex/vs_font_basic_bench.bin.h"
 #include "../src/shaders/fragment/fs_font_basic.bin.h"
 #include "../src/shaders/fragment/fs_font_sdf.bin.h"
+#include "../src/shaders/fragment/fs_font_sdf_bench.bin.h"
 #include "../src/shaders/fragment/fs_font_msdf.bin.h"
 #include "../src/shaders/fragment/fs_color.bin.h"
 #include "../src/shaders/fragment/fs_font_basic_bench.bin.h"
@@ -26,6 +26,7 @@ static const bgfx::EmbeddedShader embedded_shaders_[] = {
         BGFX_EMBEDDED_SHADER(fs_font_basic),
         BGFX_EMBEDDED_SHADER(fs_font_basic_bench),
         BGFX_EMBEDDED_SHADER(fs_font_sdf),
+        BGFX_EMBEDDED_SHADER(fs_font_sdf_bench),
         BGFX_EMBEDDED_SHADER(fs_font_msdf),
         BGFX_EMBEDDED_SHADER(fs_color),
         BGFX_EMBEDDED_SHADER_END()
@@ -36,9 +37,9 @@ GlyphErrorBenchmark::GlyphErrorBenchmark(FontManager *font_manager, Window *wind
     InitializeTextures();
 
     bgfx::setViewFrameBuffer(1, frame_buffer_);
-    bgfx::setViewClear(1, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x0050aaff, 1.0f, 0);
+    bgfx::setViewClear(1, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x000000ff, 1.0f, 0);
 
-    bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x0050aaff, 1.0f, 0);
+    bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x000000ff, 1.0f, 0);
 
     window_->SetUpdateLoop([this]() { Update(); });
     window_->GetRenderer()->SetManualMode(true);
@@ -46,8 +47,7 @@ GlyphErrorBenchmark::GlyphErrorBenchmark(FontManager *font_manager, Window *wind
     out_buffer_ = new uint8_t[1024 * 1024 * 4];
     glyph_buffer_ = new uint8_t[128 * 128];
 
-    GenerateGlyph();
-    InitializeShaders();
+    GenerateGlyph(FontType::SdfFromBitmap, 128, 'A');
     CreateQuad();
 }
 
@@ -63,11 +63,23 @@ void GlyphErrorBenchmark::InitializeTextures() {
     if (!bgfx::isValid(render_texture_)) PrintError("Failed to create render texture");
 }
 
-void GlyphErrorBenchmark::InitializeShaders() {
+void GlyphErrorBenchmark::InitializeShaders(FontType font_type) {
     const auto type = bgfx::getRendererType();
+    std::string frag_shader;
+
+    switch (font_type) {
+        case FontType::Bitmap:
+            frag_shader = "fs_font_basic_bench";
+            break;
+        case FontType::SdfFromBitmap:
+        case FontType::SdfFromVector:
+            frag_shader = "fs_font_sdf_bench";
+            break;
+    }
+
     basic_program_ = bgfx::createProgram(
             bgfx::createEmbeddedShader(embedded_shaders_, type, "vs_font_basic_bench"),
-            bgfx::createEmbeddedShader(embedded_shaders_, type, "fs_font_basic_bench"),
+            bgfx::createEmbeddedShader(embedded_shaders_, type, frag_shader.c_str()),
             true
     );
 
@@ -85,15 +97,26 @@ GlyphErrorBenchmark::~GlyphErrorBenchmark() {
     delete[] glyph_buffer_;
 }
 
-void GlyphErrorBenchmark::GenerateGlyph() {
-    const auto font = font_manager_->CreateFontByPixelSize(font_file_handle_, 0, 128, FontType::Bitmap, 0);
-    AtlasRegion::Type atlas_type;
+void GlyphErrorBenchmark::GenerateGlyph(FontType font_type, int font_size, CodePoint code_point) {
+    const int padding = 5;
+    const auto font = font_manager_->CreateFontByPixelSize(font_file_handle_, 0, font_size, font_type, padding);
+
+    AtlasRegion::Type bitmap_type{};
     GlyphInfo info{};
-    font_manager_->GenerateGlyph(font, 'A', glyph_buffer_, atlas_type, info);
+    font_manager_->GenerateGlyph(font, code_point, glyph_buffer_, bitmap_type, info);
     font_manager_->DestroyFont(font);
 
-    glyph_texture_ = bgfx::createTexture2D(info.width, info.height, false, 1, bgfx::TextureFormat::R8, 0, bgfx::copy(glyph_buffer_, info.width * info.height));
-    AdjustQuadForGlyph(info.width, info.height);
+    switch (font_type) {
+        case FontType::Bitmap:
+        case FontType::SdfFromBitmap:
+            glyph_texture_ = bgfx::createTexture2D(info.width, info.height, false, 1, bgfx::TextureFormat::R8, 0, bgfx::copy(glyph_buffer_, info.width * info.height));
+            break;
+        default:
+            glyph_texture_ = bgfx::createTexture2D(info.width, info.height, false, 1, bgfx::TextureFormat::RGBA8, 0, bgfx::copy(glyph_buffer_, info.width * info.height));
+            break;
+    }
+    AdjustQuadForGlyph(info.width, info.height, padding);
+    InitializeShaders(font_type);
 
     stbi_write_png("glyph.png", info.width, info.height, 1, glyph_buffer_, info.width);
 }
@@ -126,7 +149,7 @@ void GlyphErrorBenchmark::Update() {
 
     bgfx::setTexture(0, tex_color_uniform_, glyph_texture_);
 
-    bgfx::setState(0 | BGFX_STATE_WRITE_RGB);
+    bgfx::setState(0 | BGFX_STATE_WRITE_RGB | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA));
     bgfx::submit(1, basic_program_);
 
     // render to window
@@ -138,7 +161,7 @@ void GlyphErrorBenchmark::Update() {
 
     bgfx::setTexture(0, tex_color_uniform_, glyph_texture_);
 
-    bgfx::setState(0 | BGFX_STATE_WRITE_RGB);
+    bgfx::setState(0 | BGFX_STATE_WRITE_RGB | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA));
     bgfx::submit(0, basic_program_);
 
     // copy render texture and save
@@ -163,15 +186,23 @@ void GlyphErrorBenchmark::WriteBufferToImageIfReady(uint32_t current_frame) {
     is_frame_read_ = true;
 }
 
-void GlyphErrorBenchmark::AdjustQuadForGlyph(int glyph_width, int glyph_height) {
+void GlyphErrorBenchmark::AdjustQuadForGlyph(int glyph_width, int glyph_height, int glyph_padding) {
     float width = static_cast<float>(glyph_width) / texture_width_;
     float height = static_cast<float>(glyph_height) / texture_height_;
+    float padding = static_cast<float>(glyph_padding) / texture_width_;
 
     float width_map = width * 2 - 1.0f; // map from [0, 1] to [-1, 1]
     float height_map = height * (-2) + 1.0f; // map from [0, 1] to [1, -1]
 
-    quad_vertices_[1].x = width_map;
-    quad_vertices_[2].y = height_map;
-    quad_vertices_[3].x = width_map;
-    quad_vertices_[3].y = height_map;
+    quad_vertices_[0].x = -1.0f - padding;
+    quad_vertices_[0].y = 1.0f + padding;
+
+    quad_vertices_[1].x = width_map - padding;
+    quad_vertices_[1].y = 1.0f + padding;
+
+    quad_vertices_[2].x = -1.0f - padding;
+    quad_vertices_[2].y = height_map + padding;
+
+    quad_vertices_[3].x = width_map - padding;
+    quad_vertices_[3].y = height_map + padding;
 }
