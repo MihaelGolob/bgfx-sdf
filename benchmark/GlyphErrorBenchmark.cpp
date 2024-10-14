@@ -17,6 +17,7 @@
 #include "../src/shaders/fragment/fs_font_sdf.bin.h"
 #include "../src/shaders/fragment/fs_font_sdf_bench.bin.h"
 #include "../src/shaders/fragment/fs_font_msdf.bin.h"
+#include "../src/shaders/fragment/fs_font_msdf_bench.bin.h"
 #include "../src/shaders/fragment/fs_color.bin.h"
 #include "../src/shaders/fragment/fs_font_basic_bench.bin.h"
 
@@ -28,6 +29,7 @@ static const bgfx::EmbeddedShader embedded_shaders_[] = {
         BGFX_EMBEDDED_SHADER(fs_font_sdf),
         BGFX_EMBEDDED_SHADER(fs_font_sdf_bench),
         BGFX_EMBEDDED_SHADER(fs_font_msdf),
+        BGFX_EMBEDDED_SHADER(fs_font_msdf_bench),
         BGFX_EMBEDDED_SHADER(fs_color),
         BGFX_EMBEDDED_SHADER_END()
 };
@@ -45,9 +47,9 @@ GlyphErrorBenchmark::GlyphErrorBenchmark(FontManager *font_manager, Window *wind
     window_->GetRenderer()->SetManualMode(true);
 
     out_buffer_ = new uint8_t[1024 * 1024 * 4];
-    glyph_buffer_ = new uint8_t[128 * 128];
+    glyph_buffer_ = new uint8_t[512 * 512 * 4];
 
-    GenerateGlyph(FontType::SdfFromBitmap, 128, 'A');
+    GenerateGlyph(FontType::Msdf, 128, 'A');
     CreateQuad();
 }
 
@@ -74,6 +76,10 @@ void GlyphErrorBenchmark::InitializeShaders(FontType font_type) {
         case FontType::SdfFromBitmap:
         case FontType::SdfFromVector:
             frag_shader = "fs_font_sdf_bench";
+            break;
+        case FontType::Msdf:
+        case FontType::MsdfOriginal:
+            frag_shader = "fs_font_msdf_bench";
             break;
     }
 
@@ -112,13 +118,14 @@ void GlyphErrorBenchmark::GenerateGlyph(FontType font_type, int font_size, CodeP
             glyph_texture_ = bgfx::createTexture2D(info.width, info.height, false, 1, bgfx::TextureFormat::R8, 0, bgfx::copy(glyph_buffer_, info.width * info.height));
             break;
         default:
-            glyph_texture_ = bgfx::createTexture2D(info.width, info.height, false, 1, bgfx::TextureFormat::RGBA8, 0, bgfx::copy(glyph_buffer_, info.width * info.height));
+            glyph_texture_ = bgfx::createTexture2D(info.width, info.height, false, 1, bgfx::TextureFormat::RGBA8, 0, bgfx::copy(glyph_buffer_, info.width * info.height * 4));
             break;
     }
-    AdjustQuadForGlyph(info.width, info.height, padding);
+    AdjustQuadForGlyph(info.width, info.height, padding, 3.0);
     InitializeShaders(font_type);
 
-    stbi_write_png("glyph.png", info.width, info.height, 1, glyph_buffer_, info.width);
+    const auto channels = font_type == FontType::Bitmap || font_type == FontType::SdfFromBitmap ? 1.0f : 4.0f;
+    stbi_write_png("glyph.png", info.width, info.height, channels, glyph_buffer_, info.width * channels);
 }
 
 void GlyphErrorBenchmark::CreateQuad() {
@@ -186,10 +193,10 @@ void GlyphErrorBenchmark::WriteBufferToImageIfReady(uint32_t current_frame) {
     is_frame_read_ = true;
 }
 
-void GlyphErrorBenchmark::AdjustQuadForGlyph(int glyph_width, int glyph_height, int glyph_padding) {
-    float width = static_cast<float>(glyph_width) / texture_width_;
-    float height = static_cast<float>(glyph_height) / texture_height_;
-    float padding = static_cast<float>(glyph_padding) / texture_width_;
+void GlyphErrorBenchmark::AdjustQuadForGlyph(int glyph_width, int glyph_height, int glyph_padding, float scale) {
+    float width = (static_cast<float>(glyph_width) / texture_width_) * scale;
+    float height = (static_cast<float>(glyph_height) / texture_height_) * scale;
+    float padding = (static_cast<float>(glyph_padding) / texture_width_) * scale;
 
     float width_map = width * 2 - 1.0f; // map from [0, 1] to [-1, 1]
     float height_map = height * (-2) + 1.0f; // map from [0, 1] to [1, -1]

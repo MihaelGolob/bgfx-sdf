@@ -20,7 +20,7 @@ auto font_types_to_test_ = std::vector<FontType>{FontType::Bitmap, FontType::Sdf
 void Setup() {
     font_manager_ = new FontManager(1024);
     text_buffer_manager_ = new TextBufferManager(font_manager_);
-    font_file_ = font_manager_->CreateTtf("../assets/fonts/Helvetica-Bold.ttf");
+    font_file_ = font_manager_->CreateTtf("../assets/fonts/OpenSans-Bold.ttf");
 }
 
 void Shutdown() {

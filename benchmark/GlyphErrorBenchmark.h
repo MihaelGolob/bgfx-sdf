@@ -25,7 +25,7 @@ private:
     void CreateQuad();
     void InitializeShaders(FontType font_type);
     void InitializeTextures();
-    void AdjustQuadForGlyph(int glyph_width, int glyph_height, int padding);
+    void AdjustQuadForGlyph(int glyph_width, int glyph_height, int padding, float scale);
 
     void WriteBufferToImageIfReady(uint32_t current_frame);
 
