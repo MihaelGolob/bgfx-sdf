@@ -14,7 +14,7 @@ Window::Window(int width, int height, const std::string &title) {
 
     auto window_handle = WindowHandle(window_);
     renderer_ = new Renderer(width, height, window_handle);
-    renderer_->SetViewTransform();
+//    renderer_->SetViewTransform(); todo fix this
 }
 
 Window::~Window() {
@@ -28,12 +28,12 @@ void Window::SetUpdateLoop(const std::function<void()> &update_loop) {
     update_loop_ = update_loop;
 }
 
-void Window::StartUpdate(const std::function<bool()>& should_pause) {
+void Window::StartUpdate(const std::function<bool()> &should_pause) {
     while (!glfwWindowShouldClose(window_)) {
         if (should_pause && should_pause()) {
             break;
         }
-        
+
         glfwPollEvents();
         renderer_->OnBeforeLoop();
         update_loop_();

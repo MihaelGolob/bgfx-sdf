@@ -7,32 +7,46 @@
 #include <font_processing/FontHandles.h>
 
 class FontManager;
+
 class Window;
 
 class GlyphErrorBenchmark {
 public:
-    GlyphErrorBenchmark(FontManager* font_manager, Window* window, TrueTypeHandle font_file_handle);
+    GlyphErrorBenchmark(FontManager *font_manager, Window *window, TrueTypeHandle font_file_handle);
     ~GlyphErrorBenchmark();
     void RunBenchmark();
-    
+
 private:
     void Update();
+
     void GenerateGlyph();
+    void CreateFullScreenQuad();
+    void InitializeShaders();
+    void InitializeTextures();
+
     void WriteBufferToImageIfReady(uint32_t current_frame);
-    
-    FontManager* font_manager_;
-    Window* window_;
+
+    FontManager *font_manager_;
+    Window *window_;
     TrueTypeHandle font_file_handle_{};
-    
+
     bgfx::TextureHandle render_texture_{};
     bgfx::TextureHandle target_texture_{};
+    bgfx::TextureHandle glyph_texture_{};
     bgfx::FrameBufferHandle frame_buffer_{};
-    
+
+    bgfx::VertexBufferHandle vb_{};
+    bgfx::IndexBufferHandle ib_{};
+    bgfx::UniformHandle tex_color_uniform_{};
+
     int texture_width_{1024};
     int texture_height_{1024};
-    
-    uint8_t* out_buffer_{};
-    uint8_t* glyph_buffer_{};
+
+    uint8_t *out_buffer_{};
+    uint8_t *glyph_buffer_{};
     uint32_t read_frame_{0};
     bool is_frame_read_{false};
+
+    // shader programs
+    bgfx::ProgramHandle basic_program_{};
 };
