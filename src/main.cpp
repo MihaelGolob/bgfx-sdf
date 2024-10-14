@@ -51,12 +51,12 @@ void InitFonts() {
     // then they are scaled up 4x
     original_font_ = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_to, FontType::Bitmap, 0);
     original_text_buffer_ = text_buffer_manager_->CreateTextBuffer(FontType::Bitmap, BufferType::Transient);
-   
-    for (const auto& type : font_types_) { 
+
+    for (const auto &type: font_types_) {
         auto font = font_manager_->CreateFontByPixelSize(font_file_, 0, scale_from, type, 2);
         auto scaled_font = font_manager_->CreateScaledFontToPixelSize(font, scale_to);
         auto buffer = text_buffer_manager_->CreateTextBuffer(type, BufferType::Transient);
-        
+
         fonts_.emplace_back(font, type);
         scaled_fonts_.emplace_back(scaled_font, type);
         text_buffers_.emplace_back(buffer, type);
@@ -108,14 +108,14 @@ void InitInputManager() {
 
 void ClearTextBuffers() {
     text_buffer_manager_->ClearTextBuffer(original_text_buffer_);
-    for (const auto& buffer : text_buffers_) {
+    for (const auto &buffer: text_buffers_) {
         text_buffer_manager_->ClearTextBuffer(buffer.first);
     }
 }
 
 void DrawTextBuffers() {
     text_buffer_manager_->SubmitTextBuffer(original_text_buffer_, 0);
-    for (const auto& buffer : text_buffers_) {
+    for (const auto &buffer: text_buffers_) {
         text_buffer_manager_->SubmitTextBuffer(buffer.first, 0);
     }
 }
@@ -125,20 +125,20 @@ void Update() {
 
     text_buffer_manager_->SetPenPosition(original_text_buffer_, 10.0f, 10.0f);
     text_buffer_manager_->AppendText(original_text_buffer_, original_font_, dynamic_text_.c_str());
-    
+
     const auto get_buffer_for_type = [&](FontType type) {
-        for (const auto& buffer : text_buffers_) {
+        for (const auto &buffer: text_buffers_) {
             if (buffer.second == type) {
                 return buffer.first;
             }
         }
         return TextBufferHandle();
     };
-    
+
     for (int i = 0; i < scaled_fonts_.size(); i++) {
         const auto font = scaled_fonts_[i].first;
         const auto type = scaled_fonts_[i].second;
-        
+
         text_buffer_manager_->SetPenPosition(get_buffer_for_type(type), 10.0f, 10.0f + 120.0f * (i + 1));
         text_buffer_manager_->AppendText(get_buffer_for_type(type), font, dynamic_text_.c_str());
     }
@@ -148,20 +148,20 @@ void Update() {
 
 void DestroyAllFonts() {
     font_manager_->DestroyFont(original_font_);
-    
-    for (const auto& font : fonts_) {
+
+    for (const auto &font: fonts_) {
         font_manager_->DestroyFont(font.first);
     }
-    
-    for (const auto& font : scaled_fonts_) {
+
+    for (const auto &font: scaled_fonts_) {
         font_manager_->DestroyFont(font.first);
     }
 }
 
 void DestroyAllTextBuffers() {
     text_buffer_manager_->DestroyTextBuffer(original_text_buffer_);
-    
-    for (const auto& buffer : text_buffers_) {
+
+    for (const auto &buffer: text_buffers_) {
         text_buffer_manager_->DestroyTextBuffer(buffer.first);
     }
 }
@@ -187,6 +187,7 @@ void Shutdown() {
 int main() {
     // initialization
     window_ = new Window(k_window_width_, k_window_height_, "BGFX fonts");
+    window_->GetRenderer()->SetViewTransform();
     window_->SetUpdateLoop(Update);
 
     InitFonts();

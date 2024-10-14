@@ -14,7 +14,6 @@ Window::Window(int width, int height, const std::string &title) : window_width_(
 
     auto window_handle = WindowHandle(window_);
     renderer_ = new Renderer(width, height, window_handle);
-//    renderer_->SetViewTransform(); todo fix this
 }
 
 Window::~Window() {
