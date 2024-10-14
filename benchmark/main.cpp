@@ -7,8 +7,8 @@
 #include "GlyphRenderingBenchmark.h"
 #include "GlyphErrorBenchmark.h"
 
-const int k_window_width_ = 1500;
-const int k_window_height_ = 900;
+const int k_window_width_ = 1300;
+const int k_window_height_ = 1300;
 
 Window *window_;
 FontManager *font_manager_;

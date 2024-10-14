@@ -20,34 +20,6 @@
 #include "../src/shaders/fragment/fs_color.bin.h"
 #include "../src/shaders/fragment/fs_font_basic_bench.bin.h"
 
-struct PosTexCoordVertex {
-    float x, y, z;
-    float u, v;
-
-    static void Init() {
-        ms_layout.begin()
-                .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-                .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float, true)
-                .end();
-    }
-
-    static bgfx::VertexLayout ms_layout;
-};
-
-bgfx::VertexLayout PosTexCoordVertex::ms_layout;
-
-static PosTexCoordVertex quad_vertices_[] = {
-        {-1.0f, 1.0f,  0, 0.0f, 0.0f}, // Top-left
-        {1.0f,  1.0f,  0, 1.0f, 0.0f}, // Top-right
-        {-1.0f, -1.0f, 0, 0.0f, 1.0f}, // Bottom-left
-        {1.0f,  -1.0f, 0, 1.0f, 1.0f}, // Bottom-right
-};
-
-static const uint16_t quad_indices_[] = {
-        0, 1, 2,
-        1, 3, 2,
-};
-
 static const bgfx::EmbeddedShader embedded_shaders_[] = {
         BGFX_EMBEDDED_SHADER(vs_font_basic),
         BGFX_EMBEDDED_SHADER(vs_font_basic_bench),
@@ -61,8 +33,6 @@ static const bgfx::EmbeddedShader embedded_shaders_[] = {
 
 GlyphErrorBenchmark::GlyphErrorBenchmark(FontManager *font_manager, Window *window, TrueTypeHandle font_file_handle) : font_manager_(font_manager), window_(window),
                                                                                                                        font_file_handle_(font_file_handle) {
-    PosTexCoordVertex::Init();
-//    bgfx::setDebug(BGFX_DEBUG_TEXT | BGFX_DEBUG_STATS);
     InitializeTextures();
 
     bgfx::setViewFrameBuffer(1, frame_buffer_);
@@ -78,7 +48,7 @@ GlyphErrorBenchmark::GlyphErrorBenchmark(FontManager *font_manager, Window *wind
 
     GenerateGlyph();
     InitializeShaders();
-    CreateFullScreenQuad();
+    CreateQuad();
 }
 
 void GlyphErrorBenchmark::InitializeTextures() {
@@ -123,16 +93,22 @@ void GlyphErrorBenchmark::GenerateGlyph() {
     font_manager_->DestroyFont(font);
 
     glyph_texture_ = bgfx::createTexture2D(info.width, info.height, false, 1, bgfx::TextureFormat::R8, 0, bgfx::copy(glyph_buffer_, info.width * info.height));
+    AdjustQuadForGlyph(info.width, info.height);
 
     stbi_write_png("glyph.png", info.width, info.height, 1, glyph_buffer_, info.width);
 }
 
-void GlyphErrorBenchmark::CreateFullScreenQuad() {
+void GlyphErrorBenchmark::CreateQuad() {
+    bgfx::VertexLayout layout;
+    layout.begin()
+            .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
+            .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float, true)
+            .end();
+
     vb_ = bgfx::createVertexBuffer(
             bgfx::makeRef(quad_vertices_, sizeof(quad_vertices_)),
-            PosTexCoordVertex::ms_layout
+            layout
     );
-
     ib_ = bgfx::createIndexBuffer(bgfx::makeRef(quad_indices_, sizeof(quad_indices_)));
 }
 
@@ -185,4 +161,17 @@ void GlyphErrorBenchmark::WriteBufferToImageIfReady(uint32_t current_frame) {
 
     read_frame_ = 0;
     is_frame_read_ = true;
+}
+
+void GlyphErrorBenchmark::AdjustQuadForGlyph(int glyph_width, int glyph_height) {
+    float width = static_cast<float>(glyph_width) / texture_width_;
+    float height = static_cast<float>(glyph_height) / texture_height_;
+
+    float width_map = width * 2 - 1.0f; // map from [0, 1] to [-1, 1]
+    float height_map = height * (-2) + 1.0f; // map from [0, 1] to [1, -1]
+
+    quad_vertices_[1].x = width_map;
+    quad_vertices_[2].y = height_map;
+    quad_vertices_[3].x = width_map;
+    quad_vertices_[3].y = height_map;
 }

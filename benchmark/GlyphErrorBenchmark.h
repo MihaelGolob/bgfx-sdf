@@ -20,9 +20,10 @@ private:
     void Update();
 
     void GenerateGlyph();
-    void CreateFullScreenQuad();
+    void CreateQuad();
     void InitializeShaders();
     void InitializeTextures();
+    void AdjustQuadForGlyph(int glyph_width, int glyph_height);
 
     void WriteBufferToImageIfReady(uint32_t current_frame);
 
@@ -49,4 +50,22 @@ private:
 
     // shader programs
     bgfx::ProgramHandle basic_program_{};
+
+    struct PosTexCoordVertex {
+        float x, y, z;
+        float u, v;
+    };
+
+    PosTexCoordVertex quad_vertices_[4] = {
+            {-1.0f, 1.0f,  0, 0.0f, 0.0f}, // Top-left
+            {1.0f,  1.0f,  0, 1.0f, 0.0f}, // Top-right
+            {-1.0f, -1.0f, 0, 0.0f, 1.0f}, // Bottom-left
+            {1.0f,  -1.0f, 0, 1.0f, 1.0f}, // Bottom-right
+    };
+
+    const uint16_t quad_indices_[6] = {
+            0, 1, 2,
+            1, 3, 2,
+    };
+
 };
