@@ -19,15 +19,18 @@ public:
     void RunBenchmark();
 
 private:
-    void Update();
-
-    void GenerateGlyph(FontType font_type, int font_size, CodePoint code_point);
+    void GenerateCurrentGlyph();
+    void GenerateGlyph(FontType font_type, CodePoint code_point, int font_size, float scale);
     void CreateQuad();
     void InitializeShaders(FontType font_type);
     void InitializeTextures();
     void AdjustQuadForGlyph(int glyph_width, int glyph_height, int padding, float scale);
 
-    void WriteBufferToImageIfReady(uint32_t current_frame);
+    void Update();
+    void Render(int context);
+    void NextState();
+
+    bool WriteBufferToImageIfReady(uint32_t current_frame);
 
     FontManager *font_manager_;
     Window *window_;
@@ -49,6 +52,7 @@ private:
     uint8_t *glyph_buffer_{};
     uint32_t read_frame_{0};
     bool is_frame_read_{false};
+    bool ready_to_read_texture_{true};
 
     // shader programs
     bgfx::ProgramHandle basic_program_{};
@@ -70,4 +74,17 @@ private:
             1, 3, 2,
     };
 
+    // benchmark settings
+    std::vector<FontType> font_types_{};
+    std::vector<char> code_points_{};
+    std::vector<int> font_sizes_{};
+    std::vector<float> font_scales_{};
+
+    // hierachy: font -> character -> sizes -> scales
+
+    bool done_{false};
+    int current_font_type_{0};
+    int current_code_point_{0};
+    int current_font_size_{0};
+    int current_font_scale_{0};
 };

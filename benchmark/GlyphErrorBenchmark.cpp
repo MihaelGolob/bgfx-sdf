@@ -10,6 +10,10 @@
 #include <window/Window.h>
 #include <stb_image_write.h>
 
+#include <string>
+#include <iomanip>
+#include <sstream>
+
 // shaders
 #include "../src/shaders/vertex/vs_font_basic.bin.h"
 #include "../src/shaders/vertex/vs_font_basic_bench.bin.h"
@@ -40,7 +44,6 @@ GlyphErrorBenchmark::GlyphErrorBenchmark(FontManager *font_manager, Window *wind
 
     bgfx::setViewFrameBuffer(1, frame_buffer_);
     bgfx::setViewClear(1, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x000000ff, 1.0f, 0);
-
     bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x000000ff, 1.0f, 0);
 
     window_->SetUpdateLoop([this]() { Update(); });
@@ -49,8 +52,18 @@ GlyphErrorBenchmark::GlyphErrorBenchmark(FontManager *font_manager, Window *wind
     out_buffer_ = new uint8_t[1024 * 1024 * 4];
     glyph_buffer_ = new uint8_t[512 * 512 * 4];
 
-    GenerateGlyph(FontType::Msdf, 128, 'A');
     CreateQuad();
+}
+
+GlyphErrorBenchmark::~GlyphErrorBenchmark() {
+    window_->GetRenderer()->SetManualMode(false);
+
+    bgfx::destroy(render_texture_);
+    bgfx::destroy(target_texture_);
+    bgfx::destroy(frame_buffer_);
+
+    delete[] out_buffer_;
+    delete[] glyph_buffer_;
 }
 
 void GlyphErrorBenchmark::InitializeTextures() {
@@ -92,18 +105,7 @@ void GlyphErrorBenchmark::InitializeShaders(FontType font_type) {
     tex_color_uniform_ = bgfx::createUniform("s_texColor", bgfx::UniformType::Sampler);
 }
 
-GlyphErrorBenchmark::~GlyphErrorBenchmark() {
-    window_->GetRenderer()->SetManualMode(false);
-
-    bgfx::destroy(render_texture_);
-    bgfx::destroy(target_texture_);
-    bgfx::destroy(frame_buffer_);
-
-    delete[] out_buffer_;
-    delete[] glyph_buffer_;
-}
-
-void GlyphErrorBenchmark::GenerateGlyph(FontType font_type, int font_size, CodePoint code_point) {
+void GlyphErrorBenchmark::GenerateGlyph(FontType font_type, CodePoint code_point, int font_size, float scale) {
     const int padding = 5;
     const auto font = font_manager_->CreateFontByPixelSize(font_file_handle_, 0, font_size, font_type, padding);
 
@@ -121,76 +123,15 @@ void GlyphErrorBenchmark::GenerateGlyph(FontType font_type, int font_size, CodeP
             glyph_texture_ = bgfx::createTexture2D(info.width, info.height, false, 1, bgfx::TextureFormat::RGBA8, 0, bgfx::copy(glyph_buffer_, info.width * info.height * 4));
             break;
     }
-    AdjustQuadForGlyph(info.width, info.height, padding, 3.0);
+    AdjustQuadForGlyph(info.width, info.height, padding, scale);
     InitializeShaders(font_type);
 
     const auto channels = font_type == FontType::Bitmap || font_type == FontType::SdfFromBitmap ? 1.0f : 4.0f;
     stbi_write_png("glyph.png", info.width, info.height, channels, glyph_buffer_, info.width * channels);
 }
 
-void GlyphErrorBenchmark::CreateQuad() {
-    bgfx::VertexLayout layout;
-    layout.begin()
-            .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-            .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float, true)
-            .end();
-
-    vb_ = bgfx::createVertexBuffer(
-            bgfx::makeRef(quad_vertices_, sizeof(quad_vertices_)),
-            layout
-    );
-    ib_ = bgfx::createIndexBuffer(bgfx::makeRef(quad_indices_, sizeof(quad_indices_)));
-}
-
-void GlyphErrorBenchmark::RunBenchmark() {
-    window_->StartUpdate();
-}
-
-void GlyphErrorBenchmark::Update() {
-    // render to texture
-    bgfx::setViewRect(1, 0, 0, texture_width_, texture_height_);
-    bgfx::touch(1);
-
-    bgfx::setVertexBuffer(0, vb_);
-    bgfx::setIndexBuffer(ib_);
-
-    bgfx::setTexture(0, tex_color_uniform_, glyph_texture_);
-
-    bgfx::setState(0 | BGFX_STATE_WRITE_RGB | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA));
-    bgfx::submit(1, basic_program_);
-
-    // render to window
-    bgfx::setViewRect(0, 0, 0, window_->GetWindowWidth(), window_->GetWindowHeight());
-    bgfx::touch(0);
-
-    bgfx::setVertexBuffer(0, vb_);
-    bgfx::setIndexBuffer(ib_);
-
-    bgfx::setTexture(0, tex_color_uniform_, glyph_texture_);
-
-    bgfx::setState(0 | BGFX_STATE_WRITE_RGB | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA));
-    bgfx::submit(0, basic_program_);
-
-    // copy render texture and save
-    bgfx::blit(2, render_texture_, 0, 0, target_texture_, 0, 0, texture_width_, texture_height_);
-    const auto current_frame = bgfx::frame();
-    WriteBufferToImageIfReady(current_frame);
-}
-
-void GlyphErrorBenchmark::WriteBufferToImageIfReady(uint32_t current_frame) {
-    if (is_frame_read_) return;
-    if (read_frame_ == 0) {
-        read_frame_ = bgfx::readTexture(render_texture_, out_buffer_);
-        return;
-    }
-    if (read_frame_ == 0 || current_frame < read_frame_) return;
-
-//    stbi_flip_vertically_on_write(1);
-    stbi_write_png("render_texture.png", texture_width_, texture_height_, 4, out_buffer_, texture_width_ * 4);
-    std::cout << "Render texture saved" << std::endl;
-
-    read_frame_ = 0;
-    is_frame_read_ = true;
+void GlyphErrorBenchmark::GenerateCurrentGlyph() {
+    GenerateGlyph(font_types_[current_font_type_], code_points_[current_code_point_], font_sizes_[current_font_size_], font_scales_[current_font_scale_]);
 }
 
 void GlyphErrorBenchmark::AdjustQuadForGlyph(int glyph_width, int glyph_height, int glyph_padding, float scale) {
@@ -212,4 +153,108 @@ void GlyphErrorBenchmark::AdjustQuadForGlyph(int glyph_width, int glyph_height, 
 
     quad_vertices_[3].x = width_map - padding;
     quad_vertices_[3].y = height_map + padding;
+}
+
+void GlyphErrorBenchmark::CreateQuad() {
+    bgfx::VertexLayout layout;
+    layout.begin()
+            .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
+            .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float, true)
+            .end();
+
+    vb_ = bgfx::createVertexBuffer(
+            bgfx::makeRef(quad_vertices_, sizeof(quad_vertices_)),
+            layout
+    );
+    ib_ = bgfx::createIndexBuffer(bgfx::makeRef(quad_indices_, sizeof(quad_indices_)));
+}
+
+void GlyphErrorBenchmark::RunBenchmark() {
+    // benchmark setup
+    font_types_ = {FontType::Bitmap, FontType::SdfFromBitmap, FontType::SdfFromVector, FontType::Msdf, FontType::MsdfOriginal};
+    font_sizes_ = {80};
+    font_scales_ = {2.0f};
+    code_points_ = {'B'};
+
+    GenerateCurrentGlyph();
+    window_->StartUpdate([&] { return done_; });
+}
+
+void GlyphErrorBenchmark::Update() {
+    Render(0); // render to window
+    Render(1); // render to texture
+
+    // copy render texture and save it to file
+    bgfx::blit(2, render_texture_, 0, 0, target_texture_, 0, 0, texture_width_, texture_height_);
+
+    const auto current_frame = bgfx::frame();
+    if (WriteBufferToImageIfReady(current_frame)) {
+        NextState();
+    }
+}
+
+void GlyphErrorBenchmark::Render(int context) {
+    bgfx::setViewRect(context, 0, 0, texture_width_, texture_height_);
+    bgfx::touch(context);
+
+    bgfx::setVertexBuffer(0, vb_);
+    bgfx::setIndexBuffer(ib_);
+
+    bgfx::setTexture(0, tex_color_uniform_, glyph_texture_);
+
+    bgfx::setState(0 | BGFX_STATE_WRITE_RGB | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA));
+    bgfx::submit(context, basic_program_);
+}
+
+void GlyphErrorBenchmark::NextState() {
+    current_font_scale_++;
+    if (current_font_scale_ >= font_scales_.size()) {
+        current_font_scale_ = 0;
+
+        current_font_size_++;
+        if (current_font_size_ >= font_sizes_.size()) {
+            current_font_size_ = 0;
+
+            current_code_point_++;
+            if (current_code_point_ >= code_points_.size()) {
+                current_code_point_ = 0;
+
+                current_font_type_++;
+                if (current_font_type_ >= font_types_.size()) {
+                    done_ = true;
+                    return;
+                }
+            }
+        }
+    }
+
+    GenerateCurrentGlyph();
+    ready_to_read_texture_ = true;
+}
+
+bool GlyphErrorBenchmark::WriteBufferToImageIfReady(uint32_t current_frame) {
+    if (!ready_to_read_texture_) return false;
+    if (read_frame_ == 0) {
+        read_frame_ = bgfx::readTexture(render_texture_, out_buffer_);
+        return false;
+    }
+    if (current_frame < read_frame_) return false;
+
+    const auto type = font_types_[current_font_type_];
+    const auto code_point = code_points_[current_code_point_];
+    const auto size = font_sizes_[current_font_size_];
+    const auto scale = font_scales_[current_font_scale_];
+
+    // ugly stuff for precision
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(2) << scale;
+
+    std::string file_name = FontInfo::FontTypeToString(type) + "_" + std::string(1, code_point) + "_" + std::to_string(size) + "_" + ss.str() + ".png";
+    stbi_write_png(file_name.c_str(), texture_width_, texture_height_, 4, out_buffer_, texture_width_ * 4);
+    std::cout << "Texture " << file_name << " saved." << std::endl;
+
+    read_frame_ = 0;
+    ready_to_read_texture_ = false;
+
+    return true;
 }
