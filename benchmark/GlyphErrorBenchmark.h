@@ -20,7 +20,7 @@ public:
 
 private:
     void GenerateCurrentGlyph();
-    void GenerateGlyph(FontType font_type, CodePoint code_point, int font_size, float scale);
+    void GenerateGlyph(FontType font_type, CodePoint code_point, int font_size, float scale, int padding);
     void CreateQuad();
     void InitializeShaders(FontType font_type);
     void InitializeTextures();
@@ -51,7 +51,6 @@ private:
     uint8_t *out_buffer_{};
     uint8_t *glyph_buffer_{};
     uint32_t read_frame_{0};
-    bool is_frame_read_{false};
     bool ready_to_read_texture_{true};
 
     // shader programs

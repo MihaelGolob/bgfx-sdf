@@ -105,8 +105,14 @@ void GlyphErrorBenchmark::InitializeShaders(FontType font_type) {
     tex_color_uniform_ = bgfx::createUniform("s_texColor", bgfx::UniformType::Sampler);
 }
 
-void GlyphErrorBenchmark::GenerateGlyph(FontType font_type, CodePoint code_point, int font_size, float scale) {
-    const int padding = 5;
+void GlyphErrorBenchmark::GenerateGlyph(FontType font_type, CodePoint code_point, int font_size, float scale, int padding) {
+    if (font_type == FontType::Color) {
+        font_size *= scale;
+        scale = 1.0;
+        padding = 0;
+        font_type = FontType::Bitmap;
+    }
+
     const auto font = font_manager_->CreateFontByPixelSize(font_file_handle_, 0, font_size, font_type, padding);
 
     AtlasRegion::Type bitmap_type{};
@@ -131,13 +137,13 @@ void GlyphErrorBenchmark::GenerateGlyph(FontType font_type, CodePoint code_point
 }
 
 void GlyphErrorBenchmark::GenerateCurrentGlyph() {
-    GenerateGlyph(font_types_[current_font_type_], code_points_[current_code_point_], font_sizes_[current_font_size_], font_scales_[current_font_scale_]);
+    GenerateGlyph(font_types_[current_font_type_], code_points_[current_code_point_], font_sizes_[current_font_size_], font_scales_[current_font_scale_], 10);
 }
 
 void GlyphErrorBenchmark::AdjustQuadForGlyph(int glyph_width, int glyph_height, int glyph_padding, float scale) {
     float width = (static_cast<float>(glyph_width) / texture_width_) * scale;
     float height = (static_cast<float>(glyph_height) / texture_height_) * scale;
-    float padding = (static_cast<float>(glyph_padding) / texture_width_) * scale;
+    float padding = (static_cast<float>(glyph_padding) / texture_width_);
 
     float width_map = width * 2 - 1.0f; // map from [0, 1] to [-1, 1]
     float height_map = height * (-2) + 1.0f; // map from [0, 1] to [1, -1]
@@ -153,6 +159,8 @@ void GlyphErrorBenchmark::AdjustQuadForGlyph(int glyph_width, int glyph_height, 
 
     quad_vertices_[3].x = width_map - padding;
     quad_vertices_[3].y = height_map + padding;
+
+    CreateQuad();
 }
 
 void GlyphErrorBenchmark::CreateQuad() {
@@ -171,10 +179,10 @@ void GlyphErrorBenchmark::CreateQuad() {
 
 void GlyphErrorBenchmark::RunBenchmark() {
     // benchmark setup
-    font_types_ = {FontType::Bitmap, FontType::SdfFromBitmap, FontType::SdfFromVector, FontType::Msdf, FontType::MsdfOriginal};
+    font_types_ = {FontType::Color, FontType::Bitmap, FontType::SdfFromBitmap, FontType::SdfFromVector, FontType::Msdf, FontType::MsdfOriginal};
     font_sizes_ = {80};
-    font_scales_ = {2.0f};
-    code_points_ = {'B'};
+    font_scales_ = {7.0f};
+    code_points_ = {'G'};
 
     GenerateCurrentGlyph();
     window_->StartUpdate([&] { return done_; });
@@ -249,9 +257,10 @@ bool GlyphErrorBenchmark::WriteBufferToImageIfReady(uint32_t current_frame) {
     std::stringstream ss;
     ss << std::fixed << std::setprecision(2) << scale;
 
-    std::string file_name = FontInfo::FontTypeToString(type) + "_" + std::string(1, code_point) + "_" + std::to_string(size) + "_" + ss.str() + ".png";
+    std::string file_name =
+            "./glyphs/" + std::to_string(current_font_type_) + FontInfo::FontTypeToString(type) + "_" + std::string(1, code_point) + "_" + std::to_string(size) + "px_" + ss.str() + ".png";
     stbi_write_png(file_name.c_str(), texture_width_, texture_height_, 4, out_buffer_, texture_width_ * 4);
-    std::cout << "Texture " << file_name << " saved." << std::endl;
+    std::cout << "Texture \"" << file_name << "\" saved." << std::endl;
 
     read_frame_ = 0;
     ready_to_read_texture_ = false;
