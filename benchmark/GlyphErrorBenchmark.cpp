@@ -50,6 +50,7 @@ GlyphErrorBenchmark::GlyphErrorBenchmark(FontManager *font_manager, Window *wind
     window_->GetRenderer()->SetManualMode(true);
 
     out_buffer_ = new uint8_t[1024 * 1024 * 4];
+    copy_buffer_ = new uint8_t[1024 * 1024 * 4];
     glyph_buffer_ = new uint8_t[512 * 512 * 4];
 
     CreateQuad();
@@ -112,6 +113,9 @@ void GlyphErrorBenchmark::GenerateGlyph(FontType font_type, CodePoint code_point
         padding = 0;
         font_type = FontType::Bitmap;
     }
+    if (font_type == FontType::Bitmap) {
+        padding = 0;
+    }
 
     const auto font = font_manager_->CreateFontByPixelSize(font_file_handle_, 0, font_size, font_type, padding);
 
@@ -129,7 +133,7 @@ void GlyphErrorBenchmark::GenerateGlyph(FontType font_type, CodePoint code_point
             glyph_texture_ = bgfx::createTexture2D(info.width, info.height, false, 1, bgfx::TextureFormat::RGBA8, 0, bgfx::copy(glyph_buffer_, info.width * info.height * 4));
             break;
     }
-    AdjustQuadForGlyph(info.width, info.height, padding, scale);
+    AdjustQuadForGlyph(info, padding, scale);
     InitializeShaders(font_type);
 
     const auto channels = font_type == FontType::Bitmap || font_type == FontType::SdfFromBitmap ? 1.0f : 4.0f;
@@ -140,9 +144,9 @@ void GlyphErrorBenchmark::GenerateCurrentGlyph() {
     GenerateGlyph(font_types_[current_font_type_], code_points_[current_code_point_], font_sizes_[current_font_size_], font_scales_[current_font_scale_], 10);
 }
 
-void GlyphErrorBenchmark::AdjustQuadForGlyph(int glyph_width, int glyph_height, int glyph_padding, float scale) {
-    float width = (static_cast<float>(glyph_width) / texture_width_) * scale;
-    float height = (static_cast<float>(glyph_height) / texture_height_) * scale;
+void GlyphErrorBenchmark::AdjustQuadForGlyph(const GlyphInfo &info, int glyph_padding, float scale) {
+    float width = (info.width / texture_width_) * scale;
+    float height = (info.height / texture_height_) * scale;
     float padding = (static_cast<float>(glyph_padding) / texture_width_);
 
     float width_map = width * 2 - 1.0f; // map from [0, 1] to [-1, 1]
@@ -253,17 +257,56 @@ bool GlyphErrorBenchmark::WriteBufferToImageIfReady(uint32_t current_frame) {
     const auto size = font_sizes_[current_font_size_];
     const auto scale = font_scales_[current_font_scale_];
 
+    const auto bbox = CalculateGlyphBoundingBox();
+    const auto width = bbox.max_x - bbox.min_x;
+    const auto height = bbox.max_y - bbox.min_y;
+    CropGlyph(bbox);
+
     // ugly stuff for precision
     std::stringstream ss;
     ss << std::fixed << std::setprecision(2) << scale;
-
     std::string file_name =
             "./glyphs/" + std::to_string(current_font_type_) + FontInfo::FontTypeToString(type) + "_" + std::string(1, code_point) + "_" + std::to_string(size) + "px_" + ss.str() + ".png";
-    stbi_write_png(file_name.c_str(), texture_width_, texture_height_, 4, out_buffer_, texture_width_ * 4);
+    stbi_write_png(file_name.c_str(), width, height, 4, copy_buffer_, texture_width_ * 4);
     std::cout << "Texture \"" << file_name << "\" saved." << std::endl;
 
     read_frame_ = 0;
     ready_to_read_texture_ = false;
 
     return true;
+}
+
+void GlyphErrorBenchmark::CropGlyph(const BoundingBox &bbox) {
+    for (int y = bbox.min_y; y <= bbox.max_y; y++) {
+        for (int x = bbox.min_x; x <= bbox.max_x; x++) {
+            const int index_from = (x + y * 1024) * 4;
+            const int index_to = (x - bbox.min_x + (y - bbox.min_y) * 1024) * 4;
+
+            copy_buffer_[index_to] = out_buffer_[index_from];
+            copy_buffer_[index_to + 1] = out_buffer_[index_from + 1];
+            copy_buffer_[index_to + 2] = out_buffer_[index_from + 2];
+            copy_buffer_[index_to + 3] = out_buffer_[index_from + 3];
+        }
+    }
+}
+
+BoundingBox GlyphErrorBenchmark::CalculateGlyphBoundingBox() {
+    BoundingBox result{99999, 99999, -1, -1};
+
+    for (int y = 0; y < 1024; y++) {
+        for (int x = 0; x < 1024; x++) {
+            const int index = (x + y * 1024) * 4;
+            if (out_buffer_[index] <= 0.8) continue;
+
+            result.min_x = std::min(result.min_x, x);
+            result.min_y = std::min(result.min_y, y);
+            result.max_x = std::max(result.max_x, x);
+            result.max_y = std::max(result.max_y, y);
+        }
+    }
+
+    std::cout << "bounding box: (" << result.min_x << "," << result.min_y << ") - (" << result.max_x << "," << result.max_y << ")." << std::endl;
+    std::cout << "width: " << result.max_x - result.min_x << ", height: " << result.max_y - result.min_y << std::endl;
+
+    return result;
 }

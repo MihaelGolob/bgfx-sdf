@@ -12,6 +12,11 @@ class FontManager;
 
 class Window;
 
+struct BoundingBox {
+    int min_x, min_y;
+    int max_x, max_y;
+};
+
 class GlyphErrorBenchmark {
 public:
     GlyphErrorBenchmark(FontManager *font_manager, Window *window, TrueTypeHandle font_file_handle);
@@ -24,7 +29,10 @@ private:
     void CreateQuad();
     void InitializeShaders(FontType font_type);
     void InitializeTextures();
-    void AdjustQuadForGlyph(int glyph_width, int glyph_height, int padding, float scale);
+    void AdjustQuadForGlyph(const GlyphInfo &info, int padding, float scale);
+
+    BoundingBox CalculateGlyphBoundingBox();
+    void CropGlyph(const BoundingBox &bbox);
 
     void Update();
     void Render(int context);
@@ -49,6 +57,7 @@ private:
     int texture_height_{1024};
 
     uint8_t *out_buffer_{};
+    uint8_t *copy_buffer_{};
     uint8_t *glyph_buffer_{};
     uint32_t read_frame_{0};
     bool ready_to_read_texture_{true};
