@@ -185,7 +185,7 @@ void GlyphErrorBenchmark::RunBenchmark() {
     // benchmark setup
     font_types_ = {FontType::Color, FontType::Bitmap, FontType::SdfFromBitmap, FontType::SdfFromVector, FontType::Msdf, FontType::MsdfOriginal};
     font_sizes_ = {80};
-    font_scales_ = {7.0f};
+    font_scales_ = {7.0f, 10.0f};
     code_points_ = {'G'};
 
     GenerateCurrentGlyph();
@@ -264,9 +264,9 @@ bool GlyphErrorBenchmark::WriteBufferToImageIfReady(uint32_t current_frame) {
 
     // ugly stuff for precision
     std::stringstream ss;
-    ss << std::fixed << std::setprecision(2) << scale;
+    ss << std::fixed << std::setprecision(1) << scale;
     std::string file_name =
-            "./rendered_glyph_textures/" + std::to_string(current_font_type_) + FontInfo::FontTypeToString(type) + "_" + std::string(1, code_point) + "_" + std::to_string(size) + "px_" + ss.str() + ".png";
+            "./rendered_glyph_textures/" + std::to_string(current_font_type_) + "_" + std::string(1, code_point) + "_" + std::to_string(size) + "_" + ss.str() + "_.png";
     stbi_write_png(file_name.c_str(), width, height, 4, copy_buffer_, texture_width_ * 4);
     std::cout << "Texture \"" << file_name << "\" saved." << std::endl;
 
@@ -296,7 +296,7 @@ BoundingBox GlyphErrorBenchmark::CalculateGlyphBoundingBox() {
     for (int y = 0; y < 1024; y++) {
         for (int x = 0; x < 1024; x++) {
             const int index = (x + y * 1024) * 4;
-            if (out_buffer_[index] <= 0.8) continue;
+            if (out_buffer_[index] <= 150) continue;
 
             result.min_x = std::min(result.min_x, x);
             result.min_y = std::min(result.min_y, y);
