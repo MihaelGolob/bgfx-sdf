@@ -266,7 +266,7 @@ bool GlyphErrorBenchmark::WriteBufferToImageIfReady(uint32_t current_frame) {
     std::stringstream ss;
     ss << std::fixed << std::setprecision(2) << scale;
     std::string file_name =
-            "./glyphs/" + std::to_string(current_font_type_) + FontInfo::FontTypeToString(type) + "_" + std::string(1, code_point) + "_" + std::to_string(size) + "px_" + ss.str() + ".png";
+            "./rendered_glyph_textures/" + std::to_string(current_font_type_) + FontInfo::FontTypeToString(type) + "_" + std::string(1, code_point) + "_" + std::to_string(size) + "px_" + ss.str() + ".png";
     stbi_write_png(file_name.c_str(), width, height, 4, copy_buffer_, texture_width_ * 4);
     std::cout << "Texture \"" << file_name << "\" saved." << std::endl;
 
