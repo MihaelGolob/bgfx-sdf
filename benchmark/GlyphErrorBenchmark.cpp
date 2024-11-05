@@ -49,8 +49,9 @@ GlyphErrorBenchmark::GlyphErrorBenchmark(FontManager *font_manager, Window *wind
     window_->SetUpdateLoop([this]() { Update(); });
     window_->GetRenderer()->SetManualMode(true);
 
-    out_buffer_ = new uint8_t[1024 * 1024 * 4];
-    copy_buffer_ = new uint8_t[1024 * 1024 * 4];
+
+    out_buffer_ = new uint8_t[texture_width_ * texture_height_ * 4];
+    copy_buffer_ = new uint8_t[texture_width_ * texture_height_ * 4];
     glyph_buffer_ = new uint8_t[512 * 512 * 4];
 
     CreateQuad();
@@ -183,9 +184,9 @@ void GlyphErrorBenchmark::CreateQuad() {
 
 void GlyphErrorBenchmark::RunBenchmark() {
     // benchmark setup
-    font_types_ = {FontType::Color, FontType::Bitmap, FontType::SdfFromBitmap, FontType::SdfFromVector, FontType::Msdf, FontType::MsdfOriginal};
-    font_sizes_ = {80};
-    font_scales_ = {7.0f, 10.0f};
+    font_types_ = {FontType::Color, FontType::Bitmap, FontType::SdfFromBitmap, FontType::SdfFromVector, FontType::Msdf/*, FontType::MsdfOriginal*/};
+    font_sizes_ = {16};
+    font_scales_ = {2.0f, 3.0f, 4.0f, 5.0f, 7.0f, 10.0f, 13.0f, 16.0f, 20.0f};
     code_points_ = {'G'};
 
     GenerateCurrentGlyph();
@@ -279,8 +280,8 @@ bool GlyphErrorBenchmark::WriteBufferToImageIfReady(uint32_t current_frame) {
 void GlyphErrorBenchmark::CropGlyph(const BoundingBox &bbox) {
     for (int y = bbox.min_y; y <= bbox.max_y; y++) {
         for (int x = bbox.min_x; x <= bbox.max_x; x++) {
-            const int index_from = (x + y * 1024) * 4;
-            const int index_to = (x - bbox.min_x + (y - bbox.min_y) * 1024) * 4;
+            const int index_from = (x + y * texture_width_) * 4;
+            const int index_to = (x - bbox.min_x + (y - bbox.min_y) * texture_width_) * 4;
 
             copy_buffer_[index_to] = out_buffer_[index_from];
             copy_buffer_[index_to + 1] = out_buffer_[index_from + 1];
@@ -293,9 +294,9 @@ void GlyphErrorBenchmark::CropGlyph(const BoundingBox &bbox) {
 BoundingBox GlyphErrorBenchmark::CalculateGlyphBoundingBox() {
     BoundingBox result{99999, 99999, -1, -1};
 
-    for (int y = 0; y < 1024; y++) {
-        for (int x = 0; x < 1024; x++) {
-            const int index = (x + y * 1024) * 4;
+    for (int y = 0; y < texture_height_; y++) {
+        for (int x = 0; x < texture_width_; x++) {
+            const int index = (x + y * texture_width_) * 4;
             if (out_buffer_[index] <= 150) continue;
 
             result.min_x = std::min(result.min_x, x);

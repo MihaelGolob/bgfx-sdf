@@ -53,8 +53,8 @@ private:
     bgfx::IndexBufferHandle ib_{};
     bgfx::UniformHandle tex_color_uniform_{};
 
-    int texture_width_{1024};
-    int texture_height_{1024};
+    int texture_width_{2048};
+    int texture_height_{2048};
 
     uint8_t *out_buffer_{};
     uint8_t *copy_buffer_{};
@@ -89,7 +89,6 @@ private:
     std::vector<float> font_scales_{};
 
     // hierachy: font -> character -> sizes -> scales
-
     bool done_{false};
     int current_font_type_{0};
     int current_code_point_{0};
