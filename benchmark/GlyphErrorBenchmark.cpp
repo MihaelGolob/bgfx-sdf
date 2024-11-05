@@ -185,9 +185,9 @@ void GlyphErrorBenchmark::CreateQuad() {
 void GlyphErrorBenchmark::RunBenchmark() {
     // benchmark setup
     font_types_ = {FontType::Color, FontType::Bitmap, FontType::SdfFromBitmap, FontType::SdfFromVector, FontType::Msdf/*, FontType::MsdfOriginal*/};
-    font_sizes_ = {16};
+    font_sizes_ = {8, 16, 32, 64};
     font_scales_ = {2.0f, 3.0f, 4.0f, 5.0f, 7.0f, 10.0f, 13.0f, 16.0f, 20.0f};
-    code_points_ = {'G'};
+    code_points_ = {'A', 'B', 'C', 'D', 'E', 'F', 'G'};
 
     GenerateCurrentGlyph();
     window_->StartUpdate([&] { return done_; });
@@ -293,11 +293,12 @@ void GlyphErrorBenchmark::CropGlyph(const BoundingBox &bbox) {
 
 BoundingBox GlyphErrorBenchmark::CalculateGlyphBoundingBox() {
     BoundingBox result{99999, 99999, -1, -1};
+    const auto threshold = current_font_type_ > 3 ? 150 : 30;
 
     for (int y = 0; y < texture_height_; y++) {
         for (int x = 0; x < texture_width_; x++) {
             const int index = (x + y * texture_width_) * 4;
-            if (out_buffer_[index] <= 150) continue;
+            if (out_buffer_[index] <= threshold) continue;
 
             result.min_x = std::min(result.min_x, x);
             result.min_y = std::min(result.min_y, y);
