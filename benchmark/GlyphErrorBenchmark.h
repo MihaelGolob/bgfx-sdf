@@ -31,7 +31,7 @@ private:
     void InitializeTextures();
     void AdjustQuadForGlyph(const GlyphInfo &info, int padding, float scale);
 
-    BoundingBox CalculateGlyphBoundingBox();
+    BoundingBox CalculateGlyphBoundingBox(float threshold_multiplier);
     void CropGlyph(const BoundingBox &bbox);
 
     void Update();
@@ -39,6 +39,7 @@ private:
     void NextState();
 
     bool WriteBufferToImageIfReady(uint32_t current_frame);
+    std::string GetCurrentGlyphFileName();
 
     FontManager *font_manager_;
     Window *window_;

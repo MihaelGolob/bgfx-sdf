@@ -9,6 +9,7 @@
 #include <utilities.h>
 #include <window/Window.h>
 #include <stb_image_write.h>
+#include <filesystem>
 
 #include <string>
 #include <iomanip>
@@ -185,9 +186,9 @@ void GlyphErrorBenchmark::CreateQuad() {
 void GlyphErrorBenchmark::RunBenchmark() {
     // benchmark setup
     font_types_ = {FontType::Color, FontType::Bitmap, FontType::SdfFromBitmap, FontType::SdfFromVector, FontType::Msdf/*, FontType::MsdfOriginal*/};
-    font_sizes_ = {8, 16, 32, 64};
-    font_scales_ = {2.0f, 3.0f, 4.0f, 5.0f, 7.0f, 10.0f, 13.0f, 16.0f, 20.0f};
-    code_points_ = {'A', 'B', 'C', 'D', 'E', 'F', 'G'};
+    font_sizes_ = {10, 16, 32, 64};
+    font_scales_ = {1.0f, 2.0f, 4.0f, 7.0f, 10.0f, 13.0f, 16.0f, 20.0f};
+    code_points_ = {'A', 'B', 'C', 'D', 'E', 'F', 'G', '0', '1', '2', '4', '5', '6', '7', '8', '9'};
 
     GenerateCurrentGlyph();
     window_->StartUpdate([&] { return done_; });
@@ -234,11 +235,19 @@ void GlyphErrorBenchmark::NextState() {
 
                 current_font_type_++;
                 if (current_font_type_ >= font_types_.size()) {
+                    std::cout << "All glyph textures generated. Quitting" << std::endl;
                     done_ = true;
                     return;
                 }
             }
         }
+    }
+
+    // if file already exists, skip it
+    const auto file_name = GetCurrentGlyphFileName();
+    if (std::filesystem::exists(file_name)) {
+        NextState();
+        return;
     }
 
     GenerateCurrentGlyph();
@@ -253,21 +262,24 @@ bool GlyphErrorBenchmark::WriteBufferToImageIfReady(uint32_t current_frame) {
     }
     if (current_frame < read_frame_) return false;
 
-    const auto type = font_types_[current_font_type_];
-    const auto code_point = code_points_[current_code_point_];
-    const auto size = font_sizes_[current_font_size_];
-    const auto scale = font_scales_[current_font_scale_];
+    std::string file_name = GetCurrentGlyphFileName();
 
-    const auto bbox = CalculateGlyphBoundingBox();
-    const auto width = bbox.max_x - bbox.min_x;
-    const auto height = bbox.max_y - bbox.min_y;
+    BoundingBox bbox{};
+    int width = 0, height = 0;
+    int count = 1;
+    do {
+        float multiplier = 1.0 / count;
+        bbox = CalculateGlyphBoundingBox(multiplier);
+        width = bbox.max_x - bbox.min_x;
+        height = bbox.max_y - bbox.min_y;
+        count++;
+        if (count > 2) {
+            std::cerr << "Glyph \"" << file_name << "\" had zero width/height after cropping. Trying with a lower threshold multiplier: " << multiplier << std::endl;
+        }
+    } while (width <= 0 || height <= 0);
+
     CropGlyph(bbox);
 
-    // ugly stuff for precision
-    std::stringstream ss;
-    ss << std::fixed << std::setprecision(1) << scale;
-    std::string file_name =
-            "./rendered_glyph_textures/" + std::to_string(current_font_type_) + "_" + std::string(1, code_point) + "_" + std::to_string(size) + "_" + ss.str() + "_.png";
     stbi_write_png(file_name.c_str(), width, height, 4, copy_buffer_, texture_width_ * 4);
     std::cout << "Texture \"" << file_name << "\" saved." << std::endl;
 
@@ -291,24 +303,64 @@ void GlyphErrorBenchmark::CropGlyph(const BoundingBox &bbox) {
     }
 }
 
-BoundingBox GlyphErrorBenchmark::CalculateGlyphBoundingBox() {
+BoundingBox GlyphErrorBenchmark::CalculateGlyphBoundingBox(float threshold_multiplier) {
     BoundingBox result{99999, 99999, -1, -1};
-    const auto threshold = current_font_type_ > 3 ? 150 : 30;
+    const auto threshold = 60 * threshold_multiplier;
 
     for (int y = 0; y < texture_height_; y++) {
         for (int x = 0; x < texture_width_; x++) {
             const int index = (x + y * texture_width_) * 4;
             if (out_buffer_[index] <= threshold) continue;
 
-            result.min_x = std::min(result.min_x, x);
             result.min_y = std::min(result.min_y, y);
-            result.max_x = std::max(result.max_x, x);
             result.max_y = std::max(result.max_y, y);
+            result.min_x = std::min(result.min_x, x);
+            result.max_x = std::max(result.max_x, x);
         }
     }
 
-    std::cout << "bounding box: (" << result.min_x << "," << result.min_y << ") - (" << result.max_x << "," << result.max_y << ")." << std::endl;
-    std::cout << "width: " << result.max_x - result.min_x << ", height: " << result.max_y - result.min_y << std::endl;
+    // vertical pass
+    for (int y = texture_height_ / 3; y < 2 * (texture_height_ / 3); y++) {
+        bool empty_row = true;
+        for (int x = 0; x < texture_width_; x++) {
+            const int index = (x + y * texture_width_) * 4;
+            if (out_buffer_[index] <= threshold) continue;
+
+            empty_row = false;
+            result.min_y = std::min(result.min_y, y);
+            result.max_y = std::max(result.max_y, y);
+        }
+        if (empty_row && result.min_y < 99999 && threshold_multiplier >= 1.0f) { // hacky hacky
+            break;
+        }
+    }
+
+    // horizontal pass
+    for (int x = texture_width_ / 3; x < 2 * (texture_width_ / 3); x++) {
+        bool empty_col = true;
+        for (int y = 0; y < texture_height_; y++) {
+            const int index = (x + y * texture_width_) * 4;
+            if (out_buffer_[index] <= threshold) continue;
+
+            empty_col = false;
+            result.min_x = std::min(result.min_x, x);
+            result.max_x = std::max(result.max_x, x);
+        }
+        if (empty_col && result.min_x < 99999 && threshold_multiplier >= 1.0f) { // hacky hacky
+            break;
+        }
+    }
 
     return result;
+}
+
+std::string GlyphErrorBenchmark::GetCurrentGlyphFileName() {
+    const auto code_point = code_points_[current_code_point_];
+    const auto size = font_sizes_[current_font_size_];
+    const auto scale = font_scales_[current_font_scale_];
+
+    // ugly stuff for precision
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(1) << scale;
+    return "./rendered_glyph_textures/" + std::to_string(current_font_type_) + "_" + std::string(1, code_point) + "_" + std::to_string(size) + "_" + ss.str() + "_.png";
 }
