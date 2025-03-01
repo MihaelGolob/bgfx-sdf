@@ -305,7 +305,7 @@ void GlyphErrorBenchmark::CropGlyph(const BoundingBox &bbox) {
 
 BoundingBox GlyphErrorBenchmark::CalculateGlyphBoundingBox(float threshold_multiplier) {
     BoundingBox result{99999, 99999, -1, -1};
-    const auto threshold = 60 * threshold_multiplier;
+    const auto threshold = 150 * threshold_multiplier;
 
     for (int y = 0; y < texture_height_; y++) {
         for (int x = 0; x < texture_width_; x++) {

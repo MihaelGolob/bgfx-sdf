@@ -11,7 +11,7 @@ Renderer::Renderer(int width, int height, WindowHandle window) : window_width_(w
     bgfx_init.type = bgfx::RendererType::Count;
     bgfx_init.resolution.width = width;
     bgfx_init.resolution.height = height;
-    bgfx_init.resolution.reset = BGFX_RESET_VSYNC;
+//    bgfx_init.resolution.reset = BGFX_RESET_VSYNC;
     bgfx_init.platformData.nwh = window.GetWindowHandle();
     bgfx::init(bgfx_init);
 
